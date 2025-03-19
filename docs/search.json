@@ -4,14 +4,35 @@
     "href": "posts.html",
     "title": "Blog",
     "section": "",
-    "text": "Recreating Some Tidy-Style R Operations with Python and Polars\n\n\n\nR\n\n\nPython\n\n\n\nThis post lays out a series of examples that helped me break into Python as a Tidy-style R programmer\n\n\n\nLance Couzens\n\n\nMar 19, 2025\n\n\n\n\n\n\n\n\nNo matching items"
+    "text": "R vs. Python Query Compute Time Example\n\n\n\nR\n\n\nPython\n\n\n\nHere we compare runtime to query a large csv in R and Python\n\n\n\nLance Couzens\n\n\nMar 19, 2025\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nRecreating Some Tidy-Style R Operations with Python and Polars\n\n\n\nR\n\n\nPython\n\n\n\nThis post lays out a series of examples that helped me break into Python as a Tidy-style R programmer\n\n\n\nLance Couzens\n\n\nMar 19, 2025\n\n\n\n\n\n\n\n\nNo matching items"
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Lance Couzens",
+    "objectID": "posts/2025-03-19-R-v-Python-Compute-Time-Ex/index.html",
+    "href": "posts/2025-03-19-R-v-Python-Compute-Time-Ex/index.html",
+    "title": "R vs. Python Query Compute Time Example",
     "section": "",
-    "text": "Hello, and welcome to my code-stuffs website. I’m a statistician/data professional who is very interested in obsessed with open-source programming. Most of the action is happening under Blog. Thanks for stopping by, and don’t hesitate to hit me up via email if you’d like to chat about… whatever."
+    "text": "Let’s compare the compute time needed for an equivalent operation between Python and R. The operation is to:\nIn Python, we will use polars with lazy evaluation. In R, we will use dplyr, dtplyr, and tidytable. The latter two packages interpret dplyr syntax and deploy the data.table equivalent for efficiency."
+  },
+  {
+    "objectID": "posts/2025-03-19-R-v-Python-Compute-Time-Ex/index.html#plain-dplyr",
+    "href": "posts/2025-03-19-R-v-Python-Compute-Time-Ex/index.html#plain-dplyr",
+    "title": "R vs. Python Query Compute Time Example",
+    "section": "Plain dplyr",
+    "text": "Plain dplyr\n\nlibrary(tidyverse)\nlibrary(hms)\n\n\nAttaching package: 'hms'\n\n\nThe following object is masked from 'package:lubridate':\n\n    hms\n\nstart&lt;-Sys.time()\n\nrows&lt;-data.table::fread(\"big.csv\") %&gt;%\n  group_by(id) %&gt;%\n  summarize(across(where(is.double),mean),.groups=\"keep\") %&gt;%\n  filter(if_any(where(is.double),~.x&gt;.4)) %&gt;%\n  nrow()\n\nend&lt;-Sys.time()\n\nprint(str_glue(\"{rows} rows returned\\nelapsed time for query: {as_hms(end-start)}\"))\n\n991 rows returned\nelapsed time for query: 00:00:00.249162"
+  },
+  {
+    "objectID": "posts/2025-03-19-R-v-Python-Compute-Time-Ex/index.html#dtplyr",
+    "href": "posts/2025-03-19-R-v-Python-Compute-Time-Ex/index.html#dtplyr",
+    "title": "R vs. Python Query Compute Time Example",
+    "section": "dtplyr",
+    "text": "dtplyr\nThis is stylistically the R version that is most similar to the polars approach, but it does come with some downsides in that not all dplyr functionality is supported. In this example that is most obvious in the inability to use tidyselect helpers in summarize() and filter().\n\nlibrary(dtplyr,warn.conflicts=F)\n\nstart&lt;-Sys.time()\n\nbig&lt;-data.table::fread(\"big.csv\")\n\nvarnames&lt;-setdiff(colnames(big),\"id\")\n\nrows&lt;-lazy_dt(big) %&gt;%\n  group_by(id) %&gt;%\n  summarize(across(all_of(varnames),mean),.groups=\"keep\") %&gt;%\n  filter(if_any(all_of(varnames),~.x&gt;.4)) %&gt;%\n  collect() %&gt;%\n  nrow()\n\nend&lt;-Sys.time()\n\nprint(str_glue(\"{rows} rows returned\\nelapsed time for query: {as_hms(end-start)}\"))\n\n991 rows returned\nelapsed time for query: 00:00:00.045482"
+  },
+  {
+    "objectID": "posts/2025-03-19-R-v-Python-Compute-Time-Ex/index.html#tidytable",
+    "href": "posts/2025-03-19-R-v-Python-Compute-Time-Ex/index.html#tidytable",
+    "title": "R vs. Python Query Compute Time Example",
+    "section": "tidytable",
+    "text": "tidytable\nThis should be computationally comparable to the dtplyr approach as both are deploying data.table behind the scenes, but this approach has the benefit of preserving the plain dplyr syntax, including the ability to use tidyselect helpers.\n\nstart&lt;-Sys.time()\n\nrows&lt;-data.table::fread(\"big.csv\") %&gt;%\n  tidytable::group_by(id) %&gt;%\n  tidytable::summarize(tidytable::across(where(is.double),mean),.groups=\"keep\") %&gt;%\n  tidytable::filter(tidytable::if_any(where(is.double),~.x&gt;.4)) %&gt;%\n  nrow()\n\nend&lt;-Sys.time()\n\nprint(str_glue(\"{rows} rows returned\\nelapsed time for query: {as_hms(end-start)}\"))\n\n991 rows returned\nelapsed time for query: 00:00:00.054398"
   },
   {
     "objectID": "about.html",
@@ -19,6 +40,13 @@
     "title": "About",
     "section": "",
     "text": "About this site\n\n1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Lance Couzens",
+    "section": "",
+    "text": "Hello, and welcome to my code-stuffs website. I’m a statistician/data professional who is very interested in obsessed with open-source programming. Most of the action is happening under Blog. Thanks for stopping by, and don’t hesitate to hit me up via email if you’d like to chat about… whatever."
   },
   {
     "objectID": "posts/2025-03-19-TidyR-to-PolarsPython/index.html",

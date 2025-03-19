@@ -4,5 +4,6 @@
 .httr-oauth
 .DS_Store
 .quarto
+posts/2025-03-19-R-v-Python-Compute-Time-Ex/big.csv
 
 /.quarto/

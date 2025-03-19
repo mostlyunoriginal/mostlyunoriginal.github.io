@@ -1,0 +1,135 @@
+---
+title: "R vs. Python Query Compute Time Example"
+description: "Here we compare runtime to query a large csv in R and Python"
+date: 2025-03-19
+author:
+    - name: Lance Couzens
+      url: https://mostlyunoriginal.github.io  
+categories: [R, Python]
+citation: 
+  url: https://mostlyunoriginal.github.io/posts/2025-03-19-TidyR-to-PolarsPython/
+image: PReview.webp
+draft: false
+params:
+  rows: 1000
+  cols: 10q
+---
+
+Let's compare the compute time needed for an equivalent operation between `Python` and `R`. The operation is to:
+
+1.  ingest a largeish csv file with `r prettyNum(params$rows,big.mark=",")` records and `r prettyNum(params$cols,big.mark=",")` columns of random normal variates plus one `ID` column,
+2.  group by `ID` (100 records per `ID`),
+3.  summarize as mean for each double/float column,
+4.  filter to `ID`s with any one or more double/float column with a `mean > 0.4`, and
+5.  report how many such rows were found.
+
+In Python, we will use `polars` with lazy evaluation. In `R`, we will use `dplyr`, `dtplyr`, and `tidytable`. The latter two packages interpret `dplyr` syntax and deploy the `data.table` equivalent for efficiency.
+
+```{r}
+#| echo: false
+#| output: false
+
+library(tidyverse)
+
+rows<-params$rows
+cols<-params$cols
+
+data<-matrix(rnorm(rows*cols),nrow=rows,ncol=cols,byrow=T) %>%
+  as.data.frame() %>%
+  mutate(id=as.character(row_number() %% 10000))
+
+write_csv(data,"big.csv")
+```
+
+# Python with polars
+
+```{python}
+import polars as pl
+import polars.selectors as cs
+from datetime import datetime
+
+start=datetime.now()
+
+q=(
+    pl.scan_csv("big.csv")
+    .group_by("id")
+    .agg(cs.float().mean())
+    .filter(pl.any_horizontal(cs.float()>.4))
+)
+
+table=q.collect()
+
+elapsed=datetime.now()-start
+
+print(f"{table.height} rows returned\nelapsed time for query: {elapsed}")
+```
+
+# R
+
+Note that `data.table::fread()` is used for all R examples, as we're really just focusing on the data manipulation approach penalties.
+
+## Plain dplyr
+
+```{r}
+library(tidyverse)
+library(hms)
+
+start<-Sys.time()
+
+rows<-data.table::fread("big.csv") %>%
+  group_by(id) %>%
+  summarize(across(where(is.double),mean),.groups="keep") %>%
+  filter(if_any(where(is.double),~.x>.4)) %>%
+  nrow()
+
+end<-Sys.time()
+
+print(str_glue("{rows} rows returned\nelapsed time for query: {as_hms(end-start)}"))
+```
+
+## dtplyr
+
+This is stylistically the `R` version that is most similar to the `polars` approach, but it does come with some downsides in that not all `dplyr` functionality is supported. In this example that is most obvious in the inability to use tidyselect helpers in `summarize()` and `filter()`.
+
+```{r}
+library(dtplyr,warn.conflicts=F)
+
+start<-Sys.time()
+
+big<-data.table::fread("big.csv")
+
+varnames<-setdiff(colnames(big),"id")
+
+rows<-lazy_dt(big) %>%
+  group_by(id) %>%
+  summarize(across(all_of(varnames),mean),.groups="keep") %>%
+  filter(if_any(all_of(varnames),~.x>.4)) %>%
+  collect() %>%
+  nrow()
+
+end<-Sys.time()
+
+print(str_glue("{rows} rows returned\nelapsed time for query: {as_hms(end-start)}"))
+```
+
+## tidytable
+
+This should be computationally comparable to the `dtplyr` approach as both are deploying `data.table` behind the scenes, but this approach has the benefit of preserving the plain `dplyr` syntax, including the ability to use tidyselect helpers.
+
+```{r}
+start<-Sys.time()
+
+rows<-data.table::fread("big.csv") %>%
+  tidytable::group_by(id) %>%
+  tidytable::summarize(tidytable::across(where(is.double),mean),.groups="keep") %>%
+  tidytable::filter(tidytable::if_any(where(is.double),~.x>.4)) %>%
+  nrow()
+
+end<-Sys.time()
+
+print(str_glue("{rows} rows returned\nelapsed time for query: {as_hms(end-start)}"))
+```
+
+------------------------------------------------------------------------
+
+##
