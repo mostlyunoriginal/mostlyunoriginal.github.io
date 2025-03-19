@@ -11,8 +11,8 @@ citation:
 image: PReview.webp
 draft: false
 params:
-  rows: 1000
-  cols: 10q
+  rows: 1000000
+  cols: 1000
 ---
 
 Let's compare the compute time needed for an equivalent operation between `Python` and `R`. The operation is to:
