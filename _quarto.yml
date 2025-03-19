@@ -6,8 +6,6 @@ website:
   title: "Lance Couzens"
   navbar:
     left:
-      - href: index.qmd
-        text: Home
       - posts.qmd
 
 format:

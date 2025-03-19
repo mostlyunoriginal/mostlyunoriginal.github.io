@@ -17,4 +17,4 @@ about:
       href: https://flickr.com/lancec
 ---
 
-Hello, and welcome to my code-stuffs website. I'm a statistician/data professional who is ~~very interested in~~ obsessed with open-source programming. The site is pretty empty right now, but I hope to share some posts soon. Thanks for stopping by, and don't hesitate to hit me up via email if you'd like to chat about... whatever.
+Hello, and welcome to my code-stuffs website. I'm a statistician/data professional who is ~~very interested in~~ obsessed with open-source programming. Most of the action is happening under `Blog`. Thanks for stopping by, and don't hesitate to hit me up via email if you'd like to chat about... whatever.
