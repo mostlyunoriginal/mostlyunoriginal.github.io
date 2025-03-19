@@ -3,20 +3,22 @@ project:
   output-dir: docs
 
 website:
-  title: "mostlyunoriginal.github.io"
+  title: "Lance Couzens"
   navbar:
     left:
       - href: index.qmd
         text: Home
-      - about.qmd
+#      - about.qmd
+      - posts.qmd
 
 format:
   html:
     theme:
-      - cosmo
+      - journal
       - brand
     css: styles.css
     toc: true
+    page-layout: full
 
 editor: visual
 

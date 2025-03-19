@@ -1,0 +1,576 @@
+---
+title: "Recreating Some Tidy-Style R Operations with Python and Polars"
+description: "This post lays out a series of examples that helped me break into Python as a Tidy-style R programmer"
+date: 2025-03-19
+author:
+    - name: Lance Couzens
+      url: https://mostlyunoriginal.github.io  
+categories: [R, Python]
+citation: 
+  url: https://mostlyunoriginal.github.io/posts/2025-03-19-TidyR-to-PolarsPython/
+image: PReview.webp
+draft: false
+---
+
+## Background
+
+Before diving into the examples below, it's important to acknowledge some general differences between R and Python and specific differences in style and approach between Tidy- and Polars-style data manipulation. First and foremost: Python has a strong object orientation while R is essentially a functional language. The practical impact of that difference here is that Python objects are manipulated, or their attributes extracted, by way of methods, while R objects are inputs and outputs of functions. But Python uses functions too, and in fact methods are themselves functions, so this can be very confusing!
+
+What is a method, then? In simple terms, it's a function defined as part of the blueprint for a given type (or 'class') of object. A Polars DataFrame is a class of object, and there are certain functions defined in that class---these are the Polars DataFrame methods. By creating a *specific* DataFrame, we 'instantiate' the class into an object, and we can deploy [a predefined set of methods](https://docs.pola.rs/api/python/dev/reference/dataframe/index.html) to do things with or to that object.
+
+In both R and Python we often want to do several operations in a row without distinct assignments for each intermediate step of a process. In R---and especially in the Tidy style of R programming---we can use piping with either the `magrittr` or base pipes (`%>%` and `|>`, respectively) to achieve this. The resulting pipeline starts with an object, passes that object into a function which returns a new object which is passed into another function, and so on and so forth until the desired object is returned by the final function in the pipeline and is captured with an assignment, returned to the console, or passed as input to another pipeline or function. Consider the following example.
+
+```{r}
+#| output: false
+#| echo: false
+
+library(dplyr)
+```
+```{r}
+#| output: false
+
+cyls<-mtcars %>% #1, 5
+  distinct(cyl) %>% #2
+  arrange(cyl) %>% #3
+  pull() #4
+
+```
+
+Here, we start with the data frame `mtcars` (1), which is piped as input to the `distinct()` function along with the column reference `cyl` (2), which returns a data frame containing only the column `cyl` and one row for each distinct value. This is piped as input to `arrange()` (3) along with a column reference to `cyl`, which returns a sorted data frame. This is piped into `pull()` (4), which extracts a single column (the only one there: `cyl`) as a vector. This final object is then assigned to the environment variable `cyls` (5). Now consider the Python version which utilizes a technique called 'method chaining'.
+
+```{python}
+#| echo: false
+#| output: false
+
+import polars as pl
+
+mtcars=pl.read_csv("mtcars.csv")
+
+```
+
+```{python}
+#| output: false
+
+cyls=( #5
+    mtcars #1
+    .unique("cyl") #2
+    .sort("cyl") #3
+    .get_column("cyl") #4
+)
+
+```
+
+Here, we start with `mtcars`, a Polars DataFrame (1). We then apply the `unique()` method with a reference to the column `cyl` (2), yielding a Polars DataFrame containing the distinct values of `cyl` (note that it still contains all the other variables too!). Calling the `sort()` method sorts the rows by the values of `cyl` (3). The Polars DataFrame method `get_column()` (4) extracts a single column and yields a Polars Series (analogous to the atomic vectors that comprise R data frame columns). The resulting Series is assigned to the variable `cyls` (5).
+
+Both of these code blocks look quite similar, and the Python version should feel familiar to anyone who employs the Tidy-style of programming in R. Now that we've seen method chaining in action we can introduce a twist that unlocks some additional efficiency and that may seem strange compared to the Tidy style. The Python block above utilizes what's called 'eager evaluation', which means the code inside `cyls=(...)` is immediately evaluated and in exactly the manner we have specified. However, Polars is actually implemented in Rust (a high performance systems programming language) and has a query optimization capability that we can exploit via something called 'lazy evaluation'. The following 'lazy' alternative to the previous example gathers our instructions, performs query optimization (yielding a 'query plan'), and ultimately executes an optimized query only when we invoke the `collect()` method (a method of Polars LazyFrames which result from invoking the `lazy()` method of a regular Polars DataFrame).
+
+```{python}
+#| output: false
+
+cyls=(
+    mtcars
+    .lazy()
+    .unique("cyl")
+    .sort("cyl")
+    .collect()
+    .get_column("cyl")
+)
+
+```
+
+Note that Polars LazyFrames do not have a `get_column()` method like DataFrames do---it can therefore only be invoked *after* collection. The advantages of lazy evaluation in this trivial example would not be noticeable but could be significant depending on the size of the data and the complexity of the query. Lazy evaluation also allows for efficient processing of larger-than-memory data frames. See the [User guide](https://docs.pola.rs/user-guide/lazy/) for more detail. This approach may seem familiar to anyone who has used the `dtplyr` R package which allows the user to proved `dplyr` syntax which is translated into `data.table` (which is written primarily in C and is much faster than `dplyr`) under the hood.
+
+Without further ado, let's dive into some examples.
+
+# Data Manipulation
+
+## Example 1. Basic Summarize without Generalization across Variables
+
+Here, we take on a very simple and very common task: calculating the mean of a continuous variable (`mpg`) by the levels of a categorical variable (`cyl`).
+
+### R Version
+
+The Tidy approach utilizes a pipeline comprised of the `mtcars` data frame and the `group_by()` and `summarize()` functions. Note that these functions take a data frame (or tibble) as the first argument, but prevailing style allows this to be passed implicitly (as is done here).
+```{r}
+library(dplyr)
+
+table<-mtcars %>%
+    group_by(cyl) %>%
+    summarize(mpg.mean=mean(mpg))
+
+print(table)
+
+```
+
+### Python Version
+
+The Polars approach below begins by reading the R `mtcars` data frame into the Polars LazyFrame `mtcars`. The LazyFrame method `group_by()` is invoked followed by the `agg()` method. `agg()` contains an expression that is itself a method chain which yields the mean values for each group as the new variable `mpg.mean`. `table` is a Polars DataFrame realized as the result of evaluating an optimized query plan (via `collect()`).
+```{python}
+import polars as pl
+
+mtcars=pl.LazyFrame(r.mtcars)
+
+q=(
+    mtcars
+    .group_by("cyl")
+    .agg(pl.col("mpg").mean().alias("mpg.mean"))
+)
+
+table=q.collect()
+
+print(table)
+
+```
+
+## Example 2. Basic Mutate with Grouping and without Generalization
+
+Here we want to add a new variable to our data frame---the new variable is the ratio of each value of `mpg` relative to the mean value for the group (defined by the levels of the variable `cyl`).
+
+### R Version
+
+In R I can create the new variable with a call to `mutate()` that utilizes both group-level statistics and record-level data. This can be done in a single step with very little code.
+```{r}
+table<-mtcars %>%
+    group_by(cyl) %>%
+    mutate(rel.mpg=mpg/mean(mpg))
+
+print(table)
+
+```
+
+### Python Version
+
+The Python version uses the `with_columns()` LazyFrame method. Here, unlike in the R version, the grouping is baked into the recode expression itself by way of `over()`. Aside from looking a bit different, the Polars approach is more powerful because each expression can utilize its own grouping. Note that the Polars documentation utilizes a 'contexts' and 'expressions' framework to describe what could also be referred to as methods or method chains. In this example, `with_columns()` is the context in which the expression yielding the new variable `rel.mpg` is nested.
+```{python}
+q=(
+    mtcars
+    .with_columns(
+        (pl.col("mpg")/pl.col("mpg").mean().over("cyl")).alias("rel.mpg")
+    )
+)
+
+table=q.collect()
+
+print(table)
+
+```
+
+## Example 3. Summarize Generalized by Variable Type with Across
+
+In this example we want to generate means by group (like in example 1), but across a set of columns described by a selection criteria (i.e., not by name).
+
+### R Version
+
+As before, we specify the grouping via `group_by()` and generate the means within `summarize()`. In order to create means for several variables not explicitly specified we can utilize `across()`. To get means for all variables stored as doubles, we use the helper function `where()` in the `.cols` specification. Glue syntax in the `.names` specification allows us to rename all affected columns.
+```{r}
+mtcars %>%
+    group_by(cyl,gear) %>%
+    summarize(
+        across(
+            .cols=where(is.double)
+            ,.fns=mean
+            ,.names="{.col}_mean"
+        )
+    )
+
+```
+
+### Python Version
+The Python version looks very similar to the R version and has the same basic structure as in example 1. Here, though, instead of specifying a column with `pl.col()` we indicate that we want all columns stored as floats by using `cs.float()`. Note that there are *many* selector functions available, as explained [here](https://docs.pola.rs/api/python/stable/reference/selectors.html). The name method `name.suffix()` is used to rename all affected variables. See other name methods [here](https://docs.pola.rs/api/python/stable/reference/expressions/name.html).
+```{python}
+import polars.selectors as cs
+
+q=(
+    mtcars
+    .group_by("cyl","gear")
+    .agg(cs.float().mean().name.suffix("_mean"))
+)
+
+table=q.collect()
+
+print(table)
+
+```
+
+## Example 4. Conditional Recode
+
+In this example we use if/else if/else logic to create a string recode of the numeric variable `mpg`.
+
+### R Version
+
+In the Tidy R approach we deploy `case_when()` inside of `mutate()` to create a recode with cascading conditional logic.
+```{r}
+mtcars %>%
+    mutate(
+        mpg.cat=case_when(
+            mpg<10~"very bad"
+            ,mpg<15~"bad"
+            ,mpg<20~"okay"
+            ,mpg<25~"good"
+            ,TRUE~"great"
+        )
+    ) %>%
+    arrange(desc(mpg))
+
+```
+
+### Python Version
+
+The Python version is quite a bit more wordy. Note that `pl.lit()` is needed here to resolve ambiguity in the way column references can appear as strings in `then()`---in other words, we're indicating we want the recoded values to be the provided strings, not the values of columns represented by those strings.
+```{python}
+q=(
+    mtcars
+    .with_columns(
+        pl.when(pl.col("mpg")<10).then(pl.lit("very bad"))
+        .when(pl.col("mpg")<15).then(pl.lit("bad"))
+        .when(pl.col("mpg")<20).then(pl.lit("okay"))
+        .when(pl.col("mpg")<25).then(pl.lit("good"))
+        .otherwise(pl.lit("great"))
+        .alias("mpg.cat")
+    )
+    .sort("mpg",descending=True)
+)
+
+df=q.collect()
+
+print(df)
+
+```
+
+## Example 5. Pivots
+In this example we start with `mtcars` (a version with rownames mapped to the column `car`), pivot to a long file and then back to wide.
+
+### R Version
+
+Here we use very simple forms of `pivot_longer()` and `pivot_wider()`.
+```{r}
+library(tidyr)
+library(tibble)
+
+cars<-rownames_to_column(mtcars,"car") %>%
+  pivot_longer(
+    cols=where(is.numeric)
+    ,names_to="variable"
+    ,values_to="value"
+  )
+
+print(cars)
+
+mtcars_w_names<-cars %>%
+  pivot_wider(
+    id_cols=car
+    ,names_from="variable"
+    ,values_from="value"
+  )
+
+print(mtcars_w_names)
+
+```
+
+### Python Version
+With polars, going from wide to long is an [unpivot](https://docs.pola.rs/api/python/dev/reference/dataframe/api/polars.DataFrame.unpivot.html) and long to wide is a [pivot](https://docs.pola.rs/api/python/dev/reference/dataframe/api/polars.DataFrame.pivot.html). Note that the `pivot()` is only available in eager mode, as shown below.
+```{python}
+import polars.selectors as cs
+
+q=(
+    pl.scan_csv("mtcars_w_names.csv")
+    .unpivot(
+        on=cs.numeric()
+        ,index="car"
+        ,variable_name="variable"
+        ,value_name="value"
+    )
+)
+
+cars=q.collect()
+
+print(cars)
+
+mtcars_w_names=(
+    cars
+    .pivot(
+        index="car"
+        ,on="variable"
+        ,values="value"
+        ,aggregate_function=None
+    )
+)
+
+print(mtcars_w_names)
+
+```
+
+## Example 6. Joins
+
+In this example we will show the various join types with two distinct but overlapping subsets of `mtcars`: cars with 6-cylinder engines and those with horsepower less than 110.
+
+### R Version
+
+This code is pretty self-explanatory.
+```{r}
+carsl<-mtcars %>%
+    rownames_to_column("car") %>%
+    filter(cyl==6) %>%
+    select(car,cyl)
+
+carsr<-mtcars %>%
+    rownames_to_column("car") %>%
+    filter(hp<110) %>%
+    select(car,hp)
+
+print(carsl)
+print(carsr)
+
+left_join(carsl,carsr,by="car")
+right_join(carsl,carsr,by="car")
+inner_join(carsl,carsr,by="car")
+full_join(carsl,carsr,by="car")
+anti_join(carsl,carsr,by="car")
+
+```
+
+### Python Version
+
+```{python}
+carsl=(
+    pl.scan_csv("mtcars_w_names.csv")
+    .filter(pl.col("cyl")==6)
+    .select("car","cyl")
+)
+
+carsr=(
+    pl.scan_csv("mtcars_w_names.csv")
+    .filter(pl.col("hp")<110)
+    .select("car","hp")
+)
+
+print(carsl.collect())
+print(carsr.collect())
+
+print(carsl.join(carsr,on="car",how="left").collect())
+print(carsl.join(carsr,on="car",how="right").collect())
+print(carsl.join(carsr,on="car",how="inner").collect())
+print(carsl.join(carsr,on="car",how="full",coalesce=True).collect())
+print(carsl.join(carsr,on="car",how="anti").collect())
+
+```
+
+# Functional Programming
+
+## Example 7. Function for n & pct by Grouping Variables
+
+Here we want a custom function to create simple, list-style frequency tables based on one or more variables provided by the user.
+
+### R Version
+
+We use dynamic dots (`...`) here to tunnel in the variables provided by the user in the function call. This is powerful and flexible, allowing for 0+ variables provided as naked symbols rather than strings (`doit()`); an alternative version (`doit2()`) also uses dynamic dots, but with the intention to call with variable names provided as strings---this scales up better and is more comparable to the python version.
+```{r}
+library(rlang)
+library(purrr)
+
+doit<-function(df,...){
+  df %>%
+    ungroup() %>%
+    mutate(N=n()) %>%
+    group_by(...) %>%
+    summarize(n=n(),pct=n()*100/mean(N),.groups="drop") %>%
+    mutate(cumn=cumsum(n),cumpct=cumsum(pct))
+}
+
+doit(mtcars)
+doit(mtcars,cyl)
+doit(mtcars,cyl,gear)
+
+doit2<-function(df,...){
+    vars<-dots_list(...) %>%
+        list_c() %>%
+        syms()
+
+    df %>%
+        ungroup() %>%
+        mutate(N=n()) %>%
+        group_by(!!!vars) %>%
+        summarize(n=n(),pct=n()*100/mean(N),.groups="drop") %>%
+        mutate(cumn=cumsum(n),cumpct=cumsum(pct))
+}
+
+doit2(mtcars)
+doit2(mtcars,"cyl")
+doit2(mtcars,"cyl","gear")
+
+```
+
+### Python Version
+
+The version below gets very close! The only differences are that the python version of `doit()` doesn't work as-is if 0 variables are provided, and the variable names are passed as strings (i.e., this isn't optional as with the tidy versions). This latter point should actually simplify some situations that are complex due to data mask ambiguities in tidy functions.
+```{python}
+def doit(df,*argv):
+    q=(
+        df
+        .with_columns(pl.len().alias("N"))
+        .group_by(*argv)
+        .agg(
+            pl.len().alias("n")
+            ,((pl.len()*100)/pl.col("N").mean()).alias("pct")
+        )
+        .sort(*argv)
+        .with_columns(
+            pl.col("n").cum_sum().alias("cumn")
+            ,pl.col("pct").cum_sum().alias("cumpct")
+        )
+    )
+    table=q.collect()
+    print(table)
+
+doit(mtcars,"cyl")
+doit(mtcars,"cyl","gear")
+
+```
+
+## Example 8. Iterate a Custom Function
+
+Here we want to apply the `doit` functions over parameters.
+
+### R Version
+
+We can use `purrr::pmap()` in the R version with a list of parameters. Since we defined the R version of `doit` to take naked symbols, the mapped version is kind of clunky---a cleaner alternative based on `doit2` highlights this point.
+```{r}
+parms<-list(
+    list(mtcars,mtcars)
+    ,"var1"=list(mtcars$cyl,mtcars$cyl)
+    ,"var2"=list(mtcars$gear,mtcars$am)
+)
+
+pmap(parms,doit)
+
+parms2<-list(
+    list(mtcars,mtcars)
+    ,c("cyl","cyl")
+    ,c("gear","am")
+)
+
+pmap(parms2,doit2)
+
+```
+
+### Python Version
+
+Here we combine 3 parameter lists into a single iterator object via `zip`---we can then map `doit` over `parms` via `itertools.starmap`.
+```{python}
+import itertools as it
+
+parms=zip(
+    [mtcars,mtcars]
+    ,['cyl','cyl']
+    ,['gear','am']
+)
+
+list(it.starmap(doit,parms))
+
+```
+
+## Example 9. Stack Data Frames by List Binding with Map and Anonymous Function
+
+What we're achieving with this example---returning `mtcars`---isn't very useful, but it illustrates a common task: mapping an anonymous function over a vector to create a list of data frames which are subsequently stacked together via row binding. In other words, in this example we're reassembling `mtcars` by stacking together portions returned from each iteration of `map`.
+
+### R Version
+
+Pretty straight forward. Note that parms is a vector here.
+```{r}
+parms<-distinct(mtcars,cyl) %>%
+  pull()
+
+list<-map(
+  parms
+  ,function (x){
+    mtcars %>%
+      dplyr::filter(cyl==x) %>%
+      arrange(desc(mpg))
+  }
+)
+
+df<-list_rbind(list)
+
+print(df)
+
+```
+
+### Python Version
+
+This is extremely similar. Note that we're pulling from the csv of `mtcars` to utilize eager evaluation (for simplicity).
+```{python}
+mtcars=pl.read_csv("mtcars.csv")
+
+iterator=mtcars.get_column("cyl").unique()
+
+df=map(
+    lambda x: (
+        mtcars
+        .filter(pl.col("cyl")==x)
+        .sort("mpg",descending=True)
+    )
+    ,iterator
+)
+
+df=pl.concat(list(df))
+
+print(df)
+
+```
+
+## Example 10. Stack Data Frames by List Binding with pmap and Anonymous Function of Dots (`...`)
+
+This example generalizes the previous one to use a data frame with any number of columns (here we're just using 2) to parameterize the mapping.
+
+### R Version
+
+Dynamic dots are captured in the list `parms` within the function and column values are referenced as elements of that list.
+```{r}
+parms<-distinct(mtcars,cyl,gear)
+
+list<-pmap(
+  parms
+  ,function (...){
+    parms<-rlang::dots_list(...)
+    mtcars %>%
+      dplyr::filter(cyl==parms$cyl & gear==parms$gear) 
+  }
+)
+
+df<-list_rbind(list)
+
+print(df)
+
+```
+
+### Python Version
+
+This is very similar to the R version above. The key is that each row of the data frame `parms` is turned into a dictionary (i.e., has the form `{'key1':_key1val_,...,'keyk':_keykval_}`). `iterator` is then a list of dictionaries (`iter_rows()` returns dictionaries when `named=True`) which allows us to capture a single row of all parameters needed in the body of the anonymous function with the single parameter `dctnry`. The parameter values can be referenced by the original `parms` data frame variable name in the function body via the dictionary method `get()`. Note that there is a Polars DataFrame method `map_rows()` that does something similar, but there's no way to preserve variable names for reference inside the function, so this approach seems preferrable.
+```{python}
+mtcars=pl.read_csv("mtcars.csv")
+
+parms=(
+    mtcars
+    .group_by("cyl","gear")
+    .agg()
+)
+
+iterator=list(parms.iter_rows(named=True))
+
+dfs=map(
+    lambda dctnry: (
+        mtcars
+        .filter(
+            (pl.col("cyl")==dctnry.get('cyl')) & 
+            (pl.col("gear")==dctnry.get('gear'))
+        )
+    )
+    ,iterator
+)
+
+df=pl.concat(list(dfs))
+
+print(df)
+
+```
+
