@@ -1,11 +1,17 @@
 ---
-title: "mostlyunoriginal.github.io"
+title: "Lance Couzens"
+image: media/MeSpun.jpg
+toc: false
+about:
+  template: jolla
+  image-shape: round
+  image-width: 17em
+  links: 
+    - text: LinkedIn
+      href: https://www.linkedin.com/in/georgecouzens/
+    - text: GitHub
+      href: https://github.com/mostlyunoriginal
+    - text: Email
+      href: mailto:lance.couzens@gmail.com
 ---
 
-This is a Quarto website.
-
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
-
-```{r}
-1 + 1
-```
