@@ -36,7 +36,9 @@ cols<-params$cols
 
 data<-matrix(rnorm(rows*cols),nrow=rows,ncol=cols,byrow=T) %>%
   as.data.frame() %>%
-  mutate(id=as.character(row_number() %% 10000))
+  mutate(id=as.character(row_number() %% 10000),rand=runif(n())) %>%
+  arrange(rand) %>%
+  select(-rand)
 
 write_csv(data,"big.csv")
 ```
