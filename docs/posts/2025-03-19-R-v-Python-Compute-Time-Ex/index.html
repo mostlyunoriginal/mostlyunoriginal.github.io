@@ -206,7 +206,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <p>Let’s compare the compute time needed for an equivalent operation between <code>Python</code> and <code>R</code>. The operation is to:</p>
 <ol type="1">
-<li>ingest a largeish csv file with 1,250,000 records and 1,000 columns of random normal variates plus one <code>ID</code> column,</li>
+<li>ingest a largeish csv file (~25GB) with 1,250,000 records and 1,000 columns of random normal variates plus one <code>ID</code> column,</li>
 <li>group by <code>ID</code> (100 records per <code>ID</code>),</li>
 <li>summarize as mean for each double/float column,</li>
 <li>filter to <code>ID</code>s with any one or more double/float column with a <code>mean &gt; 0.4</code>, and</li>
@@ -236,7 +236,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>table<span class="sc">.</span>height<span class="sc">}</span><span class="ss"> rows returned</span><span class="ch">\n</span><span class="ss">elapsed time for query: </span><span class="sc">{</span>elapsed<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>40 rows returned
-elapsed time for query: 0:00:49.839682</code></pre>
+elapsed time for query: 0:00:50.211589</code></pre>
 </div>
 </div>
 </section>
@@ -270,7 +270,7 @@ Attaching package: 'hms'</code></pre>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>40 rows returned
-elapsed time for query: 00:17:45.985594</code></pre>
+elapsed time for query: 00:23:36.161897</code></pre>
 </div>
 </div>
 </section>
@@ -298,7 +298,7 @@ elapsed time for query: 00:17:45.985594</code></pre>
 <span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>40 rows returned
-elapsed time for query: 00:00:48.886949</code></pre>
+elapsed time for query: 00:00:48.459428</code></pre>
 </div>
 </div>
 </section>
@@ -319,7 +319,7 @@ elapsed time for query: 00:00:48.886949</code></pre>
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>40 rows returned
-elapsed time for query: 00:01:05.752389</code></pre>
+elapsed time for query: 00:01:04.595719</code></pre>
 </div>
 </div>
 <hr>
@@ -327,7 +327,7 @@ elapsed time for query: 00:01:05.752389</code></pre>
 </section>
 <section id="conclusions" class="level1">
 <h1>Conclusions</h1>
-<p>There will obviously be differences from one system to the next (and there certainly are between my Mac at home and my Windows laptop at work), but in general we can see there’s an obvious penalty for the plain vanilla <code>dplyr</code> approach. And if you’ve done much heavy data work with it, you’ve probably experienced it yourself. At least in this example, <code>Python</code> has a slight edge, but the <code>data.table</code> wrappers from <code>dtplyr</code> and <code>tidytable</code> get you most of the way there without having to leave <code>R</code>.</p>
+<p>There will obviously be differences from one system to the next (and there certainly are between my Mac at home and my Windows laptop at work), but in general we can see there’s a sizable penalty for the plain vanilla <code>dplyr</code> approach. And if you’ve done much heavy data work with it, you’ve probably experienced it yourself. At least in this example, <code>Python</code> with <code>polars</code> is nearly identical to <code>dtplyr</code> and <code>tidytable</code> is just a tad slower.</p>
 
 
 </section>

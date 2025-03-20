@@ -17,7 +17,7 @@ params:
 
 Let's compare the compute time needed for an equivalent operation between `Python` and `R`. The operation is to:
 
-1.  ingest a largeish csv file with `r prettyNum(params$rows,big.mark=",")` records and `r prettyNum(params$cols,big.mark=",")` columns of random normal variates plus one `ID` column,
+1.  ingest a largeish csv file (\~25GB) with `r prettyNum(params$rows,big.mark=",")` records and `r prettyNum(params$cols,big.mark=",")` columns of random normal variates plus one `ID` column,
 2.  group by `ID` (100 records per `ID`),
 3.  summarize as mean for each double/float column,
 4.  filter to `ID`s with any one or more double/float column with a `mean > 0.4`, and
@@ -136,4 +136,4 @@ print(str_glue("{rows} rows returned\nelapsed time for query: {as_hms(end-start)
 
 # Conclusions
 
-There will obviously be differences from one system to the next (and there certainly are between my Mac at home and my Windows laptop at work), but in general we can see there's an obvious penalty for the plain vanilla `dplyr` approach. And if you've done much heavy data work with it, you've probably experienced it yourself. At least in this example, `Python` has a slight edge, but the `data.table` wrappers from `dtplyr` and `tidytable` get you most of the way there without having to leave `R`.
+There will obviously be differences from one system to the next (and there certainly are between my Mac at home and my Windows laptop at work), but in general we can see there's a sizable penalty for the plain vanilla `dplyr` approach. And if you've done much heavy data work with it, you've probably experienced it yourself. At least in this example, `Python` with `polars` is nearly identical to `dtplyr` and `tidytable` is just a tad slower.
