@@ -134,4 +134,6 @@ print(str_glue("{rows} rows returned\nelapsed time for query: {as_hms(end-start)
 
 ------------------------------------------------------------------------
 
-##
+# Conclusions
+
+There will obviously be differences from one system to the next (and there certainly are between my Mac at home and my Windows laptop for work), but in general we can see there's an obvious penalty for the plain vanilla `dplyr` approach. And if you've done much heavy data work with it, you've probably experienced it yourself. At least in this example, `Python` has a slight edge, but the `data.table` wrappers from `dtplyr` and `tidytable` get you most of the way there without having to leave `R`.
