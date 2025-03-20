@@ -137,4 +137,4 @@ print(str_glue("{rows} rows returned\nelapsed time for query: {as_hms(end-start)
 
 # Conclusions
 
-After rendering this on both my work PC (2022 Windows laptop with 2.5GHz i7 and 32GB RAM) and my Mac at home (2023 M2 Max with 32GB memory) the general takeaway is that the plain vanilla `dplyr` approach is 4-5 times slower than `polars`. On the Mac, `dtplyr` and `polars` are nearly identical with `tidytable` coming in only a tad slower. On the Windows machine (which yielded the results shown here), both `dtplyr` and `tidytable` are about 2x `polars`.
+After rendering this on both my work PC (2022 Windows laptop with 2.5GHz i7 and 32GB RAM) and my Mac at home (2023 M2 Max with 32GB memory) the general takeaway is that the plain vanilla `dplyr` approach is anywhere from 3 to 8 times slower than `polars`. On the Mac, `dtplyr` and `polars` are nearly identical with `tidytable` coming in only a tad slower. On the Windows machine (which yielded the results shown here), both `dtplyr` and `tidytable` are about 2-3x `polars`.

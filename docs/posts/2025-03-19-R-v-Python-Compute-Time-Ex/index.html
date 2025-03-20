@@ -236,7 +236,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>table<span class="sc">.</span>height<span class="sc">}</span><span class="ss"> rows returned</span><span class="ch">\n</span><span class="ss">elapsed time for query: </span><span class="sc">{</span>elapsed<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>337 rows returned
-elapsed time for query: 0:00:21.652730</code></pre>
+elapsed time for query: 0:00:22.974835</code></pre>
 </div>
 </div>
 </section>
@@ -281,7 +281,7 @@ The following object is masked from 'package:lubridate':
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>337 rows returned
-elapsed time for query: 00:02:40.370616</code></pre>
+elapsed time for query: 00:02:53.151524</code></pre>
 </div>
 </div>
 </section>
@@ -309,7 +309,7 @@ elapsed time for query: 00:02:40.370616</code></pre>
 <span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>337 rows returned
-elapsed time for query: 00:00:57.062254</code></pre>
+elapsed time for query: 00:00:59.674709</code></pre>
 </div>
 </div>
 </section>
@@ -330,7 +330,7 @@ elapsed time for query: 00:00:57.062254</code></pre>
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>337 rows returned
-elapsed time for query: 00:01:06.348586</code></pre>
+elapsed time for query: 00:01:06.37921</code></pre>
 </div>
 </div>
 <hr>
@@ -338,7 +338,7 @@ elapsed time for query: 00:01:06.348586</code></pre>
 </section>
 <section id="conclusions" class="level1">
 <h1>Conclusions</h1>
-<p>After rendering this on both my work PC (2022 Windows laptop with 2.5GHz i7 and 32GB RAM) and my Mac at home (2023 M2 Max with 32GB memory) the general takeaway is that the plain vanilla <code>dplyr</code> approach is 4-5 times slower than <code>polars</code>. On the Mac, <code>dtplyr</code> and <code>polars</code> are nearly identical with <code>tidytable</code> coming in only a tad slower. On the Windows machine (which yielded the results shown here), both <code>dtplyr</code> and <code>tidytable</code> are about 2x <code>polars</code>.</p>
+<p>After rendering this on both my work PC (2022 Windows laptop with 2.5GHz i7 and 32GB RAM) and my Mac at home (2023 M2 Max with 32GB memory) the general takeaway is that the plain vanilla <code>dplyr</code> approach is anywhere from 3 to 8 times slower than <code>polars</code>. On the Mac, <code>dtplyr</code> and <code>polars</code> are nearly identical with <code>tidytable</code> coming in only a tad slower. On the Windows machine (which yielded the results shown here), both <code>dtplyr</code> and <code>tidytable</code> are about 2-3x <code>polars</code>.</p>
 
 
 </section>
