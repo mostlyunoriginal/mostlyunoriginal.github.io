@@ -136,4 +136,4 @@ print(str_glue("{rows} rows returned\nelapsed time for query: {as_hms(end-start)
 
 # Conclusions
 
-There will obviously be differences from one system to the next (and there certainly are between my Mac at home and my Windows laptop at work), but in general we can see there's a sizable penalty for the plain vanilla `dplyr` approach. And if you've done much heavy data work with it, you've probably experienced it yourself. At least in this example, `Python` with `polars` is nearly identical to `dtplyr` and `tidytable` is just a tad slower.
+There will obviously be differences from one system to the next (and there certainly are between my Mac at home and my Windows laptop at work), but in general we can see there's a sizable penalty for the plain vanilla `dplyr` approach. And if you've done much heavy data work with it, you've probably experienced it yourself. At least in this example, `Python` with `polars` has a slight edge over `dtplyr` and `tidytable` is just a tad slower.

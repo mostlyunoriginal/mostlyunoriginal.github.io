@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.40">
+<meta name="generator" content="quarto-1.6.42">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -72,10 +72,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-8b20df304ae43519df5d458fcc8598a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-eeb6d1c97efeeb0cfaf56837413d2c8e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -235,8 +235,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>table<span class="sc">.</span>height<span class="sc">}</span><span class="ss"> rows returned</span><span class="ch">\n</span><span class="ss">elapsed time for query: </span><span class="sc">{</span>elapsed<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>324 rows returned
-elapsed time for query: 0:00:36.219240</code></pre>
+<pre><code>322 rows returned
+elapsed time for query: 0:00:34.791124</code></pre>
 </div>
 </div>
 </section>
@@ -269,8 +269,8 @@ Attaching package: 'hms'</code></pre>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>324 rows returned
-elapsed time for query: 00:01:59.591926</code></pre>
+<pre><code>322 rows returned
+elapsed time for query: 00:02:51.703973</code></pre>
 </div>
 </div>
 </section>
@@ -297,8 +297,8 @@ elapsed time for query: 00:01:59.591926</code></pre>
 <span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>324 rows returned
-elapsed time for query: 00:00:42.40394</code></pre>
+<pre><code>322 rows returned
+elapsed time for query: 00:01:03.781439</code></pre>
 </div>
 </div>
 </section>
@@ -318,8 +318,8 @@ elapsed time for query: 00:00:42.40394</code></pre>
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>324 rows returned
-elapsed time for query: 00:00:56.514769</code></pre>
+<pre><code>322 rows returned
+elapsed time for query: 00:01:07.885394</code></pre>
 </div>
 </div>
 <hr>
@@ -327,7 +327,7 @@ elapsed time for query: 00:00:56.514769</code></pre>
 </section>
 <section id="conclusions" class="level1">
 <h1>Conclusions</h1>
-<p>There will obviously be differences from one system to the next (and there certainly are between my Mac at home and my Windows laptop at work), but in general we can see there’s a sizable penalty for the plain vanilla <code>dplyr</code> approach. And if you’ve done much heavy data work with it, you’ve probably experienced it yourself. At least in this example, <code>Python</code> with <code>polars</code> is nearly identical to <code>dtplyr</code> and <code>tidytable</code> is just a tad slower.</p>
+<p>There will obviously be differences from one system to the next (and there certainly are between my Mac at home and my Windows laptop at work), but in general we can see there’s a sizable penalty for the plain vanilla <code>dplyr</code> approach. And if you’ve done much heavy data work with it, you’ve probably experienced it yourself. At least in this example, <code>Python</code> with <code>polars</code> has a slight edge over <code>dtplyr</code> and <code>tidytable</code> is just a tad slower.</p>
 
 
 </section>
