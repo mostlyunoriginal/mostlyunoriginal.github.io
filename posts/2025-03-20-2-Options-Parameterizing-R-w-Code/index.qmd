@@ -1,0 +1,108 @@
+---
+title: "Decoupling Dynamic Code from a Static R Codebase"
+description: "Here we look at 2 ways to isolate the code that may change from the code that doesn't need to"
+date: 2025-03-20
+author:
+    - name: Lance Couzens
+      url: https://mostlyunoriginal.github.io  
+categories: [R, Quality]
+citation: 
+  url: https://mostlyunoriginal.github.io/posts/2025-03-20-2-Options-Parameterizing-R-w-Code/
+image: pReview.png
+draft: false
+---
+
+Oftentimes the best way to keep code working is to *just not touch it*. And while even the best, most stable code can't escape tweaking forever, there are some types of changes that can at least be made without even opening an otherwise stable and static codebase, assuming it's been set up to allow that.
+
+Suppose for example that we have an estimation pipeline that runs every year. In most years there are no changes to the methods or the structure of inputs/outputs, but every year there are some unavoidable changes to recode specifications. In this scenario, we have to be able to update the process but ideally in a way that minimizes both the effort required to QC the changes and the probability that something breaks. Well, we can minimize the breakage potential by not opening the code at all, and we can minimize QC time by extracting only the affected code into a parameter file.
+
+Here are two ways to do that.
+
+# Option 1 - A Separate Script
+
+In this option, we can store the recode logic in a separate R script. Here we define two new recodes, `cyl.rec` and `mpg.rec` using the `mtcars` data frame. The rules are stored in vectors with each vector position containing individual `case_when()` conditions and assignments as strings.
+
+```{r}
+#| output: false
+#| 
+library(tidyverse)
+
+#this part can exist in a separate script
+parms<-tribble(
+  ~newvar,     ~rules,
+  "cyl.rec",   c("cyl==4~1","cyl==6~2","cyl==8~3"),
+  "mpg.rec",   c("mpg<15~'very bad'","mpg<20~'bad'","mpg<25~'good'","TRUE~'very good'")
+)
+```
+
+We then have a static codebase that walks over the parameter file, creating recodes according to whatever code is found there.
+
+To achieve this, we utilize `purrr::pwalk()` to iterate over the parameter file `parms`, applying for each row of `parms` an anonymous function that creates the recode corresponding to that row. The recode is created by injecting `parms$newvar` as the new variable name, and splicing (via `!!!`) the vector of conditions from `parms$rules` into the body of `case_when()`. Notably, for each iteration, `cars` is read in from the global environment, the recode is created, and `cars` is written to the global environment. Alternatively, we could create within the function body data frames containing only the newly-defined column, capture them in a list (using `purrr::pmap()` instead of `purrr::pwalk()`) and column binding the list along with `cars`. I've done it both ways, but I prefer the global environment overwrite approach used below.
+
+```{r}
+#this part represents a static codebase
+cars<-mtcars %>%
+  rownames_to_column("car")
+
+pwalk(
+  parms
+  ,function(newvar,rules,df=cars){
+
+    df.name<-deparse(substitute(df))
+    
+    df %>%
+      mutate(!!newvar:=case_when(!!!rlang::parse_exprs(rules))) %>% 
+      assign(df.name,.,envir=globalenv())
+    
+  }
+)
+
+select(cars,car,cyl,cyl.rec,mpg,mpg.rec)
+```
+
+# Option 2 - Code Stored as Text in a Separate File (like a csv)
+
+Option 2 does the same thing--creating recodes metaprogrammatically by storing the code as data--but may be a better fit if we want to store the code in text-based tabular format rather than in an R script. This can be useful, for example, if we want someone who is a subject-matter expert but not an R programmer to write or review the recode code (in this case we could further break down the conditions in the parameter file to strip out the `case_when()` syntax and reassemble as necessary in the static codebase).
+
+```{r}
+#this part can exist in .csv or .xlsx file
+parms.alt<-tribble(
+  ~newvar,     ~rules,
+  "cyl.rec",   "cyl==4~1",
+  "cyl.rec",   "cyl==6~2",
+  "cyl.rec",   "cyl==8~3",
+  "mpg.rec",   "mpg<15~'very bad'",
+  "mpg.rec",   "mpg<20~'bad'",
+  "mpg.rec",   "mpg<25~'good'",
+  "mpg.rec",   "TRUE~'very good'"
+) 
+```
+
+The main difference on the static codebase side is that we group the parameter file by `newvar` and use `group_walk()` to apply our anonymous function after extracting the `rules` vector manually.
+
+```{r}
+#this part represents a static codebase
+cars<-mtcars %>%
+  rownames_to_column("car")
+
+parms.alt %>%
+  group_by(newvar) %>%
+  group_walk(
+    function(rules,group,df=cars){
+      
+      df.name<-deparse(substitute(df))
+      
+      newvar<-pull(group,newvar)
+      rules<-pull(rules,rules)
+
+      df %>%
+        mutate(!!newvar:=case_when(!!!rlang::parse_exprs(rules))) %>%
+        assign(df.name,.,envir=globalenv())
+      
+    }
+  )
+
+select(cars,car,cyl,cyl.rec,mpg,mpg.rec)
+```
+
+In either case, the recode changes are easy to QC and we eliminate the chance that we could break stable code by not even having to open it.
