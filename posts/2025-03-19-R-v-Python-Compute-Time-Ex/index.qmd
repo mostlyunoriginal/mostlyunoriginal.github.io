@@ -28,6 +28,7 @@ In Python, we will use `polars` with lazy evaluation. In `R`, we will use `dplyr
 ```{r}
 #| echo: false
 #| output: false
+#| eval: false
 
 library(tidyverse)
 
