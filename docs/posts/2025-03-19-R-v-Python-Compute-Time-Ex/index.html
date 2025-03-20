@@ -126,6 +126,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
     <a class="nav-link" href="../../posts.html"> 
 <span class="menu-text">Blog</span></a>
   </li>  
@@ -202,7 +206,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <p>Let’s compare the compute time needed for an equivalent operation between <code>Python</code> and <code>R</code>. The operation is to:</p>
 <ol type="1">
-<li>ingest a largeish csv file with 1,000,000 records and 1,000 columns of random normal variates plus one <code>ID</code> column,</li>
+<li>ingest a largeish csv file with 1,000 records and 10 columns of random normal variates plus one <code>ID</code> column,</li>
 <li>group by <code>ID</code> (100 records per <code>ID</code>),</li>
 <li>summarize as mean for each double/float column,</li>
 <li>filter to <code>ID</code>s with any one or more double/float column with a <code>mean &gt; 0.4</code>, and</li>
@@ -231,8 +235,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>table<span class="sc">.</span>height<span class="sc">}</span><span class="ss"> rows returned</span><span class="ch">\n</span><span class="ss">elapsed time for query: </span><span class="sc">{</span>elapsed<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>312 rows returned
-elapsed time for query: 0:00:37.487719</code></pre>
+<pre><code>979 rows returned
+elapsed time for query: 0:00:00.014877</code></pre>
 </div>
 </div>
 </section>
@@ -265,8 +269,8 @@ Attaching package: 'hms'</code></pre>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>312 rows returned
-elapsed time for query: 00:02:08.955338</code></pre>
+<pre><code>979 rows returned
+elapsed time for query: 00:00:00.102227</code></pre>
 </div>
 </div>
 </section>
@@ -293,8 +297,8 @@ elapsed time for query: 00:02:08.955338</code></pre>
 <span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>312 rows returned
-elapsed time for query: 00:00:42.887104</code></pre>
+<pre><code>979 rows returned
+elapsed time for query: 00:00:00.0181</code></pre>
 </div>
 </div>
 </section>
@@ -314,8 +318,8 @@ elapsed time for query: 00:00:42.887104</code></pre>
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>312 rows returned
-elapsed time for query: 00:00:54.957797</code></pre>
+<pre><code>979 rows returned
+elapsed time for query: 00:00:00.021233</code></pre>
 </div>
 </div>
 <hr>
@@ -323,7 +327,7 @@ elapsed time for query: 00:00:54.957797</code></pre>
 </section>
 <section id="conclusions" class="level1">
 <h1>Conclusions</h1>
-<p>There will obviously be differences from one system to the next (and there certainly are between my Mac at home and my Windows laptop for work), but in general we can see there’s an obvious penalty for the plain vanilla <code>dplyr</code> approach. And if you’ve done much heavy data work with it, you’ve probably experienced it yourself. At least in this example, <code>Python</code> has a slight edge, but the <code>data.table</code> wrappers from <code>dtplyr</code> and <code>tidytable</code> get you most of the way there without having to leave <code>R</code>.</p>
+<p>There will obviously be differences from one system to the next (and there certainly are between my Mac at home and my Windows laptop at work), but in general we can see there’s an obvious penalty for the plain vanilla <code>dplyr</code> approach. And if you’ve done much heavy data work with it, you’ve probably experienced it yourself. At least in this example, <code>Python</code> has a slight edge, but the <code>data.table</code> wrappers from <code>dtplyr</code> and <code>tidytable</code> get you most of the way there without having to leave <code>R</code>.</p>
 
 
 </section>
