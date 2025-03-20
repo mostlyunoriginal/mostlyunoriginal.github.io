@@ -1,6 +1,6 @@
 ---
 title: ""
-image: media/MeSpun.jpg
+image: media/MeHiking.jpg
 toc: false
 about:
   template: jolla
