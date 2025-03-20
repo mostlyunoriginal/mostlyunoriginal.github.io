@@ -199,11 +199,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>Oftentimes the best way to keep code working is to <em>just not touch it</em>. And while even the best, most stable code can’t escape tweaking forever, there are some types of changes that can at least be made without even opening an otherwise stable and static codebase, assuming it’s been set up to allow that.</p>
-<p>Suppose for example that we have an estimation pipeline that runs every year. In most years there are no changes to the methods or the structure of inputs/outputs, but every year there are some unavoidable changes to recode specifications. In this scenario, we have to be able to update the process but ideally in a way that minimizes both the effort required to QC the changes and the probability that something breaks. Well, we can minimize the breakage potential by not opening the code at all, and we can minimize QC time by extracting only the affected code into a parameter file.</p>
+<p>Suppose for example that we have an estimation pipeline that runs every year. In most years there are no changes to the methods or the structure of inputs/outputs, but every year there are some unavoidable changes to recode specifications. In this scenario, we have to be able to update the process but ideally in a way that minimizes both the effort required to QC the changes and the probability that something breaks. We can minimize the breakage potential by not opening the code at all, and we can minimize QC time by extracting only the affected code into a parameter file.</p>
 <p>Here are two ways to do that.</p>
 <section id="option-1---a-separate-script" class="level1">
 <h1>Option 1 - A Separate Script</h1>
-<p>In this option, we can store the recode logic in a separate R script. Here we define two new recodes, <code>cyl.rec</code> and <code>mpg.rec</code> using the <code>mtcars</code> data frame. The rules are stored in vectors with each vector position containing individual <code>case_when()</code> conditions and assignments as strings.</p>
+<p>In this option, we can store the recode logic in a separate R script. Here we define two new recodes, <code>cyl.rec</code> and <code>mpg.rec</code> based on the <code>mtcars</code> data frame. The rules are stored in vectors with each vector position containing, as strings, individual <code>case_when()</code> conditions and assignments.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -215,26 +215,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We then have a static codebase that walks over the parameter file, creating recodes according to whatever code is found there.</p>
-<p>To achieve this, we utilize <code>purrr::pwalk()</code> to iterate over the parameter file <code>parms</code>, applying for each row of <code>parms</code> an anonymous function that creates the recode corresponding to that row. The recode is created by injecting <code>parms$newvar</code> as the new variable name, and splicing (via <code>!!!</code>) the vector of conditions from <code>parms$rules</code> into the body of <code>case_when()</code>. Notably, for each iteration, <code>cars</code> is read in from the global environment, the recode is created, and <code>cars</code> is written to the global environment. Alternatively, we could create within the function body data frames containing only the newly-defined column, capture them in a list (using <code>purrr::pmap()</code> instead of <code>purrr::pwalk()</code>) and column binding the list along with <code>cars</code>. I’ve done it both ways, but I prefer the global environment overwrite approach used below.</p>
+<p>To achieve this, we utilize <code>purrr::pwalk()</code> to iterate over the parameter file <code>parms</code>, applying for each row an anonymous function that creates the recode corresponding to that row.</p>
+<p>The recode is created by injecting <code>parms$newvar</code> as the new variable name, and splicing (via <code>!!!</code>) the vector of conditions from <code>parms$rules</code> into the body of <code>case_when()</code>. Notably, for each iteration, <code>cars</code> is read in from the global environment, the recode is created, and <code>cars</code> is written to the global environment. Alternatively, we could create within the function body a data frame containing only the newly-defined column, capture them across iterations in a list (using <code>purrr::pmap()</code> instead of <code>purrr::pwalk()</code>) and column bind the list along with <code>cars</code>. I’ve done it both ways, but I prefer the global environment overwrite approach used below.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#this part represents a static codebase</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>cars<span class="ot">&lt;-</span>mtcars <span class="sc">%&gt;%</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"car"</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">pwalk</span>(</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  parms</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  ,<span class="cf">function</span>(newvar,rules,<span class="at">df=</span>cars){</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    df.name<span class="ot">&lt;-</span><span class="fu">deparse</span>(<span class="fu">substitute</span>(df))</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    df <span class="sc">%&gt;%</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="sc">!!</span><span class="at">newvar:=</span><span class="fu">case_when</span>(<span class="sc">!!!</span>rlang<span class="sc">::</span><span class="fu">parse_exprs</span>(rules))) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">assign</span>(df.name,.,<span class="at">envir=</span><span class="fu">globalenv</span>())</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="fu">select</span>(cars,car,cyl,cyl.rec,mpg,mpg.rec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#this part represents a static codebase that would follow a source() call </span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># to the parameter file-generating script</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>cars<span class="ot">&lt;-</span>mtcars <span class="sc">%&gt;%</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"car"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">pwalk</span>(</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  parms</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  ,<span class="cf">function</span>(newvar,rules,<span class="at">df=</span>cars){</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    df.name<span class="ot">&lt;-</span><span class="fu">deparse</span>(<span class="fu">substitute</span>(df))</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    df <span class="sc">%&gt;%</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="sc">!!</span><span class="at">newvar:=</span><span class="fu">case_when</span>(<span class="sc">!!!</span>rlang<span class="sc">::</span><span class="fu">parse_exprs</span>(rules))) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">assign</span>(df.name,.,<span class="at">envir=</span><span class="fu">globalenv</span>())</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="fu">select</span>(cars,car,cyl,cyl.rec,mpg,mpg.rec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                   car cyl cyl.rec  mpg   mpg.rec
 1            Mazda RX4   6       2 21.0      good
@@ -274,7 +277,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="option-2---code-stored-as-text-in-a-separate-file-like-a-csv" class="level1">
 <h1>Option 2 - Code Stored as Text in a Separate File (like a csv)</h1>
-<p>Option 2 does the same thing–creating recodes metaprogrammatically by storing the code as data–but may be a better fit if we want to store the code in text-based tabular format rather than in an R script. This can be useful, for example, if we want someone who is a subject-matter expert but not an R programmer to write or review the recode code (in this case we could further break down the conditions in the parameter file to strip out the <code>case_when()</code> syntax and reassemble as necessary in the static codebase).</p>
+<p>Option 2 does the same thing—creating recodes metaprogrammatically by storing the code as data—but may be a better fit if we want to store the code in text-based, tabular format rather than in an R script. This can be useful, for example, if we want someone who is a subject-matter expert but not an R programmer to write or review the recode code (in this case we could even break down the conditions in the parameter file further to strip out the <code>case_when()</code> syntax and reassemble as necessary in the static codebase).</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#this part can exist in .csv or .xlsx file</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>parms.alt<span class="ot">&lt;-</span><span class="fu">tribble</span>(</span>
@@ -290,28 +293,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>The main difference on the static codebase side is that we group the parameter file by <code>newvar</code> and use <code>group_walk()</code> to apply our anonymous function after extracting the <code>rules</code> vector manually.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#this part represents a static codebase</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>cars<span class="ot">&lt;-</span>mtcars <span class="sc">%&gt;%</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"car"</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>parms.alt <span class="sc">%&gt;%</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(newvar) <span class="sc">%&gt;%</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_walk</span>(</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">function</span>(rules,group,<span class="at">df=</span>cars){</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>      </span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>      df.name<span class="ot">&lt;-</span><span class="fu">deparse</span>(<span class="fu">substitute</span>(df))</span>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#this part represents a static codebase that would follow an ingestion step</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># that reads in the parameter file from wherever it's stored</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>cars<span class="ot">&lt;-</span>mtcars <span class="sc">%&gt;%</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"car"</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>parms.alt <span class="sc">%&gt;%</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(newvar) <span class="sc">%&gt;%</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_walk</span>(</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">function</span>(rules,group,<span class="at">df=</span>cars){</span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>      </span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>      newvar<span class="ot">&lt;-</span><span class="fu">pull</span>(group,newvar)</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>      rules<span class="ot">&lt;-</span><span class="fu">pull</span>(rules,rules)</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>      df <span class="sc">%&gt;%</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="sc">!!</span><span class="at">newvar:=</span><span class="fu">case_when</span>(<span class="sc">!!!</span>rlang<span class="sc">::</span><span class="fu">parse_exprs</span>(rules))) <span class="sc">%&gt;%</span></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">assign</span>(df.name,.,<span class="at">envir=</span><span class="fu">globalenv</span>())</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>      </span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="fu">select</span>(cars,car,cyl,cyl.rec,mpg,mpg.rec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>      df.name<span class="ot">&lt;-</span><span class="fu">deparse</span>(<span class="fu">substitute</span>(df))</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>      newvar<span class="ot">&lt;-</span><span class="fu">pull</span>(group,newvar)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>      rules<span class="ot">&lt;-</span><span class="fu">pull</span>(rules,rules)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>      df <span class="sc">%&gt;%</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="sc">!!</span><span class="at">newvar:=</span><span class="fu">case_when</span>(<span class="sc">!!!</span>rlang<span class="sc">::</span><span class="fu">parse_exprs</span>(rules))) <span class="sc">%&gt;%</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">assign</span>(df.name,.,<span class="at">envir=</span><span class="fu">globalenv</span>())</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="fu">select</span>(cars,car,cyl,cyl.rec,mpg,mpg.rec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                   car cyl cyl.rec  mpg   mpg.rec
 1            Mazda RX4   6       2 21.0      good
@@ -348,6 +353,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 32          Volvo 142E   4       1 21.4      good</code></pre>
 </div>
 </div>
+<hr>
 <p>In either case, the recode changes are easy to QC and we eliminate the chance that we could break stable code by not even having to open it.</p>
 
 
