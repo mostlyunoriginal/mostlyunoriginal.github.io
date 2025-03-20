@@ -11,13 +11,13 @@ citation:
 image: PReview.webp
 draft: false
 params:
-  rows: 1250000
+  rows: 1000000
   cols: 1000
 ---
 
 Let's compare the compute time needed for an equivalent operation between `Python` and `R`. The operation is to:
 
-1.  ingest a largeish csv file (\~25GB) with `r prettyNum(params$rows,big.mark=",")` records and `r prettyNum(params$cols,big.mark=",")` columns of random normal variates plus one `ID` column,
+1.  ingest a largeish csv file (\~18GB) with `r prettyNum(params$rows,big.mark=",")` records and `r prettyNum(params$cols,big.mark=",")` columns of random normal variates plus one `ID` column,
 2.  group by `ID` (100 records per `ID`),
 3.  summarize as mean for each double/float column,
 4.  filter to `ID`s with any one or more double/float column with a `mean > 0.4`, and
