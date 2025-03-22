@@ -8,9 +8,9 @@
 
 <meta name="author" content="Lance Couzens">
 <meta name="dcterms.date" content="2025-03-22">
-<meta name="description" content="Here we make lists of choropleth maps">
+<meta name="description" content="Here we make a list of choropleth maps">
 
-<title>Building and Working with Lists of ggplot Objects in R – Lance Couzens</title>
+<title>Building and Working with a List of ggplot Objects in R – Lance Couzens</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -147,10 +147,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-page">
-      <h1 class="title">Building and Working with Lists of ggplot Objects in R</h1>
+      <h1 class="title">Building and Working with a List of ggplot Objects in R</h1>
                   <div>
         <div class="description">
-          Here we make lists of choropleth maps
+          Here we make a list of choropleth maps
         </div>
       </div>
                           <div class="quarto-categories">
@@ -292,33 +292,41 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">%&gt;%</span></span>
 <span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ggplot</span>()<span class="sc">+</span></span>
 <span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>          <span class="co">#geom for plotting shapefile polygons</span></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>          <span class="fu">geom_sf</span>(<span class="at">size=</span><span class="fl">0.05</span>,<span class="at">color=</span><span class="st">"#000000"</span>,<span class="fu">aes</span>(<span class="at">fill=</span><span class="fu">as.numeric</span>(estimate)))<span class="sc">+</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>          <span class="fu">geom_sf_label</span>(<span class="fu">aes</span>(<span class="at">label=</span>goodlabel),<span class="at">color=</span><span class="st">"#000000"</span>,<span class="at">vjust=</span><span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>          <span class="fu">coord_sf</span>(<span class="at">crs=</span><span class="dv">4326</span>)<span class="sc">+</span></span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>          <span class="fu">scale_fill_viridis_c</span>(</span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>            <span class="at">option =</span> <span class="st">"viridis"</span>,</span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>            <span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">200000</span>,<span class="at">by=</span><span class="dv">10000</span>),</span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>            <span class="at">labels=</span>dollar</span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>          )<span class="sc">+</span></span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>          <span class="fu">labs</span>(</span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>            <span class="at">title=</span><span class="fu">str_glue</span>(<span class="st">"{parms$NAME} Median Income by County"</span>),</span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>            <span class="at">subtitle=</span><span class="fu">str_glue</span>(</span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>              <span class="st">"American Community Survey 5-Year Estimates {parms$year-4}-{parms$year}</span><span class="sc">\n</span><span class="st">"</span></span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>              ,<span class="st">"Highest and Lowest Income Counties Labelled"</span></span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>          )<span class="sc">+</span></span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>          <span class="fu">guides</span>(<span class="at">fill=</span><span class="fu">guide_colorbar</span>(<span class="st">"Median</span><span class="sc">\n</span><span class="st">Past-Year</span><span class="sc">\n</span><span class="st">HH Income"</span>))<span class="sc">+</span></span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>          <span class="fu">theme_bw</span>()<span class="sc">+</span></span>
-<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>          <span class="fu">theme_update</span>(<span class="at">legend.key.height=</span><span class="fu">unit</span>(.<span class="dv">3</span>,<span class="st">"in"</span>))</span>
-<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>      </span>
-<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(<span class="st">"state_abb"</span><span class="ot">=</span>parms<span class="sc">$</span>state_abb,<span class="st">"state"</span><span class="ot">=</span>parms<span class="sc">$</span>NAME,<span class="st">"plot"</span><span class="ot">=</span>p)</span>
-<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>      </span>
-<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>          <span class="fu">geom_sf</span>(</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>              <span class="at">size=</span><span class="fl">0.05</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>              ,<span class="at">color=</span><span class="st">"#000000"</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>              ,<span class="fu">aes</span>(<span class="at">fill=</span><span class="fu">as.numeric</span>(estimate))</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>          )<span class="sc">+</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>          <span class="fu">geom_sf_label</span>(</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>              <span class="fu">aes</span>(<span class="at">label=</span>goodlabel)</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>              ,<span class="at">color=</span><span class="st">"#000000"</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>              ,<span class="at">vjust=</span><span class="dv">1</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>          )<span class="sc">+</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>          <span class="fu">coord_sf</span>(<span class="at">crs=</span><span class="dv">4326</span>)<span class="sc">+</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>          <span class="fu">scale_fill_viridis_c</span>(</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>            <span class="at">option=</span><span class="st">"viridis"</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>            ,<span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">200000</span>,<span class="at">by=</span><span class="dv">10000</span>)</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>            ,<span class="at">labels=</span>dollar</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>          )<span class="sc">+</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>          <span class="fu">labs</span>(</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>            <span class="at">title=</span><span class="fu">str_glue</span>(<span class="st">"{parms$NAME} Median Income by County"</span>),</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>            <span class="at">subtitle=</span><span class="fu">str_glue</span>(</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>              <span class="st">"American Community Survey 5-Year Estimates {parms$year-4}-{parms$year}</span><span class="sc">\n</span><span class="st">"</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>              ,<span class="st">"Highest and Lowest Income Counties Labelled"</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>          )<span class="sc">+</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>          <span class="fu">guides</span>(<span class="at">fill=</span><span class="fu">guide_colorbar</span>(<span class="st">"Median</span><span class="sc">\n</span><span class="st">Past-Year</span><span class="sc">\n</span><span class="st">HH Income"</span>))<span class="sc">+</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>          <span class="fu">theme_bw</span>()<span class="sc">+</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>          <span class="fu">theme_update</span>(<span class="at">legend.key.height=</span><span class="fu">unit</span>(.<span class="dv">35</span>,<span class="st">"in"</span>))</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(<span class="st">"state_abb"</span><span class="ot">=</span>parms<span class="sc">$</span>state_abb,<span class="st">"state"</span><span class="ot">=</span>parms<span class="sc">$</span>NAME,<span class="st">"plot"</span><span class="ot">=</span>p)</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>At this point, <code>maplist</code> has been populated, and we can extract plot objects from it. First, let’s try just returning the first element. Recall that because our parameter file was sorted highest to lowest in terms of the proportion of the state population with household income below the poverty limit, the first element of our list will contain a plot for the most impoverished state.</p>
-<div class="cell" data-fig.fullwidth="true">
+<div class="cell" data-fig.fullwidth="true" data-fig.fullheight="true">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pluck</span>(maplist,<span class="dv">1</span>)<span class="sc">$</span>plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
@@ -329,7 +337,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>We can also <code>walk</code> over the list to present ranges of its elements. Here we look at the 5 least impoverished states. Note that in this case we need an explicit <code>print()</code> to force the plots out of the <code>walk</code> functional environment.</p>
-<div class="cell" data-fig.fullwidth="true">
+<div class="cell" data-fig.fullwidth="true" data-fig.fullheight="true">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">walk</span>(<span class="dv">50</span><span class="sc">:</span><span class="dv">46</span>,<span class="sc">~</span><span class="fu">pluck</span>(maplist,.x)<span class="sc">$</span>plot <span class="sc">%&gt;%</span> <span class="fu">print</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
@@ -368,7 +376,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Or we can extract the map corresponding to a specific state of interest. We can do this because we loaded each element of <code>maplist</code> with a list containing both a plot object <em>and</em> state identifiers.</p>
-<div class="cell" data-fig.fullwidth="true">
+<div class="cell" data-fig.fullwidth="true" data-fig.fullheight="true">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">detect</span>(maplist,<span class="sc">~</span>.x<span class="sc">$</span>state<span class="sc">==</span><span class="st">"New York"</span>)<span class="sc">$</span>plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
@@ -400,14 +408,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{couzens2025,
   author = {Couzens, Lance},
-  title = {Building and {Working} with {Lists} of Ggplot {Objects} in
+  title = {Building and {Working} with a {List} of Ggplot {Objects} in
     {R}},
   date = {2025-03-22},
   url = {https://mostlyunoriginal.github.io/posts/2025-03-22-Choropleths-and-LIst-Retrieval-Fun/},
   langid = {en}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-couzens2025" class="csl-entry quarto-appendix-citeas" role="listitem">
-Couzens, Lance. 2025. <span>“Building and Working with Lists of Ggplot
+Couzens, Lance. 2025. <span>“Building and Working with a List of Ggplot
 Objects in R.”</span> March 22, 2025. <a href="https://mostlyunoriginal.github.io/posts/2025-03-22-Choropleths-and-LIst-Retrieval-Fun/">https://mostlyunoriginal.github.io/posts/2025-03-22-Choropleths-and-LIst-Retrieval-Fun/</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

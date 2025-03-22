@@ -1,6 +1,6 @@
 ---
-title: "Building and Working with Lists of ggplot Objects in R"
-description: "Here we make lists of choropleth maps"
+title: "Building and Working with a List of ggplot Objects in R"
+description: "Here we make a list of choropleth maps"
 date: 2025-03-22
 author:
     - name: Lance Couzens
@@ -108,13 +108,21 @@ maplist<-poverty_data %>%
         ) %>%
         ggplot()+
           #geom for plotting shapefile polygons
-          geom_sf(size=0.05,color="#000000",aes(fill=as.numeric(estimate)))+
-          geom_sf_label(aes(label=goodlabel),color="#000000",vjust=1)+
+          geom_sf(
+              size=0.05
+              ,color="#000000"
+              ,aes(fill=as.numeric(estimate))
+          )+
+          geom_sf_label(
+              aes(label=goodlabel)
+              ,color="#000000"
+              ,vjust=1
+          )+
           coord_sf(crs=4326)+
           scale_fill_viridis_c(
-            option = "viridis",
-            breaks=seq(0,200000,by=10000),
-            labels=dollar
+            option="viridis"
+            ,breaks=seq(0,200000,by=10000)
+            ,labels=dollar
           )+
           labs(
             title=str_glue("{parms$NAME} Median Income by County"),
@@ -125,7 +133,7 @@ maplist<-poverty_data %>%
           )+
           guides(fill=guide_colorbar("Median\nPast-Year\nHH Income"))+
           theme_bw()+
-          theme_update(legend.key.height=unit(.3,"in"))
+          theme_update(legend.key.height=unit(.35,"in"))
       
       list("state_abb"=parms$state_abb,"state"=parms$NAME,"plot"=p)
       
@@ -140,8 +148,9 @@ At this point, `maplist` has been populated, and we can extract plot objects fro
 ```{r}
 #| warning: false
 #| fig.width: 10
-#| fig.height: 8
+#| fig.height: 10
 #| fig.fullwidth: true
+#| fig.fullheight: true
 pluck(maplist,1)$plot
 ```
 
@@ -150,8 +159,9 @@ We can also `walk` over the list to present ranges of its elements. Here we look
 ```{r}
 #| warning: false
 #| fig.width: 10
-#| fig.height: 8
+#| fig.height: 10
 #| fig.fullwidth: true
+#| fig.fullheight: true
 walk(50:46,~pluck(maplist,.x)$plot %>% print())
 ```
 
@@ -160,8 +170,9 @@ Or we can extract the map corresponding to a specific state of interest. We can 
 ```{r}
 #| warning: false
 #| fig.width: 10
-#| fig.height: 8
+#| fig.height: 10
 #| fig.fullwidth: true
+#| fig.fullheight: true
 detect(maplist,~.x$state=="New York")$plot
 detect(maplist,~.x$state=="Texas")$plot
 detect(maplist,~.x$state=="California")$plot
