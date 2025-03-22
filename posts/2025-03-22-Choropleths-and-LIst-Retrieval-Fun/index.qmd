@@ -10,7 +10,7 @@ citation:
   url: https://mostlyunoriginal.github.io/posts/2025-03-22-Choropleths-and-LIst-Retrieval-Fun/
 image: pReview.png
 lightbox: true
-draft: true
+draft: false
 ---
 
 Lists are, in many ways, R's most powerful objects. They are vectors without type, general and flexible. You can fill them with anything---including other lists---and while this enables some truly useful complexity in our R-based processes, it can also make creating and working with lists daunting, especially for newer R programmers.
@@ -25,7 +25,7 @@ Here's what we'll do:
 4.  using the resulting data frame as a parameter file, iterate a custom function that
     1.  retrieves county-level median income estimates and polygons for a given state via the Census API
     2.  ranks the counties by their median income
-    3.  generates clean labels for the top and bottom 5th percentile counties
+    3.  generates clean labels for the top and bottom counties
     4.  creates a plot object containing the county choropleth map for the state
     5.  returns a list containing the plot, the state abbreviation, and the state name
 
@@ -99,31 +99,33 @@ maplist<-poverty_data %>%
         ,year=parms$year #again here
       ) %>%
         mutate(
-          prop_rank=percent_rank(estimate)
-          ,goodlabel=case_when(
-            prop_rank<=.05|prop_rank>=.95~str_replace(NAME,"(.+)(,.+)","\\1") %>% str_remove(" County")
+          goodlabel=case_when(
+            rank(estimate,na.last=NA,ties.method="first")==1|
+              percent_rank(estimate)==1
+              ~str_replace(NAME,"(.+)(,.+)","\\1") %>% str_remove(" County")
             ,TRUE~NA_character_
           )
         ) %>%
         ggplot()+
           #geom for plotting shapefile polygons
           geom_sf(size=0.05,color="#000000",aes(fill=as.numeric(estimate)))+
-          geom_sf_label(aes(label=goodlabel),color="#000000")+
+          geom_sf_label(aes(label=goodlabel),color="#000000",vjust=1)+
           coord_sf(crs=4326)+
           scale_fill_viridis_c(
             option = "viridis",
-            breaks=seq(0,120000,by=10000),
+            breaks=seq(0,200000,by=10000),
             labels=dollar
           )+
           labs(
             title=str_glue("{parms$NAME} Median Income by County"),
             subtitle=str_glue(
               "American Community Survey 5-Year Estimates {parms$year-4}-{parms$year}\n"
-              ,"Top and Bottom 5th Percentile Counties Labelled"
+              ,"Highest and Lowest Income Counties Labelled"
             )
           )+
           guides(fill=guide_colorbar("Median\nPast-Year\nHH Income"))+
-          theme_bw()
+          theme_bw()+
+          theme_update(legend.key.height=unit(.3,"in"))
       
       list("state_abb"=parms$state_abb,"state"=parms$NAME,"plot"=p)
       
@@ -160,9 +162,9 @@ Or we can extract the map corresponding to a specific state of interest. We can 
 #| fig.width: 10
 #| fig.height: 8
 #| fig.fullwidth: true
-detect(maplist,~.x$state=="Maryland")$plot
-
-#etc...
+detect(maplist,~.x$state=="New York")$plot
+detect(maplist,~.x$state=="Texas")$plot
+detect(maplist,~.x$state=="California")$plot
 ```
 
 In conclusion... maps are fun, and lists are useful!
