@@ -9,7 +9,7 @@ categories: [R, Quality]
 citation: 
   url: https://mostlyunoriginal.github.io/posts/2025-03-20-2-Options-Parameterizing-R-w-Code/
 image: pReview.png
-draft: true
+draft: false
 ---
 
 Oftentimes the best way to keep code working is to *just not touch it*. And while even the best, most stable code can't escape tweaking forever, there are some types of changes that can at least be made without even opening an otherwise stable and static codebase, assuming it's been set up to allow that.
