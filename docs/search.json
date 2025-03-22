@@ -2,7 +2,7 @@
   {
     "objectID": "posts.html",
     "href": "posts.html",
-    "title": "Blog",
+    "title": "Code Blog",
     "section": "",
     "text": "Building and Working with a List of ggplot Objects in R\n\n\n\n\n\n\nR\n\n\nGraphics\n\n\nLists\n\n\nCensus API\n\n\n\nHere we make a list of choropleth maps\n\n\n\n\n\nMar 22, 2025\n\n\nLance Couzens\n\n\n\n\n\n\n\n\n\n\n\n\nDecoupling Dynamic Code from a Static R Codebase\n\n\n\n\n\n\nR\n\n\nQuality\n\n\n\nHere we look at 2 ways to isolate the code that may change from the code that doesn’t need to\n\n\n\n\n\nMar 20, 2025\n\n\nLance Couzens\n\n\n\n\n\n\n\n\n\n\n\n\nR vs. Python Query Compute Time Example\n\n\n\n\n\n\nR\n\n\nPython\n\n\n\nHere we compare runtime to query a large csv in R and Python\n\n\n\n\n\nMar 19, 2025\n\n\nLance Couzens\n\n\n\n\n\n\n\n\n\n\n\n\nRecreating Some Tidy-Style R Operations with Python and Polars\n\n\n\n\n\n\nR\n\n\nPython\n\n\n\nThis post lays out a series of examples that helped me break into Python as a Tidy-style R programmer\n\n\n\n\n\nMar 19, 2025\n\n\nLance Couzens\n\n\n\n\n\n\nNo matching items"
   },
@@ -11,7 +11,7 @@
     "href": "index.html",
     "title": "Lance Couzens",
     "section": "",
-    "text": "Hello, and welcome to my code-stuff website. I’m a statistician/data professional who is very interested in totally obsessed with open-source programming. Most of the action is happening under the Blog. Thanks for stopping by, and don’t hesitate to hit me up via email if you’d like to chat about coding, statistics, photography, or… whatever."
+    "text": "Hello, and welcome to my code-stuff website. I’m a statistician/data professional who is very interested in totally obsessed with open-source programming. Most of the action is happening under the Code Blog. Thanks for stopping by, and don’t hesitate to hit me up via email if you’d like to chat about coding, statistics, photography, or… whatever."
   },
   {
     "objectID": "posts/2025-03-22-Choropleths-and-LIst-Retrieval-Fun/index.html",

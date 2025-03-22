@@ -1,5 +1,5 @@
 ---
-title: "Blog"
+title: "Code Blog"
 listing:
   contents: posts
   type: default
