@@ -12,7 +12,7 @@ image: PReview.webp
 draft: false
 params:
   rows: 1000000
-  cols: 1000
+  cols: 10
 ---
 
 Let's compare the compute time needed for an equivalent operation between `Python` and `R`. The operation is to:
@@ -28,7 +28,7 @@ In Python, we will use `polars` with lazy evaluation. In `R`, we will use `dplyr
 ```{r}
 #| echo: false
 #| output: false
-#| eval: false
+#| eval: true
 
 library(tidyverse)
 
@@ -137,4 +137,4 @@ print(str_glue("{rows} rows returned\nelapsed time for query: {as_hms(end-start)
 
 # Conclusions
 
-After rendering this on both my work PC (2022 Windows laptop with 2.5GHz i7 and 32GB RAM) and my Mac at home (2023 M2 Max with 32GB memory) the general takeaway is that the plain vanilla `dplyr` approach is anywhere from 3 to 8 times slower than `polars`. On the Mac, `dtplyr` and `polars` are nearly identical with `tidytable` coming in only a tad slower. On the Windows machine (which yielded the results shown here), both `dtplyr` and `tidytable` are about 2-3x `polars`.
+After rendering this several time on both my work PC (2022 Windows laptop with 2.5GHz i7 and 32GB RAM) and my Mac at home (2023 M2 Max with 32GB memory) the general takeaway is that the plain vanilla `dplyr` approach is anywhere from 3 to 8 times slower than `polars`. On the Mac, `dtplyr` and `polars` are very close with `tidytable` coming in only a tad slower. On the Windows machine, both `dtplyr` and `tidytable` are about 2-3x `polars`.

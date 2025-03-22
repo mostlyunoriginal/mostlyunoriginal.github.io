@@ -1,0 +1,168 @@
+---
+title: "Building and Working with Lists of ggplot Objects in R"
+description: "Here we make lists of choropleth maps"
+date: 2025-03-22
+author:
+    - name: Lance Couzens
+      url: https://mostlyunoriginal.github.io  
+categories: [R, Graphics, Lists, Census API]
+citation: 
+  url: https://mostlyunoriginal.github.io/posts/2025-03-22-Choropleths-and-LIst-Retrieval-Fun/
+image: pReview.png
+lightbox: true
+draft: true
+---
+
+Lists are, in many ways, R's most powerful objects. They are vectors without type, general and flexible. You can fill them with anything---including other lists---and while this enables some truly useful complexity in our R-based processes, it can also make creating and working with lists daunting, especially for newer R programmers.
+
+With this post I make no attempt to explain (let alone *fully explain*) lists in R. Instead I just hope to showcase one example of doing something fun (and maybe kinda useful-ish?) with them: storing and retrieving income disparity choropleth maps made with the Census API and `ggplot2`. Everyone loves maps, right?!
+
+Here's what we'll do:
+
+1.  retrieve a state-level data frame with 2023 ACS 5-year poverty estimates via the Census API
+2.  create the recode variable `prop_below` that represents the proportion of the state population with household income below the poverty limit
+3.  sort in descending order by `prop_below`
+4.  using the resulting data frame as a parameter file, iterate a custom function that
+    1.  retrieves county-level median income estimates and polygons for a given state via the Census API
+    2.  ranks the counties by their median income
+    3.  generates clean labels for the top and bottom 5th percentile counties
+    4.  creates a plot object containing the county choropleth map for the state
+    5.  returns a list containing the plot, the state abbreviation, and the state name
+
+At this point, we will have a list with 50 elements—one for each state—each of which is a list containing the state-level plots plus state names and abbreviations. We will explore three ways to extract plots from this list.
+
+```{r}
+#| echo: false
+#| output: false
+library(tidycensus)
+source("key.R")
+```
+
+First, we'll load the necessary libraries and create our state-level parameter file.
+
+```{r}
+#| output: false
+library(tidycensus)
+library(tidyverse)
+library(viridis)
+library(ggplot2)
+library(scales)
+
+year<-2023
+
+poverty_data<-get_acs(
+  geography="state"
+  ,variables=c(
+      below_p5pov="C17002_002"
+      ,p5_1pov="C17002_003"
+      ,total_population="C17002_001"
+  )
+  ,year=year
+  ,survey="acs5"
+) %>%
+  pivot_wider(
+    id_cols=c(GEOID,NAME)
+    ,names_from="variable"
+    ,values_from="estimate"
+  ) %>%
+  filter(!GEOID %in% c(72,11)) %>%
+  mutate(
+    prop_below=(below_p5pov+p5_1pov)/total_population
+    ,year=.env$year
+  ) %>%
+  arrange(desc(prop_below))
+```
+
+Let's look at the parameter file to see what our functional process has to work with.
+
+```{r}
+poverty_data
+```
+
+And here we fill our list: `maplist`. To do that, we iterate over our parameter file with the `pmap()` functional and an anonymous function containing the guts of our process.
+
+```{r}
+#| output: false
+maplist<-poverty_data %>%
+  pmap( #use pmap so we can provide df as parameter file
+    
+    function(...){ #function takes in all variables in df because of dots param
+      
+      parms<-rlang::list2(...) #extract all var values for current iteration into named list
+      
+      #save plot to p
+      p<-get_acs( #api call returns county-level data with polygons
+        geography="county"
+        ,variables="B19013_001" #median income
+        ,state=parms$GEOID #note use of parms list
+        ,geometry=TRUE #include polygons
+        ,year=parms$year #again here
+      ) %>%
+        mutate(
+          prop_rank=percent_rank(estimate)
+          ,goodlabel=case_when(
+            prop_rank<=.05|prop_rank>=.95~str_replace(NAME,"(.+)(,.+)","\\1") %>% str_remove(" County")
+            ,TRUE~NA_character_
+          )
+        ) %>%
+        ggplot()+
+          #geom for plotting shapefile polygons
+          geom_sf(size=0.05,color="#000000",aes(fill=as.numeric(estimate)))+
+          geom_sf_label(aes(label=goodlabel),color="#000000")+
+          coord_sf(crs=4326)+
+          scale_fill_viridis_c(
+            option = "viridis",
+            breaks=seq(0,120000,by=10000),
+            labels=dollar
+          )+
+          labs(
+            title=str_glue("{parms$NAME} Median Income by County"),
+            subtitle=str_glue(
+              "American Community Survey 5-Year Estimates {parms$year-4}-{parms$year}\n"
+              ,"Top and Bottom 5th Percentile Counties Labelled"
+            )
+          )+
+          guides(fill=guide_colorbar("Median\nPast-Year\nHH Income"))+
+          theme_bw()
+      
+      list("state_abb"=parms$state_abb,"state"=parms$NAME,"plot"=p)
+      
+    }
+    
+  )
+
+```
+
+At this point, `maplist` has been populated, and we can extract plot objects from it. First, let's try just returning the first element. Recall that because our parameter file was sorted highest to lowest in terms of the proportion of the state population with household income below the poverty limit, the first element of our list will contain a plot for the most impoverished state.
+
+```{r}
+#| warning: false
+#| fig.width: 10
+#| fig.height: 8
+#| fig.fullwidth: true
+pluck(maplist,1)$plot
+```
+
+We can also `walk` over the list to present ranges of its elements. Here we look at the 5 least impoverished states. Note that in this case we need an explicit `print()` to force the plots out of the `walk` functional environment.
+
+```{r}
+#| warning: false
+#| fig.width: 10
+#| fig.height: 8
+#| fig.fullwidth: true
+walk(50:46,~pluck(maplist,.x)$plot %>% print())
+```
+
+Or we can extract the map corresponding to a specific state of interest. We can do this because we loaded each element of `maplist` with a list containing both a plot object *and* state identifiers.
+
+```{r}
+#| warning: false
+#| fig.width: 10
+#| fig.height: 8
+#| fig.fullwidth: true
+detect(maplist,~.x$state=="Maryland")$plot
+
+#etc...
+```
+
+In conclusion... maps are fun, and lists are useful!

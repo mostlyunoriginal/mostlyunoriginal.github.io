@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.42">
+<meta name="generator" content="quarto-1.6.40">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -72,10 +72,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-eeb6d1c97efeeb0cfaf56837413d2c8e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-8b20df304ae43519df5d458fcc8598a6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -206,7 +206,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <p>Let’s compare the compute time needed for an equivalent operation between <code>Python</code> and <code>R</code>. The operation is to:</p>
 <ol type="1">
-<li>ingest a largeish csv file (~18GB) with 1,000,000 records and 1,000 columns of random normal variates plus one <code>ID</code> column,</li>
+<li>ingest a largeish csv file (~18GB) with 1,000,000 records and 10 columns of random normal variates plus one <code>ID</code> column,</li>
 <li>group by <code>ID</code> (100 records per <code>ID</code>),</li>
 <li>summarize as mean for each double/float column,</li>
 <li>filter to <code>ID</code>s with any one or more double/float column with a <code>mean &gt; 0.4</code>, and</li>
@@ -235,8 +235,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>table<span class="sc">.</span>height<span class="sc">}</span><span class="ss"> rows returned</span><span class="ch">\n</span><span class="ss">elapsed time for query: </span><span class="sc">{</span>elapsed<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>337 rows returned
-elapsed time for query: 0:00:23.397723</code></pre>
+<pre><code>1 rows returned
+elapsed time for query: 0:00:00.060809</code></pre>
 </div>
 </div>
 </section>
@@ -246,42 +246,31 @@ elapsed time for query: 0:00:23.397723</code></pre>
 <section id="plain-dplyr" class="level2">
 <h2 class="anchored" data-anchor-id="plain-dplyr">Plain dplyr</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-✔ dplyr     1.1.4     ✔ readr     2.1.4
-✔ forcats   1.0.0     ✔ stringr   1.5.1
-✔ ggplot2   3.5.0     ✔ tibble    3.2.1
-✔ lubridate 1.9.3     ✔ tidyr     1.3.1
-✔ purrr     1.0.2     
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()
-ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(hms)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(hms)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>
-Attaching package: 'hms'
-
-The following object is masked from 'package:lubridate':
+Attaching package: 'hms'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:lubridate':
 
     hms</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>start<span class="ot">&lt;-</span><span class="fu">Sys.time</span>()</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>rows<span class="ot">&lt;-</span>data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="st">"big.csv"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.double),mean),<span class="at">.groups=</span><span class="st">"keep"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">if_any</span>(<span class="fu">where</span>(is.double),<span class="sc">~</span>.x<span class="sc">&gt;</span>.<span class="dv">4</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>end<span class="ot">&lt;-</span><span class="fu">Sys.time</span>()</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>start<span class="ot">&lt;-</span><span class="fu">Sys.time</span>()</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>rows<span class="ot">&lt;-</span>data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="st">"big.csv"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.double),mean),<span class="at">.groups=</span><span class="st">"keep"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">if_any</span>(<span class="fu">where</span>(is.double),<span class="sc">~</span>.x<span class="sc">&gt;</span>.<span class="dv">4</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>end<span class="ot">&lt;-</span><span class="fu">Sys.time</span>()</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>337 rows returned
-elapsed time for query: 00:02:57.042593</code></pre>
+<pre><code>1 rows returned
+elapsed time for query: 00:00:00.837938</code></pre>
 </div>
 </div>
 </section>
@@ -289,27 +278,27 @@ elapsed time for query: 00:02:57.042593</code></pre>
 <h2 class="anchored" data-anchor-id="dtplyr">dtplyr</h2>
 <p>This is stylistically the <code>R</code> version that is most similar to the <code>polars</code> approach, but it does come with some downsides in that not all <code>dplyr</code> functionality is supported. In this example that is most obvious in the inability to use tidyselect helpers in <code>summarize()</code> and <code>filter()</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dtplyr,<span class="at">warn.conflicts=</span>F)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>start<span class="ot">&lt;-</span><span class="fu">Sys.time</span>()</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>big<span class="ot">&lt;-</span>data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="st">"big.csv"</span>)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>varnames<span class="ot">&lt;-</span><span class="fu">setdiff</span>(<span class="fu">colnames</span>(big),<span class="st">"id"</span>)</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>rows<span class="ot">&lt;-</span><span class="fu">lazy_dt</span>(big) <span class="sc">%&gt;%</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="fu">across</span>(<span class="fu">all_of</span>(varnames),mean),<span class="at">.groups=</span><span class="st">"keep"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">if_any</span>(<span class="fu">all_of</span>(varnames),<span class="sc">~</span>.x<span class="sc">&gt;</span>.<span class="dv">4</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>end<span class="ot">&lt;-</span><span class="fu">Sys.time</span>()</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dtplyr,<span class="at">warn.conflicts=</span>F)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>start<span class="ot">&lt;-</span><span class="fu">Sys.time</span>()</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>big<span class="ot">&lt;-</span>data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="st">"big.csv"</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>varnames<span class="ot">&lt;-</span><span class="fu">setdiff</span>(<span class="fu">colnames</span>(big),<span class="st">"id"</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>rows<span class="ot">&lt;-</span><span class="fu">lazy_dt</span>(big) <span class="sc">%&gt;%</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="fu">across</span>(<span class="fu">all_of</span>(varnames),mean),<span class="at">.groups=</span><span class="st">"keep"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">if_any</span>(<span class="fu">all_of</span>(varnames),<span class="sc">~</span>.x<span class="sc">&gt;</span>.<span class="dv">4</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>end<span class="ot">&lt;-</span><span class="fu">Sys.time</span>()</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>337 rows returned
-elapsed time for query: 00:01:02.183627</code></pre>
+<pre><code>1 rows returned
+elapsed time for query: 00:00:00.210453</code></pre>
 </div>
 </div>
 </section>
@@ -317,20 +306,20 @@ elapsed time for query: 00:01:02.183627</code></pre>
 <h2 class="anchored" data-anchor-id="tidytable">tidytable</h2>
 <p>This should be computationally comparable to the <code>dtplyr</code> approach as both are deploying <code>data.table</code> behind the scenes, but this approach has the benefit of preserving the plain <code>dplyr</code> syntax, including the ability to use tidyselect helpers.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>start<span class="ot">&lt;-</span><span class="fu">Sys.time</span>()</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>rows<span class="ot">&lt;-</span>data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="st">"big.csv"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  tidytable<span class="sc">::</span><span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  tidytable<span class="sc">::</span><span class="fu">summarize</span>(tidytable<span class="sc">::</span><span class="fu">across</span>(<span class="fu">where</span>(is.double),mean),<span class="at">.groups=</span><span class="st">"keep"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  tidytable<span class="sc">::</span><span class="fu">filter</span>(tidytable<span class="sc">::</span><span class="fu">if_any</span>(<span class="fu">where</span>(is.double),<span class="sc">~</span>.x<span class="sc">&gt;</span>.<span class="dv">4</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>end<span class="ot">&lt;-</span><span class="fu">Sys.time</span>()</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>start<span class="ot">&lt;-</span><span class="fu">Sys.time</span>()</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>rows<span class="ot">&lt;-</span>data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="st">"big.csv"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  tidytable<span class="sc">::</span><span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  tidytable<span class="sc">::</span><span class="fu">summarize</span>(tidytable<span class="sc">::</span><span class="fu">across</span>(<span class="fu">where</span>(is.double),mean),<span class="at">.groups=</span><span class="st">"keep"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  tidytable<span class="sc">::</span><span class="fu">filter</span>(tidytable<span class="sc">::</span><span class="fu">if_any</span>(<span class="fu">where</span>(is.double),<span class="sc">~</span>.x<span class="sc">&gt;</span>.<span class="dv">4</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>end<span class="ot">&lt;-</span><span class="fu">Sys.time</span>()</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_glue</span>(<span class="st">"{rows} rows returned</span><span class="sc">\n</span><span class="st">elapsed time for query: {as_hms(end-start)}"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>337 rows returned
-elapsed time for query: 00:01:06.303612</code></pre>
+<pre><code>1 rows returned
+elapsed time for query: 00:00:00.098884</code></pre>
 </div>
 </div>
 <hr>
@@ -338,7 +327,7 @@ elapsed time for query: 00:01:06.303612</code></pre>
 </section>
 <section id="conclusions" class="level1">
 <h1>Conclusions</h1>
-<p>After rendering this on both my work PC (2022 Windows laptop with 2.5GHz i7 and 32GB RAM) and my Mac at home (2023 M2 Max with 32GB memory) the general takeaway is that the plain vanilla <code>dplyr</code> approach is anywhere from 3 to 8 times slower than <code>polars</code>. On the Mac, <code>dtplyr</code> and <code>polars</code> are nearly identical with <code>tidytable</code> coming in only a tad slower. On the Windows machine (which yielded the results shown here), both <code>dtplyr</code> and <code>tidytable</code> are about 2-3x <code>polars</code>.</p>
+<p>After rendering this several time on both my work PC (2022 Windows laptop with 2.5GHz i7 and 32GB RAM) and my Mac at home (2023 M2 Max with 32GB memory) the general takeaway is that the plain vanilla <code>dplyr</code> approach is anywhere from 3 to 8 times slower than <code>polars</code>. On the Mac, <code>dtplyr</code> and <code>polars</code> are very close with <code>tidytable</code> coming in only a tad slower. On the Windows machine, both <code>dtplyr</code> and <code>tidytable</code> are about 2-3x <code>polars</code>.</p>
 
 
 </section>
