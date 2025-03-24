@@ -150,7 +150,7 @@ At this point, `maplist` has been populated, and we can extract plot objects fro
 #| fig.width: 10
 #| fig.height: 10
 #| fig.fullwidth: true
-#| fig.fullheight: true
+#| fig.fullheight: false
 pluck(maplist,1)$plot
 ```
 
@@ -161,7 +161,7 @@ We can also `walk` over the list to present ranges of its elements. Here we look
 #| fig.width: 10
 #| fig.height: 10
 #| fig.fullwidth: true
-#| fig.fullheight: true
+#| fig.fullheight: false
 walk(50:46,~pluck(maplist,.x)$plot %>% print())
 ```
 
@@ -172,7 +172,7 @@ Or we can extract the map corresponding to a specific state of interest. We can 
 #| fig.width: 10
 #| fig.height: 10
 #| fig.fullwidth: true
-#| fig.fullheight: true
+#| fig.fullheight: false
 detect(maplist,~.x$state=="New York")$plot
 detect(maplist,~.x$state=="Texas")$plot
 detect(maplist,~.x$state=="California")$plot
