@@ -337,7 +337,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>We can also <code>walk</code> over the list to present ranges of its elements. Here we look at the 5 least impoverished states. Note that in this case we need an explicit <code>print()</code> to force the plots out of the <code>walk</code> functional environment.</p>
-<div class="cell" data-fig.fullwidth="true">
+<div class="cell" data-fig.fullheight="true">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">walk</span>(<span class="dv">50</span><span class="sc">:</span><span class="dv">46</span>,<span class="sc">~</span><span class="fu">pluck</span>(maplist,.x)<span class="sc">$</span>plot <span class="sc">%&gt;%</span> <span class="fu">print</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
@@ -376,7 +376,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Or we can extract the map corresponding to a specific state of interest. We can do this because we loaded each element of <code>maplist</code> with a list containing both a plot object <em>and</em> state identifiers.</p>
-<div class="cell" data-fig.fullwidth="true">
+<div class="cell" data-fig.fullheight="true">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">detect</span>(maplist,<span class="sc">~</span>.x<span class="sc">$</span>state<span class="sc">==</span><span class="st">"New York"</span>)<span class="sc">$</span>plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
