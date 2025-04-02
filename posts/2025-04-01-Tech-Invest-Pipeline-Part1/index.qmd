@@ -199,6 +199,9 @@ library(tidyverse)
 library(reticulate)
 library(patchwork)
 
+bg<-"#00BFC4"
+r<-"#F8766D"
+
 theme<-theme_set(theme_linedraw())+
     theme_update(
         axis.text.x=element_blank(),axis.ticks.x=element_blank(),
@@ -214,6 +217,7 @@ g2<-ggplot(py$df,aes(x=as_date(date)))+
         expand=expansion(add=1),
     )+
     scale_y_continuous()+
+    scale_fill_manual(values=c(r,bg))+
     labs(y=NULL,x=NULL)+
     guides(color="none",fill="none")
 
@@ -222,8 +226,8 @@ l<-layer_scales(g2)$x$limits[[1]] %>% as_date()
 
 g1<-ggplot(py$df,aes(x=as_date(date)))+
     geom_hline(yintercept=0,linetype=2,linewidth=.5)+
-    geom_line(aes(y=signal),color="#00A9FF",linewidth=1.1)+
-    geom_line(aes(y=MACD),color="#00BE67",linewidth=1.1)+
+    geom_line(aes(y=signal),color=bg,linewidth=1.1)+
+    geom_line(aes(y=MACD),color=r,linewidth=1.1)+
     scale_x_date(
         limits=c(l,u),
         date_breaks="1 week",
@@ -240,7 +244,7 @@ g3<-ggplot(py$df,aes(x=as_date(date)))+
         axis.ticks.x=element_line(),
     )+
     annotate(geom="rect",fill="#000000",xmin=l,xmax=u,ymin=30,ymax=70,alpha=0.1)+
-    geom_line(aes(y=RSI),linewidth=1.1,color="#00BE67")+
+    geom_line(aes(y=RSI),linewidth=1.1,color=r)+
     scale_x_date(
         limits=c(l,u),
         date_breaks="1 week",
@@ -256,8 +260,8 @@ g3<-ggplot(py$df,aes(x=as_date(date)))+
     )
 
 p<-ggplot(py$df,aes(x=as_date(date)))+
-    geom_line(aes(y=sma_l),color="#00A9FF",linewidth=1.1)+
-    geom_line(aes(y=sma_s),color="#00BE67",linewidth=1.1)+
+    geom_line(aes(y=sma_l),color=bg,linewidth=1.1)+
+    geom_line(aes(y=sma_s),color=r,linewidth=1.1)+
     geom_linerange(aes(ymax=high,ymin=low,color=factor(candle_color)))+
     geom_tile(
         aes(
@@ -265,6 +269,7 @@ p<-ggplot(py$df,aes(x=as_date(date)))+
             height=candle_high-candle_low,
             width=.8,
             fill=factor(candle_color),
+            
         ),
     )+
     scale_x_date(
@@ -273,6 +278,8 @@ p<-ggplot(py$df,aes(x=as_date(date)))+
         date_minor_breaks="1 day",
         expand=expansion(add=1),
     )+
+    scale_fill_manual(values=c(r,bg))+
+    scale_color_manual(values=c(r,bg))+
     scale_y_continuous(labels=scales::dollar)+
     labs(y=NULL,x=NULL)+
     ggtitle(str_glue("Ticker: {params$ticker}"))+
@@ -281,4 +288,4 @@ p<-ggplot(py$df,aes(x=as_date(date)))+
 p / g1 / g2 / g3 + plot_layout(nrow=4,heights=c(3,1,1,1))
 ```
 
-More to come, but that's it for now!
+More to come (including some color scheme fussing), but that's it for now!
