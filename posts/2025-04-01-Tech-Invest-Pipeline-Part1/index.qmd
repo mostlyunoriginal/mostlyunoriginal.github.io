@@ -10,6 +10,7 @@ citation:
   url: https://mostlyunoriginal.github.io/posts/2025-04-01-Tech-Invest-Pipeline-Part1/
 image: PReview.webp
 draft: false
+lightbox: true
 params:
     ref_date: '2025-04-01'
     ticker: 'AAPL'
@@ -279,3 +280,5 @@ p<-ggplot(py$df,aes(x=as_date(date)))+
 
 p / g1 / g2 / g3 + plot_layout(nrow=4,heights=c(3,1,1,1))
 ```
+
+More to come, but that's it for now!
