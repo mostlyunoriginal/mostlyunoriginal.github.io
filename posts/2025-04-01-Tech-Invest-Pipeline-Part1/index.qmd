@@ -12,7 +12,7 @@ image: PReview.webp
 draft: false
 lightbox: true
 params:
-    ref_date: '2025-04-01'
+    ref_date: '2025-04-02'
     ticker: 'AAPL'
     window: 120
     sma_l: 50
@@ -213,13 +213,13 @@ theme<-theme_set(theme_solarized(light=FALSE))+
     )
 
 g2<-ggplot(py$df,aes(x=as_date(date)))+
-    geom_hline(yintercept=0,linewidth=.5,color="#000000")+
-    geom_col(aes(y=histogram,fill=MACD>signal),color="#000000")+
+    geom_hline(yintercept=0,linewidth=.5,color="#111111")+
+    geom_col(aes(y=histogram,fill=MACD>signal),color="#111111")+
     scale_x_date(
         limits=c(min(as_date(py$df$date))-1,max(as_date(py$df$date))+1),
         date_breaks="1 week",
         date_minor_breaks="1 day",
-        expand=expansion(add=1),
+        expand=expansion(add=0),
     )+
     scale_y_continuous()+
     scale_fill_manual(values=c(r,bg))+
@@ -237,7 +237,7 @@ g1<-ggplot(py$df,aes(x=as_date(date)))+
         limits=c(l,u),
         date_breaks="1 week",
         date_minor_breaks="1 day",
-        expand=expansion(add=1),
+        expand=expansion(add=0),
     )+
     scale_y_continuous()+
     labs(y=NULL,x=NULL)+
@@ -248,13 +248,21 @@ g3<-ggplot(py$df,aes(x=as_date(date)))+
         axis.text.x=element_text(angle=45,hjust=1,vjust=1,color="#bbbbbb"),
         axis.ticks.x=element_line(),
     )+
-    annotate(geom="rect",fill="#000000",xmin=l,xmax=u,ymin=30,ymax=70,alpha=0.4)+
     geom_line(aes(y=RSI),linewidth=1.1,color=hotline)+
+    annotate(
+        geom="rect",
+        fill=coldline,
+        xmin=l,
+        xmax=u,
+        ymin=30,
+        ymax=70,
+        alpha=0.5,
+    )+
     scale_x_date(
         limits=c(l,u),
         date_breaks="1 week",
         date_minor_breaks="1 day",
-        expand=expansion(add=1),
+        expand=expansion(add=0),
     )+
     scale_y_continuous(limits=c(0,100),breaks=c(0,30,70,100))+
     labs(y=NULL,x=NULL)+
@@ -268,14 +276,6 @@ p<-ggplot(py$df,aes(x=as_date(date)))+
     geom_line(aes(y=sma_l),color=coldline,linewidth=1.1)+
     geom_line(aes(y=sma_s),color=hotline,linewidth=1.1)+
     geom_linerange(aes(ymax=high,ymin=low,color=factor(candle_color)),linewidth=1.1)+
-    # geom_tile(
-    #     aes(
-    #         y=candle_mid,
-    #         height=(candle_high-candle_low)+.2,
-    #         width=1,
-    #     ),
-    #     fill="#000000", 
-    # )+
     geom_tile(
         aes(
             y=candle_mid,
@@ -284,13 +284,13 @@ p<-ggplot(py$df,aes(x=as_date(date)))+
         ),
         width=.8,
         linewidth=.4,
-        color="#000000",
+        color="#111111",
     )+
     scale_x_date(
         limits=c(l,u),
         date_breaks="1 week",
         date_minor_breaks="1 day",
-        expand=expansion(add=1),
+        expand=expansion(add=0),
     )+
     scale_fill_manual(values=c(r,bg))+
     scale_color_manual(values=c(r,bg))+
@@ -302,4 +302,4 @@ p<-ggplot(py$df,aes(x=as_date(date)))+
 p / g1 / g2 / g3 + plot_layout(nrow=4,heights=c(3,1,1,1))
 ```
 
-More to come (including some color scheme fussing), but that's it for now!
+More to come, but that's it for now!
