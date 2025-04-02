@@ -222,8 +222,8 @@ l<-layer_scales(g2)$x$limits[[1]] %>% as_date()
 
 g1<-ggplot(py$df,aes(x=as_date(date)))+
     geom_hline(yintercept=0,linetype=2,linewidth=.5)+
-    geom_line(aes(y=signal),color="#92C5DE",linewidth=1.1)+
-    geom_line(aes(y=MACD),color="#F4A582",linewidth=1.1)+
+    geom_line(aes(y=signal),color="#00A9FF",linewidth=1.1)+
+    geom_line(aes(y=MACD),color="#00BE67",linewidth=1.1)+
     scale_x_date(
         limits=c(l,u),
         date_breaks="1 week",
@@ -240,7 +240,7 @@ g3<-ggplot(py$df,aes(x=as_date(date)))+
         axis.ticks.x=element_line(),
     )+
     annotate(geom="rect",fill="#000000",xmin=l,xmax=u,ymin=30,ymax=70,alpha=0.1)+
-    geom_line(aes(y=RSI),linewidth=1.1,color="#F4A582")+
+    geom_line(aes(y=RSI),linewidth=1.1,color="#00BE67")+
     scale_x_date(
         limits=c(l,u),
         date_breaks="1 week",
@@ -256,8 +256,8 @@ g3<-ggplot(py$df,aes(x=as_date(date)))+
     )
 
 p<-ggplot(py$df,aes(x=as_date(date)))+
-    geom_line(aes(y=sma_l),color="#92C5DE",linewidth=1.1)+
-    geom_line(aes(y=sma_s),color="#F4A582",linewidth=1.1)+
+    geom_line(aes(y=sma_l),color="#00A9FF",linewidth=1.1)+
+    geom_line(aes(y=sma_s),color="#00BE67",linewidth=1.1)+
     geom_linerange(aes(ymax=high,ymin=low,color=factor(candle_color)))+
     geom_tile(
         aes(
