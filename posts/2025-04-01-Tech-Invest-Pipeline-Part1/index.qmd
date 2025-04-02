@@ -302,4 +302,4 @@ p<-ggplot(py$df,aes(x=as_date(date)))+
 p / g1 / g2 / g3 + plot_layout(nrow=4,heights=c(3,1,1,1))
 ```
 
-More to come, but that's it for now!
+Much more to come, but that's it for now!
