@@ -198,18 +198,20 @@ I could probably develop these graphics in Python, but I've just got way too muc
 library(tidyverse)
 library(reticulate)
 library(patchwork)
+library(ggthemes)
 
-bg<-"#00BFC4"
-r<-"#F8766D"
+bg<-"#ffffff"
+r<-"#888888"
 
-theme<-theme_set(theme_linedraw())+
+theme<-theme_set(theme_solarized(light=FALSE))+
     theme_update(
         axis.text.x=element_blank(),axis.ticks.x=element_blank(),
+        axis.text.y=element_text(color="#ffffff")
     )
 
 g2<-ggplot(py$df,aes(x=as_date(date)))+
-    geom_hline(yintercept=0,linewidth=.5,color="lightgrey")+
-    geom_col(aes(y=histogram,fill=MACD>signal))+
+    geom_hline(yintercept=0,linewidth=.5,color="#000000")+
+    geom_col(aes(y=histogram,fill=MACD>signal),color="#000000")+
     scale_x_date(
         limits=c(min(as_date(py$df$date))-1,max(as_date(py$df$date))+1),
         date_breaks="1 week",
@@ -226,8 +228,8 @@ l<-layer_scales(g2)$x$limits[[1]] %>% as_date()
 
 g1<-ggplot(py$df,aes(x=as_date(date)))+
     geom_hline(yintercept=0,linetype=2,linewidth=.5)+
-    geom_line(aes(y=signal),color=bg,linewidth=1.1)+
-    geom_line(aes(y=MACD),color=r,linewidth=1.1)+
+    geom_line(aes(y=signal),color=r,linewidth=1.1)+
+    geom_line(aes(y=MACD),color=bg,linewidth=1.1)+
     scale_x_date(
         limits=c(l,u),
         date_breaks="1 week",
@@ -240,11 +242,11 @@ g1<-ggplot(py$df,aes(x=as_date(date)))+
 
 g3<-ggplot(py$df,aes(x=as_date(date)))+
     theme_update(
-        axis.text.x=element_text(angle=45,hjust=1,vjust=1),
+        axis.text.x=element_text(angle=45,hjust=1,vjust=1,color="#ffffff"),
         axis.ticks.x=element_line(),
     )+
-    annotate(geom="rect",fill="#000000",xmin=l,xmax=u,ymin=30,ymax=70,alpha=0.1)+
-    geom_line(aes(y=RSI),linewidth=1.1,color=r)+
+    annotate(geom="rect",fill="#000000",xmin=l,xmax=u,ymin=30,ymax=70,alpha=0.4)+
+    geom_line(aes(y=RSI),linewidth=1.1,color=bg)+
     scale_x_date(
         limits=c(l,u),
         date_breaks="1 week",
@@ -260,16 +262,23 @@ g3<-ggplot(py$df,aes(x=as_date(date)))+
     )
 
 p<-ggplot(py$df,aes(x=as_date(date)))+
-    geom_line(aes(y=sma_l),color=bg,linewidth=1.1)+
-    geom_line(aes(y=sma_s),color=r,linewidth=1.1)+
-    geom_linerange(aes(ymax=high,ymin=low,color=factor(candle_color)))+
+    geom_line(aes(y=sma_l),color=r,linewidth=1.1)+
+    geom_line(aes(y=sma_s),color=bg,linewidth=1.1)+
+    geom_linerange(aes(ymax=high,ymin=low),color=r)+
+    geom_tile(
+        aes(
+            y=candle_mid,
+            height=(candle_high-candle_low)+.14,
+            width=.94,
+        ),
+        fill="#000000", 
+    )+
     geom_tile(
         aes(
             y=candle_mid,
             height=candle_high-candle_low,
             width=.8,
             fill=factor(candle_color),
-            
         ),
     )+
     scale_x_date(
