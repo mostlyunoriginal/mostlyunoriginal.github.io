@@ -209,7 +209,7 @@ coldline<-"#1F988BFF"
 theme<-theme_set(theme_solarized(light=FALSE))+
     theme_update(
         axis.text.x=element_blank(),axis.ticks.x=element_blank(),
-        axis.text.y=element_text(color="#ffffff")
+        axis.text.y=element_text(color="#bbbbbb")
     )
 
 g2<-ggplot(py$df,aes(x=as_date(date)))+
@@ -230,7 +230,7 @@ u<-layer_scales(g2)$x$limits[[2]] %>% as_date()
 l<-layer_scales(g2)$x$limits[[1]] %>% as_date()
 
 g1<-ggplot(py$df,aes(x=as_date(date)))+
-    geom_hline(yintercept=0,linetype=2,linewidth=.5)+
+    geom_hline(yintercept=0,linetype=2,linewidth=.5,color="#bbbbbb")+
     geom_line(aes(y=signal),color=coldline,linewidth=1.1)+
     geom_line(aes(y=MACD),color=hotline,linewidth=1.1)+
     scale_x_date(
@@ -245,7 +245,7 @@ g1<-ggplot(py$df,aes(x=as_date(date)))+
 
 g3<-ggplot(py$df,aes(x=as_date(date)))+
     theme_update(
-        axis.text.x=element_text(angle=45,hjust=1,vjust=1,color="#ffffff"),
+        axis.text.x=element_text(angle=45,hjust=1,vjust=1,color="#bbbbbb"),
         axis.ticks.x=element_line(),
     )+
     annotate(geom="rect",fill="#000000",xmin=l,xmax=u,ymin=30,ymax=70,alpha=0.4)+
@@ -267,22 +267,24 @@ g3<-ggplot(py$df,aes(x=as_date(date)))+
 p<-ggplot(py$df,aes(x=as_date(date)))+
     geom_line(aes(y=sma_l),color=coldline,linewidth=1.1)+
     geom_line(aes(y=sma_s),color=hotline,linewidth=1.1)+
-    geom_linerange(aes(ymax=high,ymin=low),color=r)+
-    geom_tile(
-        aes(
-            y=candle_mid,
-            height=(candle_high-candle_low)+.14,
-            width=.94,
-        ),
-        fill="#000000", 
-    )+
+    geom_linerange(aes(ymax=high,ymin=low,color=factor(candle_color)),linewidth=1.1)+
+    # geom_tile(
+    #     aes(
+    #         y=candle_mid,
+    #         height=(candle_high-candle_low)+.2,
+    #         width=1,
+    #     ),
+    #     fill="#000000", 
+    # )+
     geom_tile(
         aes(
             y=candle_mid,
             height=candle_high-candle_low,
-            width=.8,
             fill=factor(candle_color),
         ),
+        width=.8,
+        linewidth=.4,
+        color="#000000",
     )+
     scale_x_date(
         limits=c(l,u),
