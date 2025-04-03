@@ -196,7 +196,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#function-1-list-files" id="toc-function-1-list-files" class="nav-link" data-scroll-target="#function-1-list-files">Function 1: List Files</a></li>
   <li><a href="#function-2-ingest-files" id="toc-function-2-ingest-files" class="nav-link" data-scroll-target="#function-2-ingest-files">Function 2: Ingest Files</a></li>
   </ul></li>
-  <li><a href="#data-transormation" id="toc-data-transormation" class="nav-link" data-scroll-target="#data-transormation">Data Transormation</a></li>
+  <li><a href="#data-transformation" id="toc-data-transformation" class="nav-link" data-scroll-target="#data-transformation">Data Transformation</a></li>
   <li><a href="#a-graphics-template-for-buy-candidate-analysis-and-position-monitoring" id="toc-a-graphics-template-for-buy-candidate-analysis-and-position-monitoring" class="nav-link" data-scroll-target="#a-graphics-template-for-buy-candidate-analysis-and-position-monitoring">A Graphics Template for Buy Candidate Analysis and Position Monitoring</a></li>
   </ul>
 </nav>
@@ -298,8 +298,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section>
 </section>
-<section id="data-transormation" class="level2">
-<h2 class="anchored" data-anchor-id="data-transormation">Data Transormation</h2>
+<section id="data-transformation" class="level2">
+<h2 class="anchored" data-anchor-id="data-transformation">Data Transformation</h2>
 <p>Next, I pull in the data and create some metrics, including candlesticks, short and long simple moving averages, moving average convergence/divergence (MACD) indicator and signal (its moving average), and the relative strength index (RSI). Note that I convert to a Pandas DataFrame here to make the data readable in a subsequent R block—that’s just a byproduct of this post being written in Quarto. This portion of the pipeline will be scripted when implemented.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
@@ -368,7 +368,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="a-graphics-template-for-buy-candidate-analysis-and-position-monitoring" class="level2">
 <h2 class="anchored" data-anchor-id="a-graphics-template-for-buy-candidate-analysis-and-position-monitoring">A Graphics Template for Buy Candidate Analysis and Position Monitoring</h2>
-<p>I could probably develop these graphics in Python, but I’ve just got way too much <code>ggplot</code> experience at this point and would rather do this part in R. The idea is to present a consistent set of metrics I can use to make buy/sell decisions. I <em>think</em> these will be embedded in ticker-specific html reports along with other relevant information as of yet undetermined. Here’s the code with some example output for Apple stock over a 10-week window ending on April 1, 2025.</p>
+<p>I could probably develop these graphics in Python, but I’ve just got way too much <code>ggplot</code> experience at this point and would rather do this part in R. The idea is to present a consistent set of metrics I can use to make buy/sell decisions. I <em>think</em> these will be embedded in ticker-specific html reports along with other relevant information as of yet undetermined. Here’s the code with some example output for NVIDIA stock over a 10-week window ending on April 1, 2025.</p>
 <div class="cell" data-fig.fullwidth="true">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(reticulate)</span>
