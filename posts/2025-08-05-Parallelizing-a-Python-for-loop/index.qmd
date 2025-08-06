@@ -83,7 +83,7 @@ def get_acs(
 Here we grab and stack the data for all states and two data years via list comprehension.
 
 ```{python}
-%%timeit -r 4
+%%time
 
 all_acs = [
     get_acs(state_fips, year, api_key=os.getenv("CENSUS_API_KEY"))
@@ -98,12 +98,12 @@ else:
     print("No data was fetched.")
 ```
 
-## A Parallelized Alternative
+## A Threaded Alternative
 
 Here we leverage the `concurrent.futures` module from the standard Python library to issue all API calls simultaneously, gathering results asynchronously as they become available.
 
 ```{python}
-%%timeit -r 4
+%%time
 
 all_acs = []
 with ThreadPoolExecutor(max_workers=len(state_year_pairs)) as executor:
