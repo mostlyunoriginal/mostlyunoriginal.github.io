@@ -1,0 +1,140 @@
+---
+title: "Parallelizing a Python Process to Build a Stacked ACS DataFrame"
+description: "This post demonstrates how to take a standard list comprehension of calls to the Census API and parallelize it for dramatic time savings."
+date: 2025-08-05
+author:
+    - name: Lance Couzens
+      url: https://mostlyunoriginal.github.io  
+categories: [Python, Parallelization]
+citation: 
+  url: https://mostlyunoriginal.github.io/posts/2025-08-05-Parallelizing-a-Python-for-loop/
+image: Preview.png
+draft: true
+lightbox: true
+params:
+    year: 2023
+---
+
+## Background
+
+As part of a machine learning class I've been building for a client, I've provided the option to join county-level ACS estimates onto the training and prediction data. County data require state-level calls to the Census API, and including all states and a few years, sequential pulls were proving to be a significant bottleneck. Swapping the sequential process out in favor of a parallel one yielded dramatic time savings. This post demonstrates that change via an abstracted, simplified example.
+
+## Data Ingestion
+
+The `get_acs` function pulls county-level 5-year ACS estimates from the Census API for a single state and year. We also do all the importing and environment variable creation we'll need for both versions of subsequent steps (we want those to be as close to apples-to-apples as possible since we'll be comparing timing).
+
+```{python}
+import requests
+import polars as pl
+import os
+import itertools as it
+import us
+from dotenv import load_dotenv
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+load_dotenv()
+
+# states and years to pull ACS 5-year county-level estimates for
+states = [state.fips for state in us.states.STATES]
+years = [2020, 2021]
+
+# list of tuples representing cartesian product of individual state and year lists
+state_year_pairs = list(it.product(states, years))
+
+def get_acs(
+    state_fips: str, 
+    year: int,
+    api_key: str = None, 
+    acs_vars: dict = {
+            "B01001_001E": "pop_total",
+            "B01002_001E": "median_age",
+            "B19013_001E": "med_hh_income",
+            "B23025_005E": "unemployed",
+            "B25077_001E": "med_home_value",
+            "B25064_001E": "med_rent",
+        }
+    ):
+
+    url = (
+        f"https://api.census.gov/data/{year}/acs/"
+        f"acs5?get={','.join(acs_vars.keys())}"
+        f"&for=county:*&in=state:{state_fips}"
+        f"&key={api_key}"
+    )
+
+    # issue request and parse resulting json
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        if len(data)>1:
+            acs_df = pl.DataFrame(
+                data[1:], 
+                schema=data[0],
+                orient="row",
+            ).rename(acs_vars).with_columns(year=pl.lit(year))
+            return acs_df
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+
+    return None
+```
+
+## Implementation via sequential list comprehension
+
+Here we grab and stack the data for all states and two data years via list comprehension.
+
+```{python}
+%%time
+
+all_acs = [
+    get_acs(state_fips, year, api_key=os.getenv("CENSUS_API_KEY"))
+    for state_fips, year in state_year_pairs
+]
+
+# concatenate all results
+if all_acs:
+    stacked_acs = pl.concat(all_acs)
+    print(stacked_acs)
+else:
+    print("No data was fetched.")
+```
+
+## A Parallelized Alternative
+
+Here we leverage the `concurrent.futures` module from the standard Python library to issue all API calls simultaneously, gathering results asynchronously as they become available.
+
+```{python}
+%%time
+
+all_acs = []
+with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+    futures = {
+        executor.submit(
+          get_acs, 
+          state_fips, 
+          year, 
+          api_key=os.getenv("CENSUS_API_KEY")
+        ): (state_fips, year)
+        for state_fips, year in state_year_pairs
+    }
+    for future in as_completed(futures.keys()):
+        pair = futures[future]
+        try:
+          result = future.result()
+          if result is not None:
+              all_acs.append(result)
+        except Exception as e:
+          print(f"ERROR: Something went wrong for state={pair[0]}, year={pair[1]}: {e}")
+
+# concatenate all results
+if all_acs:
+    stacked_acs = pl.concat(all_acs)
+    print(stacked_acs)
+else:
+    print("No data was fetched.")            
+```
+
+In this alternative, `ThreadPoolExecutor` is used as a context manager to issue `get_acs` calls and "future states" are gathered via a dictionary comprehension. Note, however, that this dictionary flips the script a bit with the returned data frames in the key position and the state, year tuples they correspond to in the values position. This is possible because the returned data frames are unique / hashable, and it allows us to report out for which state and year a failure occurs.
+
+As results are returned, they are assessed and appended to the `all_acs` list for subsequent concatenation. As shown by the `Wall time` under each code chunk, we see a significant speed up, roughly corresponding to the number of cores (16) available in the PC in which this post was rendered.
