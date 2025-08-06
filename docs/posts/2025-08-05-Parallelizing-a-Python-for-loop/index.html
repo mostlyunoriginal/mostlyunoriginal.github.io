@@ -8,9 +8,9 @@
 
 <meta name="author" content="Lance Couzens">
 <meta name="dcterms.date" content="2025-08-05">
-<meta name="description" content="This post demonstrates how to take a standard list comprehension of calls to the Census API and parallelize it for dramatic time savings.">
+<meta name="description" content="This post demonstrates how to take a standard list comprehension of calls to the Census API and pool it for dramatic time savings.">
 
-<title>Parallelizing a Python Process to Build a Stacked ACS DataFrame – Lance Couzens</title>
+<title>Thread Pooling a Python Process to Build a Stacked ACS DataFrame – Lance Couzens</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -144,15 +144,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-page-left">
-      <h1 class="title">Parallelizing a Python Process to Build a Stacked ACS DataFrame</h1>
+      <h1 class="title">Thread Pooling a Python Process to Build a Stacked ACS DataFrame</h1>
                   <div>
         <div class="description">
-          This post demonstrates how to take a standard list comprehension of calls to the Census API and parallelize it for dramatic time savings.
+          This post demonstrates how to take a standard list comprehension of calls to the Census API and pool it for dramatic time savings.
         </div>
       </div>
                           <div class="quarto-categories">
                 <div class="quarto-category">Python</div>
-                <div class="quarto-category">Parallelization</div>
+                <div class="quarto-category">Thread Pooling</div>
               </div>
                   </div>
   </div>
@@ -188,7 +188,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background">Background</a></li>
   <li><a href="#data-ingestion" id="toc-data-ingestion" class="nav-link" data-scroll-target="#data-ingestion">Data Ingestion</a></li>
-  <li><a href="#implementation-via-sequential-list-comprehension" id="toc-implementation-via-sequential-list-comprehension" class="nav-link" data-scroll-target="#implementation-via-sequential-list-comprehension">Implementation via sequential list comprehension</a></li>
+  <li><a href="#sequential-implementation-via-list-comprehension" id="toc-sequential-implementation-via-list-comprehension" class="nav-link" data-scroll-target="#sequential-implementation-via-list-comprehension">Sequential Implementation via List Comprehension</a></li>
   <li><a href="#a-parallelized-alternative" id="toc-a-parallelized-alternative" class="nav-link" data-scroll-target="#a-parallelized-alternative">A Parallelized Alternative</a></li>
   </ul>
 </nav>
@@ -202,12 +202,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="background" class="level2">
 <h2 class="anchored" data-anchor-id="background">Background</h2>
-<p>As part of a machine learning class I’ve been building for a client, I’ve provided the option to join county-level ACS estimates onto the training and prediction data. County data require state-level calls to the Census API, and including all states and a few years, sequential pulls were proving to be a significant bottleneck. Swapping the sequential process out in favor of a parallel one yielded dramatic time savings. This post demonstrates that change via an abstracted, simplified example.</p>
+<p>As part of a machine learning class I’ve been building for a client, I’ve provided the option to join county-level ACS estimates onto the training and prediction data. County data require state-level calls to the Census API, and including all states and a few years, sequential pulls were proving to be a significant bottleneck. Swapping the sequential process out in favor of a pooled one yielded dramatic time savings. This post demonstrates that change via an abstracted, simplified example.</p>
 </section>
 <section id="data-ingestion" class="level2">
 <h2 class="anchored" data-anchor-id="data-ingestion">Data Ingestion</h2>
 <p>The <code>get_acs</code> function pulls county-level 5-year ACS estimates from the Census API for a single state and year. We also do all the importing and environment variable creation we’ll need for both versions of subsequent steps (we want those to be as close to apples-to-apples as possible since we’ll be comparing timing).</p>
-<div id="5510a408" class="cell" data-execution_count="1">
+<div id="ff36e972" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
@@ -264,11 +264,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="implementation-via-sequential-list-comprehension" class="level2">
-<h2 class="anchored" data-anchor-id="implementation-via-sequential-list-comprehension">Implementation via sequential list comprehension</h2>
+<section id="sequential-implementation-via-list-comprehension" class="level2">
+<h2 class="anchored" data-anchor-id="sequential-implementation-via-list-comprehension">Sequential Implementation via List Comprehension</h2>
 <p>Here we grab and stack the data for all states and two data years via list comprehension.</p>
-<div id="78adcd7b" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
+<div id="f0c34e1e" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit <span class="op">-</span>r <span class="dv">4</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>all_acs <span class="op">=</span> [</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    get_acs(state_fips, year, api_key<span class="op">=</span>os.getenv(<span class="st">"CENSUS_API_KEY"</span>))</span>
@@ -278,41 +278,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># concatenate all results</span></span>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> all_acs:</span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    stacked_acs <span class="op">=</span> pl.concat(all_acs)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(stacked_acs)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Data stacked and </span><span class="sc">{</span>stacked_acs<span class="sc">.</span>height<span class="sc">}</span><span class="ss"> records returned"</span>)</span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"No data was fetched."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>shape: (6_284, 9)
-┌───────────┬────────────┬───────────────┬────────────┬───┬──────────┬───────┬────────┬──────┐
-│ pop_total ┆ median_age ┆ med_hh_income ┆ unemployed ┆ … ┆ med_rent ┆ state ┆ county ┆ year │
-│ ---       ┆ ---        ┆ ---           ┆ ---        ┆   ┆ ---      ┆ ---   ┆ ---    ┆ ---  │
-│ str       ┆ str        ┆ str           ┆ str        ┆   ┆ str      ┆ str   ┆ str    ┆ i32  │
-╞═══════════╪════════════╪═══════════════╪════════════╪═══╪══════════╪═══════╪════════╪══════╡
-│ 55639     ┆ 38.6       ┆ 57982         ┆ 736        ┆ … ┆ 1011     ┆ 01    ┆ 001    ┆ 2020 │
-│ 218289    ┆ 43.2       ┆ 61756         ┆ 4027       ┆ … ┆ 1032     ┆ 01    ┆ 003    ┆ 2020 │
-│ 25026     ┆ 40.1       ┆ 34990         ┆ 649        ┆ … ┆ 587      ┆ 01    ┆ 005    ┆ 2020 │
-│ 22374     ┆ 39.9       ┆ 51721         ┆ 667        ┆ … ┆ 693      ┆ 01    ┆ 007    ┆ 2020 │
-│ 57755     ┆ 41.0       ┆ 48922         ┆ 1253       ┆ … ┆ 666      ┆ 01    ┆ 009    ┆ 2020 │
-│ …         ┆ …          ┆ …             ┆ …          ┆ … ┆ …        ┆ …     ┆ …      ┆ …    │
-│ 42459     ┆ 36.4       ┆ 76668         ┆ 1503       ┆ … ┆ 859      ┆ 56    ┆ 037    ┆ 2021 │
-│ 23319     ┆ 39.6       ┆ 94498         ┆ 368        ┆ … ┆ 1524     ┆ 56    ┆ 039    ┆ 2021 │
-│ 20514     ┆ 36.3       ┆ 75106         ┆ 348        ┆ … ┆ 711      ┆ 56    ┆ 041    ┆ 2021 │
-│ 7768      ┆ 42.7       ┆ 62271         ┆ 101        ┆ … ┆ 621      ┆ 56    ┆ 043    ┆ 2021 │
-│ 6891      ┆ 43.6       ┆ 65566         ┆ 126        ┆ … ┆ 726      ┆ 56    ┆ 045    ┆ 2021 │
-└───────────┴────────────┴───────────────┴────────────┴───┴──────────┴───────┴────────┴──────┘
-CPU times: total: 62.5 ms
-Wall time: 1min 5s</code></pre>
+<pre><code>Data stacked and 6284 records returned
+Data stacked and 6284 records returned
+Data stacked and 6284 records returned
+Data stacked and 6284 records returned
+Data stacked and 6284 records returned
+1min 3s ± 806 ms per loop (mean ± std. dev. of 4 runs, 1 loop each)</code></pre>
 </div>
 </div>
 </section>
 <section id="a-parallelized-alternative" class="level2">
 <h2 class="anchored" data-anchor-id="a-parallelized-alternative">A Parallelized Alternative</h2>
 <p>Here we leverage the <code>concurrent.futures</code> module from the standard Python library to issue all API calls simultaneously, gathering results asynchronously as they become available.</p>
-<div id="eb721c7e" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
+<div id="939e8345" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit <span class="op">-</span>r <span class="dv">4</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>all_acs <span class="op">=</span> []</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> ThreadPoolExecutor(max_workers<span class="op">=</span>os.cpu_count()) <span class="im">as</span> executor:</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> ThreadPoolExecutor(max_workers<span class="op">=</span><span class="bu">len</span>(state_year_pairs)) <span class="im">as</span> executor:</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    futures <span class="op">=</span> {</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        executor.submit(</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>          get_acs, </span>
@@ -334,48 +320,34 @@ Wall time: 1min 5s</code></pre>
 <span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co"># concatenate all results</span></span>
 <span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> all_acs:</span>
 <span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    stacked_acs <span class="op">=</span> pl.concat(all_acs)</span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(stacked_acs)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Data stacked and </span><span class="sc">{</span>stacked_acs<span class="sc">.</span>height<span class="sc">}</span><span class="ss"> records returned"</span>)</span>
 <span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
 <span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"No data was fetched."</span>)            </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>shape: (6_284, 9)
-┌───────────┬────────────┬───────────────┬────────────┬───┬──────────┬───────┬────────┬──────┐
-│ pop_total ┆ median_age ┆ med_hh_income ┆ unemployed ┆ … ┆ med_rent ┆ state ┆ county ┆ year │
-│ ---       ┆ ---        ┆ ---           ┆ ---        ┆   ┆ ---      ┆ ---   ┆ ---    ┆ ---  │
-│ str       ┆ str        ┆ str           ┆ str        ┆   ┆ str      ┆ str   ┆ str    ┆ i32  │
-╞═══════════╪════════════╪═══════════════╪════════════╪═══╪══════════╪═══════╪════════╪══════╡
-│ 55639     ┆ 38.6       ┆ 57982         ┆ 736        ┆ … ┆ 1011     ┆ 01    ┆ 001    ┆ 2020 │
-│ 218289    ┆ 43.2       ┆ 61756         ┆ 4027       ┆ … ┆ 1032     ┆ 01    ┆ 003    ┆ 2020 │
-│ 25026     ┆ 40.1       ┆ 34990         ┆ 649        ┆ … ┆ 587      ┆ 01    ┆ 005    ┆ 2020 │
-│ 22374     ┆ 39.9       ┆ 51721         ┆ 667        ┆ … ┆ 693      ┆ 01    ┆ 007    ┆ 2020 │
-│ 57755     ┆ 41.0       ┆ 48922         ┆ 1253       ┆ … ┆ 666      ┆ 01    ┆ 009    ┆ 2020 │
-│ …         ┆ …          ┆ …             ┆ …          ┆ … ┆ …        ┆ …     ┆ …      ┆ …    │
-│ 35480     ┆ 51.4       ┆ 58156         ┆ 377        ┆ … ┆ 789      ┆ 55    ┆ 085    ┆ 2020 │
-│ 7261      ┆ 46.8       ┆ 58750         ┆ 92         ┆ … ┆ 632      ┆ 55    ┆ 091    ┆ 2020 │
-│ 70822     ┆ 37.2       ┆ 60316         ┆ 1267       ┆ … ┆ 782      ┆ 55    ┆ 097    ┆ 2020 │
-│ 17408     ┆ 45.8       ┆ 52052         ┆ 177        ┆ … ┆ 688      ┆ 55    ┆ 103    ┆ 2020 │
-│ 89702     ┆ 39.2       ┆ 84985         ┆ 1041       ┆ … ┆ 1036     ┆ 55    ┆ 109    ┆ 2020 │
-└───────────┴────────────┴───────────────┴────────────┴───┴──────────┴───────┴────────┴──────┘
-CPU times: total: 15.6 ms
-Wall time: 4.41 s</code></pre>
+<pre><code>Data stacked and 6284 records returned
+Data stacked and 6284 records returned
+Data stacked and 6284 records returned
+Data stacked and 6284 records returned
+Data stacked and 6284 records returned
+4.02 s ± 2.05 s per loop (mean ± std. dev. of 4 runs, 1 loop each)</code></pre>
 </div>
 </div>
 <p>In this alternative, <code>ThreadPoolExecutor</code> is used as a context manager to issue <code>get_acs</code> calls and “future states” are gathered via a dictionary comprehension. Note, however, that this dictionary flips the script a bit with the returned data frames in the key position and the state, year tuples they correspond to in the values position. This is possible because the returned data frames are unique / hashable, and it allows us to report out for which state and year a failure occurs.</p>
-<p>As results are returned, they are assessed and appended to the <code>all_acs</code> list for subsequent concatenation. As shown by the <code>Wall time</code> under each code chunk, we see a significant speed up, roughly corresponding to the number of cores (16) available in the PC in which this post was rendered.</p>
+<p>As results are returned, they are assessed and appended to the <code>all_acs</code> list for subsequent concatenation. As shown by the <code>Wall time</code> under each code chunk, we see a significant speed up from over 1 minute to ~2 seconds. Note also that we specify a <code>max_workers</code> count equivalent to the number of times we will be hitting the API. For thread pooling, we’re not limited to our machine’s core count, as we’re not running a truly parallelized process that utilizes multiple cores simultaneously.</p>
 
 
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{couzens2025,
   author = {Couzens, Lance},
-  title = {Parallelizing a {Python} {Process} to {Build} a {Stacked}
+  title = {Thread {Pooling} a {Python} {Process} to {Build} a {Stacked}
     {ACS} {DataFrame}},
   date = {2025-08-05},
   url = {https://mostlyunoriginal.github.io/posts/2025-08-05-Parallelizing-a-Python-for-loop/},
   langid = {en}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-couzens2025" class="csl-entry quarto-appendix-citeas" role="listitem">
-Couzens, Lance. 2025. <span>“Parallelizing a Python Process to Build a
+Couzens, Lance. 2025. <span>“Thread Pooling a Python Process to Build a
 Stacked ACS DataFrame.”</span> August 5, 2025. <a href="https://mostlyunoriginal.github.io/posts/2025-08-05-Parallelizing-a-Python-for-loop/">https://mostlyunoriginal.github.io/posts/2025-08-05-Parallelizing-a-Python-for-loop/</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

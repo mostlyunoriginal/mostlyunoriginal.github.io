@@ -1,23 +1,21 @@
 ---
-title: "Parallelizing a Python Process to Build a Stacked ACS DataFrame"
-description: "This post demonstrates how to take a standard list comprehension of calls to the Census API and parallelize it for dramatic time savings."
+title: "Thread Pooling a Python Process to Build a Stacked ACS DataFrame"
+description: "This post demonstrates how to take a standard list comprehension of calls to the Census API and pool it for dramatic time savings."
 date: 2025-08-05
 author:
     - name: Lance Couzens
       url: https://mostlyunoriginal.github.io  
-categories: [Python, Parallelization]
+categories: [Python, Thread Pooling]
 citation: 
   url: https://mostlyunoriginal.github.io/posts/2025-08-05-Parallelizing-a-Python-for-loop/
 image: Preview.png
 draft: false
 lightbox: true
-params:
-    year: 2023
 ---
 
 ## Background
 
-As part of a machine learning class I've been building for a client, I've provided the option to join county-level ACS estimates onto the training and prediction data. County data require state-level calls to the Census API, and including all states and a few years, sequential pulls were proving to be a significant bottleneck. Swapping the sequential process out in favor of a parallel one yielded dramatic time savings. This post demonstrates that change via an abstracted, simplified example.
+As part of a machine learning class I've been building for a client, I've provided the option to join county-level ACS estimates onto the training and prediction data. County data require state-level calls to the Census API, and including all states and a few years, sequential pulls were proving to be a significant bottleneck. Swapping the sequential process out in favor of a pooled one yielded dramatic time savings. This post demonstrates that change via an abstracted, simplified example.
 
 ## Data Ingestion
 
@@ -80,12 +78,12 @@ def get_acs(
     return None
 ```
 
-## Implementation via sequential list comprehension
+## Sequential Implementation via List Comprehension
 
 Here we grab and stack the data for all states and two data years via list comprehension.
 
 ```{python}
-%%time
+%%timeit -r 4
 
 all_acs = [
     get_acs(state_fips, year, api_key=os.getenv("CENSUS_API_KEY"))
@@ -95,7 +93,7 @@ all_acs = [
 # concatenate all results
 if all_acs:
     stacked_acs = pl.concat(all_acs)
-    print(stacked_acs)
+    print(f"Data stacked and {stacked_acs.height} records returned")
 else:
     print("No data was fetched.")
 ```
@@ -105,10 +103,10 @@ else:
 Here we leverage the `concurrent.futures` module from the standard Python library to issue all API calls simultaneously, gathering results asynchronously as they become available.
 
 ```{python}
-%%time
+%%timeit -r 4
 
 all_acs = []
-with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+with ThreadPoolExecutor(max_workers=len(state_year_pairs)) as executor:
     futures = {
         executor.submit(
           get_acs, 
@@ -130,11 +128,11 @@ with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
 # concatenate all results
 if all_acs:
     stacked_acs = pl.concat(all_acs)
-    print(stacked_acs)
+    print(f"Data stacked and {stacked_acs.height} records returned")
 else:
     print("No data was fetched.")            
 ```
 
 In this alternative, `ThreadPoolExecutor` is used as a context manager to issue `get_acs` calls and "future states" are gathered via a dictionary comprehension. Note, however, that this dictionary flips the script a bit with the returned data frames in the key position and the state, year tuples they correspond to in the values position. This is possible because the returned data frames are unique / hashable, and it allows us to report out for which state and year a failure occurs.
 
-As results are returned, they are assessed and appended to the `all_acs` list for subsequent concatenation. As shown by the `Wall time` under each code chunk, we see a significant speed up, roughly corresponding to the number of cores (16) available in the PC in which this post was rendered.
+As results are returned, they are assessed and appended to the `all_acs` list for subsequent concatenation. As shown by the `Wall time` under each code chunk, we see a significant speed up from over 1 minute to \~2 seconds. Note also that we specify a `max_workers` count equivalent to the number of times we will be hitting the API. For thread pooling, we're not limited to our machine's core count, as we're not running a truly parallelized process that utilizes multiple cores simultaneously.
