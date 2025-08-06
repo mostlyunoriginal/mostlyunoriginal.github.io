@@ -207,7 +207,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="data-ingestion" class="level2">
 <h2 class="anchored" data-anchor-id="data-ingestion">Data Ingestion</h2>
 <p>The <code>get_acs</code> function pulls county-level 5-year ACS estimates from the Census API for a single state and year. We also do all the importing and environment variable creation we’ll need for both versions of subsequent steps (we want those to be as close to apples-to-apples as possible since we’ll be comparing timing).</p>
-<div id="ff36e972" class="cell" data-execution_count="1">
+<div id="d3d38a00" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
@@ -267,7 +267,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="sequential-implementation-via-list-comprehension" class="level2">
 <h2 class="anchored" data-anchor-id="sequential-implementation-via-list-comprehension">Sequential Implementation via List Comprehension</h2>
 <p>Here we grab and stack the data for all states and two data years via list comprehension.</p>
-<div id="f0c34e1e" class="cell" data-execution_count="2">
+<div id="6673c7a9" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit <span class="op">-</span>r <span class="dv">4</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>all_acs <span class="op">=</span> [</span>
@@ -287,14 +287,14 @@ Data stacked and 6284 records returned
 Data stacked and 6284 records returned
 Data stacked and 6284 records returned
 Data stacked and 6284 records returned
-1min 3s ± 806 ms per loop (mean ± std. dev. of 4 runs, 1 loop each)</code></pre>
+1min 3s ± 1.39 s per loop (mean ± std. dev. of 4 runs, 1 loop each)</code></pre>
 </div>
 </div>
 </section>
 <section id="a-parallelized-alternative" class="level2">
 <h2 class="anchored" data-anchor-id="a-parallelized-alternative">A Parallelized Alternative</h2>
 <p>Here we leverage the <code>concurrent.futures</code> module from the standard Python library to issue all API calls simultaneously, gathering results asynchronously as they become available.</p>
-<div id="939e8345" class="cell" data-execution_count="3">
+<div id="b6be6424" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit <span class="op">-</span>r <span class="dv">4</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>all_acs <span class="op">=</span> []</span>
@@ -329,11 +329,12 @@ Data stacked and 6284 records returned
 Data stacked and 6284 records returned
 Data stacked and 6284 records returned
 Data stacked and 6284 records returned
-4.02 s ± 2.05 s per loop (mean ± std. dev. of 4 runs, 1 loop each)</code></pre>
+The slowest run took 6.27 times longer than the fastest. This could mean that an intermediate result is being cached.
+4.51 s ± 4.17 s per loop (mean ± std. dev. of 4 runs, 1 loop each)</code></pre>
 </div>
 </div>
 <p>In this alternative, <code>ThreadPoolExecutor</code> is used as a context manager to issue <code>get_acs</code> calls and “future states” are gathered via a dictionary comprehension. Note, however, that this dictionary flips the script a bit with the returned data frames in the key position and the state, year tuples they correspond to in the values position. This is possible because the returned data frames are unique / hashable, and it allows us to report out for which state and year a failure occurs.</p>
-<p>As results are returned, they are assessed and appended to the <code>all_acs</code> list for subsequent concatenation. As shown by the <code>Wall time</code> under each code chunk, we see a significant speed up from over 1 minute to ~2 seconds. Note also that we specify a <code>max_workers</code> count equivalent to the number of times we will be hitting the API. For thread pooling, we’re not limited to our machine’s core count, as we’re not running a truly parallelized process that utilizes multiple cores simultaneously.</p>
+<p>As results are returned, they are assessed and appended to the <code>all_acs</code> list for subsequent concatenation. As shown by the timing stats under each code chunk, we see a significant speed up from over 1 minute to just a handful of seconds. Note also that we specify a <code>max_workers</code> count equivalent to the number of times we will be hitting the API. For thread pooling, we’re not limited to our machine’s core count, as we’re not running a truly parallelized process that utilizes multiple cores simultaneously.</p>
 
 
 </section>
