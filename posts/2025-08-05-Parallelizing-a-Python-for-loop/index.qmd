@@ -9,7 +9,7 @@ categories: [Python, Parallelization]
 citation: 
   url: https://mostlyunoriginal.github.io/posts/2025-08-05-Parallelizing-a-Python-for-loop/
 image: Preview.png
-draft: true
+draft: false
 lightbox: true
 params:
     year: 2023
