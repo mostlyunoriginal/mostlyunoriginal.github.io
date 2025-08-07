@@ -7,7 +7,7 @@ author:
       url: https://mostlyunoriginal.github.io  
 categories: [Python, Thread Pooling]
 citation: 
-  url: https://mostlyunoriginal.github.io/posts/2025-08-05-Parallelizing-a-Python-for-loop/
+  url: https://mostlyunoriginal.github.io/posts/2025-08-05-Python-Thread-Pooling/
 image: Preview.png
 draft: false
 lightbox: true
