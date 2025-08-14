@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Lance Couzens">
+<meta name="dcterms.date" content="2025-08-13">
+<meta name="description" content="This post introduces cendat and demonstrates its use through examples.">
+
+<title>Introducing cendat, a Python Library for Simplifying and Speeding up Use of the Census API – Lance Couzens</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-eeb6d1c97efeeb0cfaf56837413d2c8e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Lance Couzens</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Code Blog</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-page-left">
+      <h1 class="title">Introducing cendat, a Python Library for Simplifying and Speeding up Use of the Census API</h1>
+                  <div>
+        <div class="description">
+          This post introduces cendat and demonstrates its use through examples.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Python</div>
+                <div class="quarto-category">cendat</div>
+                <div class="quarto-category">Census</div>
+                <div class="quarto-category">API</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta column-page-left">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p><a href="https://mostlyunoriginal.github.io">Lance Couzens</a> </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">August 13, 2025</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background">Background</a></li>
+  <li><a href="#workflow" id="toc-workflow" class="nav-link" data-scroll-target="#workflow">Workflow</a></li>
+  <li><a href="#step-1.-import-and-instantiate" id="toc-step-1.-import-and-instantiate" class="nav-link" data-scroll-target="#step-1.-import-and-instantiate">Step 1. Import and Instantiate</a></li>
+  <li><a href="#step-2.-explore-available-products" id="toc-step-2.-explore-available-products" class="nav-link" data-scroll-target="#step-2.-explore-available-products">Step 2. Explore Available Products</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
+
+
+
+
+
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<p>The U.S. Census Bureau makes available through its free, public API mountains of data, though navigating it and acquiring the data you need can be tricky, especially for complex, nested geographic summary levels like those available in American Community Survey (ACS) data products. The Census Bureau provides buckets of features and nuance in its data portal <a href="https://data.census.gov" class="uri">https://data.census.gov</a>, but this doesn’t address the need to acquire data programmatically or in aggregate across the many ‘drill-down’ geographies required for certain summary levels. The API addresses the first problem, but on its own it does nothing to address the second. To acquire estimates at certain levels–even for a single state–may require several thousand API queries, and while data can be downloaded in bulk from <a href="https://www2.census.gov" class="uri">https://www2.census.gov</a>, you may have to sift through a lot of what you don’t need to get at what you do. It’s also not well-suited for obtaining data in-script.</p>
+<p><code>cendat</code> aims to address the programmatic need while leveraging automatic query building and concurrency to quickly and easily explore the API’s data offerings, and pull in the data you need. There are other Census API wrapper libraries available for Python, and I honestly haven’t assessed their capabilities more than superficially, but I like building my own tools, so here we are!</p>
+<p><code>cendat</code> can be installed with <code>pip</code></p>
+<pre class="{bash}"><code>pip install cendat</code></pre>
+<p>and you can also install <code>pandas</code> and/or <code>polars</code> at the same time to enable optional methods to work with acquired data</p>
+<pre class="{bash}"><code>pip install cendat[pandas]</code></pre>
+<pre class="{bash}"><code>pip install cendat[polars]</code></pre>
+<pre class="{bash}"><code>pip install cendat[all]</code></pre>
+<p>You can check out its documentation at <a href="https://pypi.org/project/cendat/" class="uri">https://pypi.org/project/cendat/</a>.</p>
+<p>You need an API key to get the most out of <code>cendat</code>–you can get one here: <a href="https://api.census.gov/data/key_signup.html" class="uri">https://api.census.gov/data/key_signup.html</a>.</p>
+</section>
+<section id="workflow" class="level2">
+<h2 class="anchored" data-anchor-id="workflow">Workflow</h2>
+<p><code>cendat</code> includes two classes: <code>CenDatHelper</code> for exploring the API, locking in product, vintage, variable, and geographic selections, and getting data, and <code>CenDatResponse</code> to represent the returned data structure and provide methods for conversion to <code>pandas</code> or <code>polars</code> DataFrames.</p>
+<p>These classes can be used if you already know exactly what you want and how to specify it, but they also streamline the process of figuring out and selecting what you want through a consistent list <span class="math inline">\(\rightarrow\)</span> set two-step that works for products, geographies, and variables. Once selections are locked in, the <code>get_data()</code> method builds the queries, issues them concurrently, and organizes the results into a digestible format.</p>
+</section>
+<section id="step-1.-import-and-instantiate" class="level2">
+<h2 class="anchored" data-anchor-id="step-1.-import-and-instantiate">Step 1. Import and Instantiate</h2>
+<p>A <code>CenDatHelper</code> object can be instantiated without argument, or with the <code>key</code> parameter (as shown below) and/or <code>years</code>, which can be provided as an integer or list of integers. API key and years can also be provided later via the <code>load_key()</code> and <code>set_years()</code> methods, respectively. To start exploring, we’ll provide a key but not specify any years of interest.</p>
+<div id="feb084e3" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cendat <span class="im">import</span> CenDatHelper</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pprint <span class="im">import</span> pprint</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>load_dotenv()</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>cdh <span class="op">=</span> CenDatHelper(key<span class="op">=</span>os.getenv(<span class="st">'CENSUS_API_KEY'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ API key loaded successfully.</code></pre>
+</div>
+</div>
+</section>
+<section id="step-2.-explore-available-products" class="level2">
+<h2 class="anchored" data-anchor-id="step-2.-explore-available-products">Step 2. Explore Available Products</h2>
+<p><code>cendat</code> (currently, as of ver. 0.2.1) supports all aggregate and microdata products available in the API (I’m open to adding timeseries product handling as well, if anyone requests it). To explore those products, we use the <code>list_products()</code> method. Let’s start by looking for anything related to the ACS 5-year detailed tables.</p>
+<div id="9cca7bb8" class="cell" data-results="markup" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>potential_products <span class="op">=</span> cdh.list_products(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    patterns<span class="op">=</span>[<span class="st">"acs"</span>, <span class="st">"5-year"</span>, <span class="st">"detailed"</span>]</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> product <span class="kw">in</span> potential_products:</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(product[<span class="st">'title'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2009/acs/acs5)
+American Community Survey: 5-Year Estimates: American Indian and Alaska Native Detailed Tables 5-Year (2010/acs/acs5/aian)
+ACS 5-Year Detailed Tables (2010/acs/acs5)
+American Community Survey: 5-Year Estimates: Selected Population Detailed Tables 5-Year (2010/acs/acs5/spt)
+ACS 5-Year Detailed Tables (2011/acs/acs5)
+ACS 5-Year Detailed Tables (2012/acs/acs5)
+ACS 5-Year Detailed Tables (2013/acs/acs5)
+ACS 5-Year Detailed Tables (2014/acs/acs5)
+ACS 5-Year AIAN Detailed Tables (2015/acs/acs5/aian)
+ACS 5-Year Detailed Tables (2015/acs/acs5)
+American Community Survey: 5-Year Estimates: Selected Population Detailed Tables 5-Year (2015/acs/acs5/spt)
+ACS 5-Year Detailed Tables (2016/acs/acs5)
+ACS 5-Year Detailed Tables (2017/acs/acs5)
+American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2018/acs/acs5)
+American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2019/acs/acs5)
+American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2020/acs/acs5)
+American Community Survey: 5-Year Estimates: American Indian and Alaska Native Detailed Tables 5-Year (2021/acs/acs5/aian)
+American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2021/acs/acs5)
+American Community Survey: 5-Year Estimates: Selected Population Detailed Tables 5-Year (2021/acs/acs5/spt)
+American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2022/acs/acs5)
+ACS 5-Year Detailed Tables (2023/acs/acs5)</code></pre>
+</div>
+</div>
+<p>Okay, gives us a good starting point. We’ll get to filtering those results down in a moment, but first I want to highlight a couple of things about the code block above. First, you’ll notice that I provided patterns to filter the products by via the <code>patterns</code> parameter. <code>patterns</code> takes a string or list of strings compiled into (case-insensitive) regular expressions. We can control whether the patterns all have to be met (the default) or only one or more through the <code>logic</code> parameter. To employ <code>any</code> logic set <code>logic=any</code>. If you don’t speak regex, fear not–just supply substrings you’d like to match. We can also control which portion of the metadata the patterns will be used on. The default (which we’ve used here) is to operate on the titles. The alternative is to operate on the descriptions, which can be achieved by setting <code>match_in='desc'</code>. One other point. You’ll notice that I selectively printed only <code>product['title']</code>. By default, the <code>list_products()</code> method returns a list of dictionaries of which the title is only one item (we can force it to return only the title by setting <code>to_dicts=False</code>). We’ll see some more of what’s returned after we filter our products down a bit more.</p>
+<p>Okay, back to the results. A couple of things are obvious: the detailed tables products aren’t named consistently across years, and there are some special population products that are being picked up as well. We can also see that there’s a parenthetical portion to each product title that looks like a directory path–that’s parsed from the JSON packet returned by the API and tacked on by <code>list_products()</code>. So, rather than trying to refine our patterns to capture the inconsistent portion of the titles, we can focus on that and try again.</p>
+<div id="b8c6ef09" class="cell" data-results="markup" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>potential_products <span class="op">=</span> cdh.list_products(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    patterns<span class="op">=</span>[<span class="vs">r"acs/acs5\)"</span>]</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> product <span class="kw">in</span> potential_products:</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(product[<span class="st">'title'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2009/acs/acs5)
+ACS 5-Year Detailed Tables (2010/acs/acs5)
+ACS 5-Year Detailed Tables (2011/acs/acs5)
+ACS 5-Year Detailed Tables (2012/acs/acs5)
+ACS 5-Year Detailed Tables (2013/acs/acs5)
+ACS 5-Year Detailed Tables (2014/acs/acs5)
+ACS 5-Year Detailed Tables (2015/acs/acs5)
+ACS 5-Year Detailed Tables (2016/acs/acs5)
+ACS 5-Year Detailed Tables (2017/acs/acs5)
+American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2018/acs/acs5)
+American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2019/acs/acs5)
+American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2020/acs/acs5)
+American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2021/acs/acs5)
+American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2022/acs/acs5)
+ACS 5-Year Detailed Tables (2023/acs/acs5)</code></pre>
+</div>
+</div>
+<p>Now we’ve filtered down to the core product we want, but let’s subset to only a couple years to keep things simple. We’ll also take a look at the full contents of the products’ dictionaries.</p>
+<div id="de7055d2" class="cell" data-results="markup" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>potential_products <span class="op">=</span> cdh.list_products(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    patterns<span class="op">=</span>[<span class="vs">r"acs/acs5\)"</span>],</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    years<span class="op">=</span>[<span class="dv">2022</span>, <span class="dv">2023</span>]</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> product <span class="kw">in</span> potential_products:</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    pprint(product)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'desc': 'The American Community Survey (ACS) is an ongoing survey that '
+         'provides data every year -- giving communities the current '
+         'information they need to plan investments and services. The ACS '
+         'covers a broad range of topics about social, economic, demographic, '
+         'and housing characteristics of the U.S. population. Summary files '
+         'include the following geographies: nation, all states (including DC '
+         'and Puerto Rico), all metropolitan areas, all congressional '
+         'districts, all counties, all places, and all tracts and block '
+         'groups. Summary files contain the most detailed cross-tabulations, '
+         'many of which are published down to block groups. The data are '
+         'population and housing counts. There are over 64,000 variables in '
+         'this dataset.',
+ 'is_aggregate': True,
+ 'is_microdata': False,
+ 'title': 'American Community Survey: 5-Year Estimates: Detailed Tables 5-Year '
+          '(2022/acs/acs5)',
+ 'type': 'acs/acs5',
+ 'url': 'http://api.census.gov/data/2022/acs/acs5',
+ 'vintage': [2022]}
+{'desc': 'The American Community Survey (ACS) is an ongoing survey that '
+         'provides data every year -- giving communities the current '
+         'information they need to plan investments and services. The ACS '
+         'covers a broad range of topics about social, economic, demographic, '
+         'and housing characteristics of the U.S. population. Summary files '
+         'include the following geographies: nation, all states (including DC '
+         'and Puerto Rico), all metropolitan areas, all congressional '
+         'districts, all counties, all places, and all tracts and block '
+         'groups. Summary files contain the most detailed cross-tabulations, '
+         'many of which are published down to block groups. The data are '
+         'population and housing counts. There are over 64,000 variables in '
+         'this dataset.',
+ 'is_aggregate': True,
+ 'is_microdata': False,
+ 'title': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+ 'type': 'acs/acs5',
+ 'url': 'http://api.census.gov/data/2023/acs/acs5',
+ 'vintage': [2023]}</code></pre>
+</div>
+</div>
+<p>Okay, great–now we’ve got what we want, let’s lock in our selection.</p>
+<div id="bd831af6" class="cell" data-results="markup" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>cdh.set_products()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ Product set: 'American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2022/acs/acs5)' (Vintage: [2022])
+✅ Product set: 'ACS 5-Year Detailed Tables (2023/acs/acs5)' (Vintage: [2023])</code></pre>
+</div>
+</div>
+<p>Now, let’s start to think about which variables we want–according to the descriptions above, we have over 64,000 to choose from! Let’s assume we’re interested in median household income and average household size.</p>
+<div id="263d99b2" class="cell" data-results="markup" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>potential_variables <span class="op">=</span> cdh.list_variables(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    patterns<span class="op">=</span>[<span class="st">"median household income"</span>, <span class="st">"household size"</span>],</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    logic<span class="op">=</span><span class="bu">any</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co"># look at the first to get a sense of what the full dictionaries have to offer</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>pprint(potential_variables[<span class="dv">0</span>])</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co"># print only the titles for all of the variables</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> variable <span class="kw">in</span> potential_variables:</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(variable[<span class="st">'name'</span>], variable[<span class="st">'label'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'concept': 'Average Household Size of Occupied Housing Units by Tenure '
+            '(Hispanic or Latino Householder)',
+ 'group': 'B25010I',
+ 'label': 'Estimate!!Average household size --!!Total:!!Owner occupied',
+ 'name': 'B25010I_002E',
+ 'product': 'American Community Survey: 5-Year Estimates: Detailed Tables '
+            '5-Year (2022/acs/acs5)',
+ 'sugg_wgt': 'N/A',
+ 'type': 'float',
+ 'url': 'http://api.census.gov/data/2022/acs/acs5',
+ 'values': 'N/A',
+ 'vintage': [2022]}
+B25010I_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010I_001E Estimate!!Average household size --!!Total:
+B25010I_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010_001E Estimate!!Average household size --!!Total:
+B19013E_001E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars)
+B19013D_001E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars)
+B22008_002E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars)--!!Total:!!Household received Food Stamps/SNAP in the past 12 months
+B22008_001E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars)--!!Total:
+B19013I_001E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars)
+B22008_003E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars)--!!Total:!!Household did not receive Food Stamps/SNAP in the past 12 months
+B25010D_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010D_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010D_001E Estimate!!Average household size --!!Total:
+B19013A_001E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars)
+B19013F_001E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars)
+B25010F_001E Estimate!!Average household size --!!Total:
+B25010F_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010F_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010A_001E Estimate!!Average household size --!!Total:
+B25010A_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010A_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010E_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010E_001E Estimate!!Average household size --!!Total:
+B25010E_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25119_002E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars) --!!Total:!!Owner occupied (dollars)
+B25119_001E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars) --!!Total:
+B25119_003E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars) --!!Total:!!Renter occupied (dollars)
+B19013G_001E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars)
+B25010B_001E Estimate!!Average household size --!!Total:
+B25010B_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010B_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25099_003E Estimate!!Median household income --!!Total:!!Median household income for units without a mortgage
+B25099_001E Estimate!!Median household income --!!Total:
+B25099_002E Estimate!!Median household income --!!Total:!!Median household income for units with a mortgage
+B25010G_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010G_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010G_001E Estimate!!Average household size --!!Total:
+B19013B_001E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars)
+B25010H_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010H_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010H_001E Estimate!!Average household size --!!Total:
+B29004_001E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars)
+B19049_004E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars) --!!Total:!!Householder 45 to 64 years
+B19049_005E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars) --!!Total:!!Householder 65 years and over
+B19049_002E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars) --!!Total:!!Householder under 25 years
+B19049_003E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars) --!!Total:!!Householder 25 to 44 years
+B19049_001E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars) --!!Total:
+B19013C_001E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars)
+B19013_001E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars)
+B25010C_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010C_001E Estimate!!Average household size --!!Total:
+B25010C_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B19013H_001E Estimate!!Median household income in the past 12 months (in 2022 inflation-adjusted dollars)
+B25010I_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010I_001E Estimate!!Average household size --!!Total:
+B25010I_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010_001E Estimate!!Average household size --!!Total:
+B19013E_001E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars)
+B19013D_001E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars)
+B22008_002E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars)--!!Total:!!Household received Food Stamps/SNAP in the past 12 months
+B22008_001E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars)--!!Total:
+B19013I_001E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars)
+B22008_003E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars)--!!Total:!!Household did not receive Food Stamps/SNAP in the past 12 months
+B25010D_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010D_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010D_001E Estimate!!Average household size --!!Total:
+B19013A_001E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars)
+B19013F_001E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars)
+B25010F_001E Estimate!!Average household size --!!Total:
+B25010F_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010F_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010A_001E Estimate!!Average household size --!!Total:
+B25010A_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010A_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010E_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010E_001E Estimate!!Average household size --!!Total:
+B25010E_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25119_002E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars) --!!Total:!!Owner occupied (dollars)
+B25119_001E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars) --!!Total:
+B25119_003E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars) --!!Total:!!Renter occupied (dollars)
+B19013G_001E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars)
+B25010B_001E Estimate!!Average household size --!!Total:
+B25010B_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010B_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25099_003E Estimate!!Median household income --!!Total:!!Median household income for units without a mortgage
+B25099_001E Estimate!!Median household income --!!Total:
+B25099_002E Estimate!!Median household income --!!Total:!!Median household income for units with a mortgage
+B25010G_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010G_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010G_001E Estimate!!Average household size --!!Total:
+B19013B_001E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars)
+B25010H_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B25010H_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010H_001E Estimate!!Average household size --!!Total:
+B29004_001E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars)
+B19049_004E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars) --!!Total:!!Householder 45 to 64 years
+B19049_005E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars) --!!Total:!!Householder 65 years and over
+B19049_002E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars) --!!Total:!!Householder under 25 years
+B19049_003E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars) --!!Total:!!Householder 25 to 44 years
+B19049_001E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars) --!!Total:
+B19013C_001E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars)
+B19013_001E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars)
+B25010C_002E Estimate!!Average household size --!!Total:!!Owner occupied
+B25010C_001E Estimate!!Average household size --!!Total:
+B25010C_003E Estimate!!Average household size --!!Total:!!Renter occupied
+B19013H_001E Estimate!!Median household income in the past 12 months (in 2023 inflation-adjusted dollars)</code></pre>
+</div>
+</div>
+<p>A couple of things stand out here. First, when comparing the full dictionary of the first variable to just its label, we can see why there appears to be duplication of labels across variable names–there are nuances not captured in the label alone. In our next pass we’ll print the variable name and concept, as that seems to capture the nuance we need to be aware of.</p>
+<div id="05559e91" class="cell" data-results="markup" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>potential_variables <span class="op">=</span> cdh.list_variables(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    patterns<span class="op">=</span>[</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r"Average household size --!!Total:$"</span>,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r"Median household income in the past 12 months \(in 202\d inflation-adjusted dollars\)$"</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    logic<span class="op">=</span><span class="bu">any</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> variable <span class="kw">in</span> potential_variables:</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(variable[<span class="st">'name'</span>], <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>, variable[<span class="st">'concept'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>B25010I_001E 
+ Average Household Size of Occupied Housing Units by Tenure (Hispanic or Latino Householder)
+B25010_001E 
+ Average Household Size of Occupied Housing Units by Tenure
+B19013E_001E 
+ Median Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (Native Hawaiian and Other Pacific Islander Alone Householder)
+B19013D_001E 
+ Median Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (Asian Alone Householder)
+B19013I_001E 
+ Median Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (Hispanic or Latino Householder)
+B25010D_001E 
+ Average Household Size of Occupied Housing Units by Tenure (Asian Alone Householder)
+B19013A_001E 
+ Median Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (White Alone Householder)
+B19013F_001E 
+ Median Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (Some Other Race Alone Householder)
+B25010F_001E 
+ Average Household Size of Occupied Housing Units by Tenure (Some Other Race Alone Householder)
+B25010A_001E 
+ Average Household Size of Occupied Housing Units by Tenure (White Alone Householder)
+B25010E_001E 
+ Average Household Size of Occupied Housing Units by Tenure (Native Hawaiian and Other Pacific Islander Alone Householder)
+B19013G_001E 
+ Median Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (Two or More Races Householder)
+B25010B_001E 
+ Average Household Size of Occupied Housing Units by Tenure (Black or African American Alone Householder)
+B25010G_001E 
+ Average Household Size of Occupied Housing Units by Tenure (Two or More Races Householder)
+B19013B_001E 
+ Median Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (Black or African American Alone Householder)
+B25010H_001E 
+ Average Household Size of Occupied Housing Units by Tenure (White Alone, Not Hispanic or Latino Householder)
+B29004_001E 
+ Median Household Income for Households With a Citizen, Voting-Age Householder (in 2022 Inflation-Adjusted Dollars)
+B19013C_001E 
+ Median Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (American Indian and Alaska Native Alone Householder)
+B19013_001E 
+ Median Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars)
+B25010C_001E 
+ Average Household Size of Occupied Housing Units by Tenure (American Indian and Alaska Native Alone Householder)
+B19013H_001E 
+ Median Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (White Alone, Not Hispanic or Latino Householder)
+B25010I_001E 
+ Average Household Size of Occupied Housing Units by Tenure (Hispanic or Latino Householder)
+B25010_001E 
+ Average Household Size of Occupied Housing Units by Tenure
+B19013E_001E 
+ Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (Native Hawaiian and Other Pacific Islander Alone Householder)
+B19013D_001E 
+ Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (Asian Alone Householder)
+B19013I_001E 
+ Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (Hispanic or Latino Householder)
+B25010D_001E 
+ Average Household Size of Occupied Housing Units by Tenure (Asian Alone Householder)
+B19013A_001E 
+ Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (White Alone Householder)
+B19013F_001E 
+ Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (Some Other Race Alone Householder)
+B25010F_001E 
+ Average Household Size of Occupied Housing Units by Tenure (Some Other Race Alone Householder)
+B25010A_001E 
+ Average Household Size of Occupied Housing Units by Tenure (White Alone Householder)
+B25010E_001E 
+ Average Household Size of Occupied Housing Units by Tenure (Native Hawaiian and Other Pacific Islander Alone Householder)
+B19013G_001E 
+ Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (Two or More Races Householder)
+B25010B_001E 
+ Average Household Size of Occupied Housing Units by Tenure (Black or African American Alone Householder)
+B25010G_001E 
+ Average Household Size of Occupied Housing Units by Tenure (Two or More Races Householder)
+B19013B_001E 
+ Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (Black or African American Alone Householder)
+B25010H_001E 
+ Average Household Size of Occupied Housing Units by Tenure (White Alone, Not Hispanic or Latino Householder)
+B29004_001E 
+ Median Household Income for Households With a Citizen, Voting-Age Householder (in 2023 Inflation-Adjusted Dollars)
+B19013C_001E 
+ Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (American Indian and Alaska Native Alone Householder)
+B19013_001E 
+ Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars)
+B25010C_001E 
+ Average Household Size of Occupied Housing Units by Tenure (American Indian and Alaska Native Alone Householder)
+B19013H_001E 
+ Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (White Alone, Not Hispanic or Latino Householder)</code></pre>
+</div>
+</div>
+<p>Based on this output we can see that we’re interested in <code>B25010_001E</code> and <code>B19013_001E</code>–we can set these variables explicitly.</p>
+<div id="7e4a224c" class="cell" data-results="markup" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>cdh.set_variables(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    names<span class="op">=</span>[<span class="st">"B25010_001E"</span>, <span class="st">"B19013_001E"</span>]</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ Variables set:
+  - Product: American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2022/acs/acs5) (Vintage: [2022])
+    Variables: B25010_001E, B19013_001E
+  - Product: ACS 5-Year Detailed Tables (2023/acs/acs5) (Vintage: [2023])
+    Variables: B25010_001E, B19013_001E</code></pre>
+</div>
+</div>
+<p>Next we need to select the geographic level at which we want to get our estimates. Let’s assume we’re interested in block groups and filter accordingly. That should give us a small number of options, so we’ll output and view the complete dictionaries.</p>
+<div id="afff9dd7" class="cell" data-results="markup" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>potential_geos <span class="op">=</span> cdh.list_geos(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    patterns<span class="op">=</span><span class="st">"block group"</span>,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    to_dicts<span class="op">=</span><span class="va">True</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>pprint(potential_geos)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[{'desc': 'block group',
+  'product': 'American Community Survey: 5-Year Estimates: Detailed Tables '
+             '5-Year (2022/acs/acs5)',
+  'requires': ['state', 'county', 'tract'],
+  'sumlev': '150',
+  'url': 'http://api.census.gov/data/2022/acs/acs5',
+  'vintage': [2022]},
+ {'desc': 'tribal block group',
+  'product': 'American Community Survey: 5-Year Estimates: Detailed Tables '
+             '5-Year (2022/acs/acs5)',
+  'requires': ['american indian area/alaska native area/hawaiian home land',
+               'tribal census tract'],
+  'sumlev': '258',
+  'url': 'http://api.census.gov/data/2022/acs/acs5',
+  'vintage': [2022]},
+ {'desc': 'tribal block group (or part)',
+  'product': 'American Community Survey: 5-Year Estimates: Detailed Tables '
+             '5-Year (2022/acs/acs5)',
+  'requires': ['american indian area/alaska native area (reservation or '
+               'statistical entity only)',
+               'tribal census tract (or part)'],
+  'sumlev': '293',
+  'url': 'http://api.census.gov/data/2022/acs/acs5',
+  'vintage': [2022]},
+ {'desc': 'tribal block group (or part)',
+  'product': 'American Community Survey: 5-Year Estimates: Detailed Tables '
+             '5-Year (2022/acs/acs5)',
+  'requires': ['american indian area (off-reservation trust land '
+               'only)/hawaiian home land',
+               'tribal census tract (or part)'],
+  'sumlev': '294',
+  'url': 'http://api.census.gov/data/2022/acs/acs5',
+  'vintage': [2022]},
+ {'desc': 'block group',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'requires': ['state', 'county', 'tract'],
+  'sumlev': '150',
+  'url': 'http://api.census.gov/data/2023/acs/acs5',
+  'vintage': [2023]},
+ {'desc': 'tribal block group',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'requires': ['american indian area/alaska native area/hawaiian home land',
+               'tribal census tract'],
+  'sumlev': '258',
+  'url': 'http://api.census.gov/data/2023/acs/acs5',
+  'vintage': [2023]},
+ {'desc': 'tribal block group (or part)',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'requires': ['american indian area/alaska native area (reservation or '
+               'statistical entity only)',
+               'tribal census tract (or part)'],
+  'sumlev': '293',
+  'url': 'http://api.census.gov/data/2023/acs/acs5',
+  'vintage': [2023]},
+ {'desc': 'tribal block group (or part)',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'requires': ['american indian area (off-reservation trust land '
+               'only)/hawaiian home land',
+               'tribal census tract (or part)'],
+  'sumlev': '294',
+  'url': 'http://api.census.gov/data/2023/acs/acs5',
+  'vintage': [2023]}]</code></pre>
+</div>
+</div>
+<p>A couple of things to note here. First, we can see in the first dictionary that the first entry is the one we’re interested in (summary level 150). Second, the dictionary includes <code>'requires': ['state', 'county', 'tract']</code> which indicates that in order to get estimates for a set of block groups from the API, the query must specify the parent state, county, and tract. There are nearly 84,000 tracts in continental U.S.! To keep this example a little more bite-sized, we’ll focus on just one county from Colorado and the state of Wyoming (mostly to illustrate how we can provide <code>within</code> as a list of dictionaries). Now, that’s still a lot of tracts, but <code>CenDatHelper</code> does the hard work of figuring out all of the state-county-tract combinations and building/issuing the necessary API calls. First we set our summary level of interest, then we get the data. Let’s see how that works.</p>
+<div id="f61f7775" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: markup</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>cdh.set_geos(<span class="st">"150"</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> cdh.get_data(</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    within<span class="op">=</span>[</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>        {<span class="st">'state'</span>: <span class="st">'08'</span>, <span class="st">'county'</span>: <span class="st">'069'</span>},</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>        {<span class="st">'state'</span>: <span class="st">'56'</span>}</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ Geographies set: 'block group' (requires `within` for: county, state, tract)
+✅ Parameters created for 2 geo-variable combinations.
+ℹ️ Fetching parent geographies for 'block group'...
+✅ Found 86 combinations for 'block group' within the specified scope.
+ℹ️ Fetching parent geographies for 'block group'...
+✅ Found 160 combinations for 'block group' within the specified scope.
+ℹ️ Fetching parent geographies for 'block group'...
+✅ Found 86 combinations for 'block group' within the specified scope.
+ℹ️ Fetching parent geographies for 'block group'...
+✅ Found 160 combinations for 'block group' within the specified scope.
+ℹ️ Making 492 API call(s)...
+CPU times: total: 688 ms
+Wall time: 15.5 s</code></pre>
+</div>
+</div>
+<p>We can see that in the end 492 API calls were needed to satisfy our request, but due to the wonders of thread pooling, it didn’t take too long. Our final step is to convert our output to a more friendly format.</p>
+<div id="06d94c2c" class="cell" data-results="markup" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.concat(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>        response.to_polars(</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>            schema_overrides<span class="op">=</span>{</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>                <span class="st">"B25010_001E"</span>: pl.Float64, </span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>                <span class="st">"B19013_001E"</span>: pl.Float64,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.head())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>shape: (5, 10)
+┌─────────────┬─────────────┬───────┬────────┬───┬────────────────┬─────────┬────────┬─────────────┐
+│ B25010_001E ┆ B19013_001E ┆ state ┆ county ┆ … ┆ product        ┆ vintage ┆ sumlev ┆ desc        │
+│ ---         ┆ ---         ┆ ---   ┆ ---    ┆   ┆ ---            ┆ ---     ┆ ---    ┆ ---         │
+│ f64         ┆ f64         ┆ str   ┆ str    ┆   ┆ str            ┆ i32     ┆ str    ┆ str         │
+╞═════════════╪═════════════╪═══════╪════════╪═══╪════════════════╪═════════╪════════╪═════════════╡
+│ -6.6667e8   ┆ -6.6667e8   ┆ 08    ┆ 069    ┆ … ┆ American       ┆ 2022    ┆ 150    ┆ block group │
+│             ┆             ┆       ┆        ┆   ┆ Community      ┆         ┆        ┆             │
+│             ┆             ┆       ┆        ┆   ┆ Survey: 5-Y…   ┆         ┆        ┆             │
+│ -6.6667e8   ┆ -6.6667e8   ┆ 08    ┆ 069    ┆ … ┆ American       ┆ 2022    ┆ 150    ┆ block group │
+│             ┆             ┆       ┆        ┆   ┆ Community      ┆         ┆        ┆             │
+│             ┆             ┆       ┆        ┆   ┆ Survey: 5-Y…   ┆         ┆        ┆             │
+│ 1.84        ┆ 25156.0     ┆ 08    ┆ 069    ┆ … ┆ American       ┆ 2022    ┆ 150    ┆ block group │
+│             ┆             ┆       ┆        ┆   ┆ Community      ┆         ┆        ┆             │
+│             ┆             ┆       ┆        ┆   ┆ Survey: 5-Y…   ┆         ┆        ┆             │
+│ 1.05        ┆ 25625.0     ┆ 08    ┆ 069    ┆ … ┆ American       ┆ 2022    ┆ 150    ┆ block group │
+│             ┆             ┆       ┆        ┆   ┆ Community      ┆         ┆        ┆             │
+│             ┆             ┆       ┆        ┆   ┆ Survey: 5-Y…   ┆         ┆        ┆             │
+│ 2.65        ┆ 172953.0    ┆ 08    ┆ 069    ┆ … ┆ American       ┆ 2022    ┆ 150    ┆ block group │
+│             ┆             ┆       ┆        ┆   ┆ Community      ┆         ┆        ┆             │
+│             ┆             ┆       ┆        ┆   ┆ Survey: 5-Y…   ┆         ┆        ┆             │
+└─────────────┴─────────────┴───────┴────────┴───┴────────────────┴─────────┴────────┴─────────────┘</code></pre>
+</div>
+</div>
+<p>Here I’ve chosen to convert to polars DataFrames (the response is a list with entries for each product vintage, so <code>to_polars()</code> generates a list of DataFrames - <code>pl.concat()</code> stacks them). I’ve also forced my estimate variables to float type, as they come from the API as strings.</p>
+<p>That’s all for now! Development is ongoing, and I plan to add new features as they occur to me. Don’t hesitate to reach out of there’s anything you’d like to see (or if you spot any bugs).</p>
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{couzens2025,
+  author = {Couzens, Lance},
+  title = {Introducing Cendat, a {Python} {Library} for {Simplifying}
+    and {Speeding} up {Use} of the {Census} {API}},
+  date = {2025-08-13},
+  url = {https://mostlyunoriginal.github.io/posts/2025-08-13-Introducing-cendat/},
+  langid = {en}
+}
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-couzens2025" class="csl-entry quarto-appendix-citeas" role="listitem">
+Couzens, Lance. 2025. <span>“Introducing Cendat, a Python Library for
+Simplifying and Speeding up Use of the Census API.”</span> August 13,
+2025. <a href="https://mostlyunoriginal.github.io/posts/2025-08-13-Introducing-cendat/">https://mostlyunoriginal.github.io/posts/2025-08-13-Introducing-cendat/</a>.
+</div></div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
