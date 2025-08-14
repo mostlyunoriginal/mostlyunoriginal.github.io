@@ -175,7 +175,7 @@ potential_geos = cdh.list_geos(
 pprint(potential_geos)
 ```
 
-A couple of things to note here. First, we can see in the first dictionary that it is the one we're interested in (summary level 150). Second, the dictionary includes `'requires': ['state', 'county', 'tract']` which indicates that in order to get estimates for a set of block groups from the API, the query must specify the parent state, county, and tract. In other to get block groups from multiple tracts, we will need multiple API calls--one for every tract, each of which also has to provide a specific state and county.
+A couple of things to note here. First, we can see in the first dictionary that it is the one we're interested in (summary level 150). Second, the dictionary includes `'requires': ['state', 'county', 'tract']` which indicates that in order to get estimates for a set of block groups from the API, the query must specify the parent state, county, and tract. So, we will need multiple API calls--one for every tract, each of which also has to provide a specific state and county.
 
 ## Step 5. Get Data
 Notably, there are nearly 84,000 tracts in continental U.S.! To keep this example a little more bite-sized, we'll focus on just three counties in Colorado and the entire state of Wyoming (mostly to illustrate the flexibility we have in providing nesting information in `within`). Now, that's still a lot of tracts, but `CenDatHelper` does the hard work of figuring out all of the state-county-tract combinations and building/issuing the necessary API calls. First we set our summary level of interest, then we get the data. Let's see how that works.
@@ -187,7 +187,6 @@ Notably, there are nearly 84,000 tracts in continental U.S.! To keep this exampl
 cdh.set_geos("150")
 
 response = cdh.get_data(
-    max_workers=50, 
     within=[
         {"state": "08", "county": ["123", "013"]},
         {"state": "08", "county": "069", "tract": ["001307", "001810","001308"]},
@@ -196,7 +195,7 @@ response = cdh.get_data(
 )
 ```
 
-We can see that in the end 648 API calls were needed to satisfy our request, but due to the wonders of thread pooling, it didn't take very long at all. Note that this example illustrates the flexibility of `within` pretty well--we can specify parent geographies as a list of dictionaries at different levels of the geographic hierarchy above the summary level of interest. Since we're pulling block groups, we can provide state, state and county, or state, county and tract. Within each dictionary, the last item's values may be provided as a list. We see that above for counties in the first dictionary and tracts in the second.
+We can see that in the end 648 API calls were needed to satisfy our request, but due to the wonders of thread pooling, it didn't take very long at all. Note that this example illustrates the flexibility of `within` pretty well--we can specify parent geographies as a list of dictionaries at different levels of the geographic hierarchy above the summary level of interest. Since we're pulling block groups, we can provide state, state and county, or state, county and tract. Within each dictionary, the last item's values may be provided as a list. We see that above for counties in the first dictionary and tracts in the second. Technically, any item's values can be provided as a list, we will just issue some API calls that won't work as intended (we'll get, say, counties from two different states because they have the same county code) or that won't work at all (we'll end up looking for parent geography combinations that don't exist), and we'll see messages to that effect in the output. For predictable output, it's best to stick to lists only in the last item of a given dictionary.
 
 ## Step 6. Convert
 Our final step is to convert our output to a more friendly format.
