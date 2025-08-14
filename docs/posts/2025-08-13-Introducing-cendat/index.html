@@ -256,7 +256,7 @@ window.Quarto = {
 <section id="step-1.-import-and-instantiate" class="level2">
 <h2 class="anchored" data-anchor-id="step-1.-import-and-instantiate">Step 1. Import and Instantiate</h2>
 <p>A <code>CenDatHelper</code> object can be instantiated without argument, or with the <code>key</code> parameter (as shown below) and/or <code>years</code>, which can be provided as an integer or list of integers. API key and years can also be provided later via the <code>load_key()</code> and <code>set_years()</code> methods, respectively. To start exploring, we’ll provide a key but not specify any years of interest.</p>
-<div id="8cb70449" class="cell" data-execution_count="1">
+<div id="a3a16ea1" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cendat <span class="im">import</span> CenDatHelper</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
@@ -272,8 +272,8 @@ window.Quarto = {
 </section>
 <section id="step-2.-explore-available-products" class="level2">
 <h2 class="anchored" data-anchor-id="step-2.-explore-available-products">Step 2. Explore Available Products</h2>
-<p><code>cendat</code> (currently, as of ver. 0.2.1) supports all aggregate and microdata products available in the API (I’m open to adding timeseries product handling as well, if anyone requests it). To explore those products, we use the <code>list_products()</code> method. Let’s start by looking for anything related to the ACS 5-year detailed tables.</p>
-<div id="3d56350d" class="cell" data-results="markup" data-execution_count="2">
+<p><code>cendat</code> (currently, as of ver. 0.2.2) supports all aggregate and microdata products available in the API (I’m open to adding timeseries product handling as well, if anyone requests it). To explore those products, we use the <code>list_products()</code> method. Let’s start by looking for anything related to the ACS 5-year detailed tables.</p>
+<div id="29c85f14" class="cell" data-results="markup" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>potential_products <span class="op">=</span> cdh.list_products(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    patterns<span class="op">=</span>[<span class="st">"acs"</span>, <span class="st">"5-year"</span>, <span class="st">"detailed"</span>]</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>)</span>
@@ -304,9 +304,9 @@ American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2022/acs/ac
 ACS 5-Year Detailed Tables (2023/acs/acs5)</code></pre>
 </div>
 </div>
-<p>Okay, gives us a good starting point. We’ll get to filtering those results down in a moment, but first I want to highlight a couple of things about the code block above. First, you’ll notice that I provided patterns to filter the products by via the <code>patterns</code> parameter. <code>patterns</code> takes a string or list of strings compiled into (case-insensitive) regular expressions. We can control whether the patterns all have to be met (the default) or only one or more through the <code>logic</code> parameter. To employ <code>any</code> logic set <code>logic=any</code>. If you don’t speak regex, fear not–just supply substrings you’d like to match. We can also control which portion of the metadata the patterns will be used on. The default (which we’ve used here) is to operate on the titles. The alternative is to operate on the descriptions, which can be achieved by setting <code>match_in='desc'</code>. One other point. You’ll notice that I selectively printed only <code>product['title']</code>. By default, the <code>list_products()</code> method returns a list of dictionaries of which the title is only one item (we can force it to return only the title by setting <code>to_dicts=False</code>). We’ll see some more of what’s returned after we filter our products down a bit more.</p>
+<p>Okay, that gives us a good starting point. We’ll get to filtering those results down in a moment, but first I want to highlight a couple of things about the code block above. First, you’ll notice that I provided patterns to filter the products by via the <code>patterns</code> parameter. <code>patterns</code> takes a string or list of strings compiled into (case-insensitive) regular expressions. We can control whether the patterns all have to be met (the default) or only one or more through the <code>logic</code> parameter. To employ <code>any</code> logic set <code>logic=any</code>. If you don’t speak regex, fear not–just supply substrings you’d like to match. We can also control which portion of the metadata the patterns will be used on. The default (which we’ve used here) is to operate on the titles. The alternative is to operate on the descriptions, which can be achieved by setting <code>match_in='desc'</code>. One other point. You’ll notice that I selectively printed only <code>product['title']</code>. By default, the <code>list_products()</code> method returns a list of dictionaries of which the title is only one item (we can force it to return only the title by setting <code>to_dicts=False</code>). We’ll see some more of what’s returned after we filter our products down a bit more.</p>
 <p>Okay, back to the results. A couple of things are obvious: the detailed tables products aren’t named consistently across years, and there are some special population products that are being picked up as well. We can also see that there’s a parenthetical portion to each product title that looks like a directory path–that’s parsed from the JSON packet returned by the API and tacked on by <code>list_products()</code>. So, rather than trying to refine our patterns to capture the inconsistent portion of the titles, we can focus on that and try again.</p>
-<div id="c4959a50" class="cell" data-results="markup" data-execution_count="3">
+<div id="f4b1be61" class="cell" data-results="markup" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>potential_products <span class="op">=</span> cdh.list_products(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    patterns<span class="op">=</span>[<span class="vs">r"acs/acs5\)"</span>]</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>)</span>
@@ -332,7 +332,7 @@ ACS 5-Year Detailed Tables (2023/acs/acs5)</code></pre>
 </div>
 </div>
 <p>Now we’ve filtered down to the core product we want, but let’s subset to only a couple years to keep things simple. We’ll also take a look at the full contents of the products’ dictionaries.</p>
-<div id="cdd18611" class="cell" data-results="markup" data-execution_count="4">
+<div id="fd16a5df" class="cell" data-results="markup" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>potential_products <span class="op">=</span> cdh.list_products(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    patterns<span class="op">=</span>[<span class="vs">r"acs/acs5\)"</span>],</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    years<span class="op">=</span>[<span class="dv">2022</span>, <span class="dv">2023</span>]</span>
@@ -381,7 +381,7 @@ ACS 5-Year Detailed Tables (2023/acs/acs5)</code></pre>
 </div>
 </div>
 <p>Okay, great–now we’ve got what we want, let’s lock in our selection.</p>
-<div id="71490d61" class="cell" data-results="markup" data-execution_count="5">
+<div id="37549ca0" class="cell" data-results="markup" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>cdh.set_products()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>✅ Product set: 'American Community Survey: 5-Year Estimates: Detailed Tables 5-Year (2022/acs/acs5)' (Vintage: [2022])
@@ -392,7 +392,7 @@ ACS 5-Year Detailed Tables (2023/acs/acs5)</code></pre>
 <section id="step-3.-explore-variables" class="level2">
 <h2 class="anchored" data-anchor-id="step-3.-explore-variables">Step 3. Explore Variables</h2>
 <p>Now, let’s start to think about which variables we want–according to the descriptions above, we have over 64,000 to choose from! Let’s assume we’re interested in median household income and average household size.</p>
-<div id="cba31799" class="cell" data-results="markup" data-execution_count="6">
+<div id="3f47f346" class="cell" data-results="markup" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>potential_variables <span class="op">=</span> cdh.list_variables(</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    patterns<span class="op">=</span>[<span class="st">"median household income"</span>, <span class="st">"household size"</span>],</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    logic<span class="op">=</span><span class="bu">any</span></span>
@@ -530,7 +530,7 @@ B19013H_001E Estimate!!Median household income in the past 12 months (in 2023 in
 </div>
 </div>
 <p>A couple of things stand out here. First, when comparing the full dictionary of the first variable to just its label, we can see why there appears to be duplication of labels across variable names–there are nuances not captured in the label alone. In our next pass we’ll print the variable name and concept, as that seems to capture the nuance we need to be aware of.</p>
-<div id="c01c382b" class="cell" data-results="markup" data-execution_count="7">
+<div id="379332e8" class="cell" data-results="markup" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>potential_variables <span class="op">=</span> cdh.list_variables(</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    patterns<span class="op">=</span>[</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r"Average household size --!!Total:$"</span>,</span>
@@ -629,7 +629,7 @@ B19013H_001E
 </div>
 </div>
 <p>Based on this output we can see that we’re interested in <code>B25010_001E</code> and <code>B19013_001E</code>–we can set these variables explicitly.</p>
-<div id="b7bcffa5" class="cell" data-results="markup" data-execution_count="8">
+<div id="d1069c61" class="cell" data-results="markup" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>cdh.set_variables(</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    names<span class="op">=</span>[<span class="st">"B25010_001E"</span>, <span class="st">"B19013_001E"</span>]</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -645,7 +645,7 @@ B19013H_001E
 <section id="step-4.-explore-geographic-summary-levels" class="level2">
 <h2 class="anchored" data-anchor-id="step-4.-explore-geographic-summary-levels">Step 4. Explore Geographic Summary Levels</h2>
 <p>Next we need to select the geographic level at which we want to get our estimates. Let’s assume we’re interested in block groups and filter accordingly. That should give us a small number of options, so we’ll output and view the complete dictionaries.</p>
-<div id="1fbeec85" class="cell" data-results="markup" data-execution_count="9">
+<div id="9d5ab20e" class="cell" data-results="markup" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>potential_geos <span class="op">=</span> cdh.list_geos(</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    patterns<span class="op">=</span><span class="st">"block group"</span>,</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    to_dicts<span class="op">=</span><span class="va">True</span></span>
@@ -722,7 +722,7 @@ B19013H_001E
 <section id="step-5.-get-data" class="level2">
 <h2 class="anchored" data-anchor-id="step-5.-get-data">Step 5. Get Data</h2>
 <p>Notably, there are nearly 84,000 tracts in continental U.S.! To keep this example a little more bite-sized, we’ll focus on just one county from Colorado and the state of Wyoming (mostly to illustrate how we can provide <code>within</code> as a list of dictionaries). Now, that’s still a lot of tracts, but <code>CenDatHelper</code> does the hard work of figuring out all of the state-county-tract combinations and building/issuing the necessary API calls. First we set our summary level of interest, then we get the data. Let’s see how that works.</p>
-<div id="4cba0973" class="cell" data-execution_count="10">
+<div id="ff018c86" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: markup</span></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -746,8 +746,8 @@ B19013H_001E
 ℹ️ Fetching parent geographies for 'block group'...
 ✅ Found 160 combinations for 'block group' within the specified scope.
 ℹ️ Making 492 API call(s)...
-CPU times: total: 375 ms
-Wall time: 15.8 s</code></pre>
+CPU times: total: 78.1 ms
+Wall time: 14.6 s</code></pre>
 </div>
 </div>
 <p>We can see that in the end 492 API calls were needed to satisfy our request, but due to the wonders of thread pooling, it didn’t take very long at all.</p>
@@ -755,7 +755,7 @@ Wall time: 15.8 s</code></pre>
 <section id="step-6.-convert" class="level2">
 <h2 class="anchored" data-anchor-id="step-6.-convert">Step 6. Convert</h2>
 <p>Our final step is to convert our output to a more friendly format.</p>
-<div id="edd2fc4d" class="cell" data-results="markup" data-execution_count="11">
+<div id="957450e8" class="cell" data-results="markup" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.concat(</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>        response.to_polars(</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>            schema_overrides<span class="op">=</span>{</span>
@@ -773,19 +773,19 @@ Wall time: 15.8 s</code></pre>
 │ ---         ┆ ---         ┆ ---   ┆ ---    ┆   ┆ ---            ┆ ---     ┆ ---    ┆ ---         │
 │ f64         ┆ f64         ┆ str   ┆ str    ┆   ┆ str            ┆ i32     ┆ str    ┆ str         │
 ╞═════════════╪═════════════╪═══════╪════════╪═══╪════════════════╪═════════╪════════╪═════════════╡
-│ 2.29        ┆ 91833.0     ┆ 08    ┆ 069    ┆ … ┆ American       ┆ 2022    ┆ 150    ┆ block group │
+│ -6.6667e8   ┆ -6.6667e8   ┆ 08    ┆ 069    ┆ … ┆ American       ┆ 2022    ┆ 150    ┆ block group │
 │             ┆             ┆       ┆        ┆   ┆ Community      ┆         ┆        ┆             │
 │             ┆             ┆       ┆        ┆   ┆ Survey: 5-Y…   ┆         ┆        ┆             │
-│ 2.38        ┆ 116875.0    ┆ 08    ┆ 069    ┆ … ┆ American       ┆ 2022    ┆ 150    ┆ block group │
+│ -6.6667e8   ┆ -6.6667e8   ┆ 08    ┆ 069    ┆ … ┆ American       ┆ 2022    ┆ 150    ┆ block group │
 │             ┆             ┆       ┆        ┆   ┆ Community      ┆         ┆        ┆             │
 │             ┆             ┆       ┆        ┆   ┆ Survey: 5-Y…   ┆         ┆        ┆             │
-│ 2.2         ┆ 129671.0    ┆ 08    ┆ 069    ┆ … ┆ American       ┆ 2022    ┆ 150    ┆ block group │
+│ 1.84        ┆ 25156.0     ┆ 08    ┆ 069    ┆ … ┆ American       ┆ 2022    ┆ 150    ┆ block group │
 │             ┆             ┆       ┆        ┆   ┆ Community      ┆         ┆        ┆             │
 │             ┆             ┆       ┆        ┆   ┆ Survey: 5-Y…   ┆         ┆        ┆             │
-│ 1.82        ┆ 24107.0     ┆ 08    ┆ 069    ┆ … ┆ American       ┆ 2022    ┆ 150    ┆ block group │
+│ 1.05        ┆ 25625.0     ┆ 08    ┆ 069    ┆ … ┆ American       ┆ 2022    ┆ 150    ┆ block group │
 │             ┆             ┆       ┆        ┆   ┆ Community      ┆         ┆        ┆             │
 │             ┆             ┆       ┆        ┆   ┆ Survey: 5-Y…   ┆         ┆        ┆             │
-│ 2.45        ┆ 114375.0    ┆ 08    ┆ 069    ┆ … ┆ American       ┆ 2022    ┆ 150    ┆ block group │
+│ 2.62        ┆ 90208.0     ┆ 08    ┆ 069    ┆ … ┆ American       ┆ 2022    ┆ 150    ┆ block group │
 │             ┆             ┆       ┆        ┆   ┆ Community      ┆         ┆        ┆             │
 │             ┆             ┆       ┆        ┆   ┆ Survey: 5-Y…   ┆         ┆        ┆             │
 └─────────────┴─────────────┴───────┴────────┴───┴────────────────┴─────────┴────────┴─────────────┘</code></pre>
