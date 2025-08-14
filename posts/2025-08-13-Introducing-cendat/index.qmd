@@ -189,7 +189,7 @@ cdh.set_geos("150")
 response = cdh.get_data(
     max_workers=50, 
     within=[
-        {"state": "08", "county": ["123", "013"]}, 
+        {"state": "08", "county": ["123", "013"]},
         {"state": "08", "county": "069", "tract": ["001307", "001810","001308"]},
         {"state": "56"}
     ]
