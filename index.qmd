@@ -7,6 +7,10 @@ about:
   image-shape: round
   image-width: 20em
   links: 
+    - text: cendat
+      href: https://pypi.org/project/cendat
+    - text: LCutils
+      href: https://github.com/mostlyunoriginal/LCutils
     - text: LinkedIn
       href: https://www.linkedin.com/in/georgecouzens/
     - text: GitHub
@@ -14,7 +18,7 @@ about:
     - text: Email
       href: mailto:lance.couzens@gmail.com
     - text: Flickr
-      href: https://flickr.com/lancec
+      href: https://flickr.com/photos/lancec
 ---
 
 Hello, and welcome to my code-stuff website. I'm a statistician/data professional who is ~~very interested in~~ totally obsessed with open-source programming. Most of the action is happening under the [Code Blog](https://mostlyunoriginal.github.io/posts.html). Thanks for stopping by, and don't hesitate to hit me up via email if you'd like to chat about coding, statistics, photography, or... whatever.
