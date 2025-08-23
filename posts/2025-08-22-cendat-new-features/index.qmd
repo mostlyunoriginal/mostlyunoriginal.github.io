@@ -88,7 +88,7 @@ Note that we can also see the suggested weights to use for analysis of these var
 ```{python}
 cdh.list_products(years=[2022, 2023], patterns="/cps/tobacco")
 cdh.set_products()
-cdh.set_variables(["PEA1", "PEA3", "PWSRWGT"])
+cdh.set_variables(["PEA1", "PEA3", "PWNRWGT"])
 ```
 
 Next, we'll set our geography of interest--states, specified by description (vs sumlev)--and get our data. Since this is a microdata request, we have to explicitly specify the geographies we want, corresponding to the summary level we set in `set_geos()`. We'll specify our states in the `within` argument of `get_data()`. Let's assume we're interested in comparing the proportions between California (06) and Texas (48).
@@ -99,7 +99,7 @@ response = cdh.get_data(within={'state': ['06', '48']})
 response.tabulate(
     "PEA1", "PEA3",
     strat_by="state",
-    weight_var="PWSRWGT",
+    weight_var="PWNRWGT",
     weight_div=3,
 )
 ```
