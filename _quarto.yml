@@ -13,7 +13,7 @@ website:
 format:
   html:
     theme:
-      - journal
+      - lux
       - brand
     css: styles.css
     toc: true

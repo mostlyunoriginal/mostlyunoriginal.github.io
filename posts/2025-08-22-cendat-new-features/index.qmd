@@ -1,0 +1,110 @@
+---
+title: "New Features in cendat ver 0.4.1"
+description: "This post covers some new cendat features."
+date: 2025-08-22
+author:
+    - name: Lance Couzens
+      url: https://mostlyunoriginal.github.io  
+categories: [Python, cendat, Census, API]
+citation: 
+  url: https://mostlyunoriginal.github.io/posts/2025-08-22-cendat-new-features/
+image: Preview.png
+draft: true
+lightbox: true
+---
+
+# New Version, New Features
+
+Since the introductory post, I've added some new features to make `cendat` more robust, user-friendly, and capable:
+
+  1. The biggest update is the addition of the `tabulate()` method for the `CenDatResponse` objects returned by `get_data()`.
+
+  2. The `CenDatResponse` methods `to_polars()` and `to_pandas()` got new functionality
+     - Automatic concatenation via the new `concat` parameter, which defaults to `False` for backward compatibility with prior versions
+     - Destringing--the Census API returns all data in strings, which prevents polars and pandas from inferring the schema. You can now set `destring=True` to force type conversion on the raw response data and allow polars and pandas to infer the schema automatically. This parameter defaults to `False`, and the schema may still be specified by the user via `schema_overrides` with or without destringing.
+
+  3. The user can now specify the API timeout count in seconds via `timeout` in the `get_data()` method to accommodate longer requests--the default is 30 seconds.
+
+  4. The `get_data()` method gained the `preview_only` parameter (boolean, defaults to `False`). If `True`, the number of API queries required to satisfy the request will be determined and messaged, but the queries will not be executed. This is a handy precursor step when dealing with very granular or unfamiliar geographic summary levels which could yield tens of thousands of queries.
+
+  5. Pattern matching in the `list_variables()` method has been extended to the "concept" field.
+
+# Examples
+
+These primarilly illustrate usage of the new `tabulate()` method.
+
+## Quick ACS Aggregate Analysis
+
+Here we want to see how many counties in the U.S., as of 2023, had a million or more residents, and how many people lived in those counties.
+
+```{python}
+%%time
+
+from cendat import CenDatHelper
+from dotenv import load_dotenv
+import os
+from pprint import pprint
+import polars as pl
+load_dotenv()
+
+cdh = CenDatHelper(key=os.getenv('CENSUS_API_KEY'))
+
+cdh.list_products(years=[2023], patterns=r"/acs/acs1\)")
+cdh.set_products()
+cdh.set_variables("B01001_001E") # total population
+cdh.set_geos("050") # counties
+response = cdh.get_data()
+
+# how many counties
+response.tabulate("state", where="B01001_001E > 1_000_000")
+
+# how many people in those counties
+response.tabulate("state", weight_var="B01001_001E", where="B01001_001E > 1_000_000")
+```
+
+In 2023 there were 48 counties with populations over a million (mostly in California, Florida, New York, and Texas), and the total population across those counties was nearly 98 million.
+
+## CPS Microdata Tabulation
+
+In this example, we'll pull microdata from the Current Population Survey's tobacco supplements for 2022 and 2023, and compare the proportions of established daily smokers across a selection of states. We'll start with just 2022 to limit the output in our variable search. We're looking for variables that indicate the respondent has smooked at least 100 cigarettes and is a current every day smoker.
+
+```{python}
+cdh.list_products(years=[2022], patterns="/cps/tobacco")
+cdh.set_products()
+for var in cdh.list_variables(patterns=[r"smoke.*every day", "100"], logic=any):
+    print(var['name'], var['label'])
+```
+
+It looks like we're interested in `PEA1` and `PEA3`--we'll inspect the full variable dictionaries to make sure.
+
+```{python}
+cdh.list_variables(patterns=["PEA1", "PEA3"], logic=any, match_in="name")
+```
+
+These variables get at what we want, and since we're interested in the proportion among all adults, we can ignore the out of universe responsdents (likely never smokers that didn't make it past a gate question... this is just an example, so we don't need to dig any deeper). 
+
+Note that we can also see the suggested weights to use for analysis of these variables, so we'll include that in our set variables list. First, though, we'll expand our products to cover 2023 as well.
+
+```{python}
+cdh.list_products(years=[2022, 2023], patterns="/cps/tobacco")
+cdh.set_products()
+cdh.set_variables(["PEA1", "PEA3", "PWSRWGT"])
+```
+
+Next, we'll set our geography of interest--states, specified by description (vs sumlev)--and get our data. Since this is a microdata request, we have to explicitly specify the geographies we want, corresponding to the summary level we set in `set_geos()`. We'll specify our states in the `within` argument of `get_data()`. Let's assume we're interested in comparing the proportions between California (06) and Texas (48).
+
+```{python}
+cdh.set_geos("state", "desc")
+response = cdh.get_data(within={'state': ['06', '48']})
+response.tabulate(
+    "PEA1", "PEA3",
+    strat_by="state",
+    weight_var="PWSRWGT",
+    weight_div=3,
+)
+```
+
+We're interested in the rows where `PEA1 == 1` (have smoked 100+ cigarettes) and `PEA3 == 1` (currently smoke every day). Since we're pooling three supplement waves, we need to divide the weights by 3 to get totals that make sense. We also stratify by state to get results that are comparable across states.
+
+In 2022/2023, 5.6% of adults in Texas were estimated to be established, daily cigarette smokers. The figure in California was 3.6%.
+
