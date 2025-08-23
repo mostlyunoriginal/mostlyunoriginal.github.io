@@ -17,17 +17,32 @@ lightbox: true
 
 Since the introductory post, I've added some new features to make `cendat` more robust, user-friendly, and capable:
 
-  1. The biggest update is the addition of the `tabulate()` method for the `CenDatResponse` objects returned by `get_data()`.
+1.  The biggest update is the addition of the `tabulate()` method for the `CenDatResponse` objects returned by `get_data()`.
 
-  2. The `CenDatResponse` methods `to_polars()` and `to_pandas()` got new functionality
-     - Automatic concatenation via the new `concat` parameter, which defaults to `False` for backward compatibility with prior versions
-     - Destringing--the Census API returns all data in strings, which prevents polars and pandas from inferring the schema. You can now set `destring=True` to force type conversion on the raw response data and allow polars and pandas to infer the schema automatically. This parameter defaults to `False`, and the schema may still be specified by the user via `schema_overrides` with or without destringing.
+2.  The `CenDatResponse` methods `to_polars()` and `to_pandas()` got new functionality
 
-  3. The user can now specify the API timeout count in seconds via `timeout` in the `get_data()` method to accommodate longer requests--the default is 30 seconds.
+    -   Automatic concatenation via the new `concat` parameter, which defaults to `False` for backward compatibility with prior versions
+    -   Destringing--the Census API returns all data in strings, which prevents polars and pandas from inferring the schema. You can now set `destring=True` to force type conversion on the raw response data and allow polars and pandas to infer the schema automatically. This parameter defaults to `False`, and the schema may still be specified by the user via `schema_overrides` with or without destringing.
 
-  4. The `get_data()` method gained the `preview_only` parameter (boolean, defaults to `False`). If `True`, the number of API queries required to satisfy the request will be determined and messaged, but the queries will not be executed. This is a handy precursor step when dealing with very granular or unfamiliar geographic summary levels which could yield tens of thousands of queries.
+3.  The user can now specify the API timeout count in seconds via `timeout` in the `get_data()` method to accommodate longer requests--the default is 30 seconds.
 
-  5. Pattern matching in the `list_variables()` method has been extended to the "concept" field.
+4.  The `get_data()` method gained the `preview_only` parameter (boolean, defaults to `False`). If `True`, the number of API queries required to satisfy the request will be determined and messaged, but the queries will not be executed. This is a handy precursor step when dealing with very granular or unfamiliar geographic summary levels which could yield tens of thousands of queries.
+
+5.  Pattern matching in the `list_variables()` method has been extended to the "concept" field.
+
+Please consult the [GitHub](https://github.com/mostlyunoriginal/cendat/tree/main) or [PyPi](https://pypi.org/project/cendat/) repository landing pages for a full library reference--here is the syntax for `tabulate()`:
+
+**`tabulate(self, *variables, strat_by=None, weight_var=None, weight_div=None, where=None, logic=all, digits=1)`**
+
+Generates and prints a frequency table.
+
+-   **`*variables`** (`str`): One or more column names to include in the tabulation.
+-   **`strat_by`** (`str`, optional): A column name to stratify the results by. Percentages and cumulative stats will be calculated within each stratum. Defaults to `None`.
+-   **`weight_var`** (`str`, optional): The name of the column to use for weighting. If `None`, each row has a weight of 1. Defaults to `None`.
+-   **`weight_div`** (`int`, optional): A positive integer to divide the weight by, useful for pooled tabulations across multiple product vintages. `weight_var` must be provided if this is used. Defaults to `None`.
+-   **`where`** (`str` | `list[str]`, optional): A string or list of strings representing conditions to filter the data before tabulation. Each condition should be in a format like `"variable operator value"` (e.g., `"AGE > 30"`). Defaults to `None`.
+-   **`logic`** (`callable`): The function to apply when multiple `where` conditions are provided. Use `all` for AND logic (default) or `any` for OR logic.
+-   **`digits`** (`int`): The number of decimal places to display for floating-point numbers in the output table. Defaults to `1`.
 
 # Examples
 
@@ -43,8 +58,7 @@ Here we want to see how many counties in the U.S., as of 2023, had a million or 
 from cendat import CenDatHelper
 from dotenv import load_dotenv
 import os
-from pprint import pprint
-import polars as pl
+
 load_dotenv()
 
 cdh = CenDatHelper(key=os.getenv('CENSUS_API_KEY'))
@@ -81,7 +95,7 @@ It looks like we're interested in `PEA1` and `PEA3`--we'll inspect the full vari
 cdh.list_variables(patterns=["PEA1", "PEA3"], logic=any, match_in="name")
 ```
 
-These variables get at what we want, and since we're interested in the proportion among all adults, we can ignore the out of universe responsdents (likely never smokers that didn't make it past a gate question... this is just an example, so we don't need to dig any deeper). 
+These variables get at what we want, and since we're interested in the proportion among all adults, we can ignore the out of universe responsdents (likely never smokers that didn't make it past a gate question... this is just an example, so we don't need to dig any deeper).
 
 Note that we can also see the suggested weights to use for analysis of these variables, so we'll include that in our set variables list. First, though, we'll expand our products to cover 2023 as well.
 
@@ -107,4 +121,3 @@ response.tabulate(
 We're interested in the rows where `PEA1 == 1` (have smoked 100+ cigarettes) and `PEA3 == 1` (currently smoke every day). Since we're pooling three supplement waves, we need to divide the weights by 3 to get totals that make sense. We also stratify by state to get results that are comparable across states.
 
 In 2022/2023, 5.5% of adults in Texas were estimated to be established, daily cigarette smokers. The figure in California was 3.5%.
-
