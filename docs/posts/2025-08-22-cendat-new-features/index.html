@@ -1,2 +1,879 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"></html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Lance Couzens">
+<meta name="dcterms.date" content="2025-08-22">
+<meta name="description" content="This post covers some new cendat features.">
+
+<title>New Features in cendat ver 0.4.1 – Lance Couzens</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-3b7f4aff7acac744aa1d596ce5db2ede.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Lance Couzens</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Code Blog</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-page-left">
+      <h1 class="title">New Features in cendat ver 0.4.1</h1>
+                  <div>
+        <div class="description">
+          This post covers some new cendat features.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Python</div>
+                <div class="quarto-category">cendat</div>
+                <div class="quarto-category">Census</div>
+                <div class="quarto-category">API</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta column-page-left">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p><a href="https://mostlyunoriginal.github.io">Lance Couzens</a> </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">August 22, 2025</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#new-version-new-features" id="toc-new-version-new-features" class="nav-link active" data-scroll-target="#new-version-new-features">New Version, New Features</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a>
+  <ul class="collapse">
+  <li><a href="#quick-acs-aggregate-analysis" id="toc-quick-acs-aggregate-analysis" class="nav-link" data-scroll-target="#quick-acs-aggregate-analysis">Quick ACS Aggregate Analysis</a></li>
+  <li><a href="#cps-microdata-tabulation" id="toc-cps-microdata-tabulation" class="nav-link" data-scroll-target="#cps-microdata-tabulation">CPS Microdata Tabulation</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
+
+
+
+
+
+<section id="new-version-new-features" class="level1">
+<h1>New Version, New Features</h1>
+<p>Since the introductory post, I’ve added some new features to make <code>cendat</code> more robust, user-friendly, and capable:</p>
+<ol type="1">
+<li><p>The biggest update is the addition of the <code>tabulate()</code> method for the <code>CenDatResponse</code> objects returned by <code>get_data()</code>.</p></li>
+<li><p>The <code>CenDatResponse</code> methods <code>to_polars()</code> and <code>to_pandas()</code> got new functionality</p>
+<ul>
+<li>Automatic concatenation via the new <code>concat</code> parameter, which defaults to <code>False</code> for backward compatibility with prior versions</li>
+<li>Destringing–the Census API returns all data in strings, which prevents polars and pandas from inferring the schema. You can now set <code>destring=True</code> to force type conversion on the raw response data and allow polars and pandas to infer the schema automatically. This parameter defaults to <code>False</code>, and the schema may still be specified by the user via <code>schema_overrides</code> with or without destringing.</li>
+</ul></li>
+<li><p>The user can now specify the API timeout count in seconds via <code>timeout</code> in the <code>get_data()</code> method to accommodate longer requests–the default is 30 seconds.</p></li>
+<li><p>The <code>get_data()</code> method gained the <code>preview_only</code> parameter (boolean, defaults to <code>False</code>). If <code>True</code>, the number of API queries required to satisfy the request will be determined and messaged, but the queries will not be executed. This is a handy precursor step when dealing with very granular or unfamiliar geographic summary levels which could yield tens of thousands of queries.</p></li>
+<li><p>Pattern matching in the <code>list_variables()</code> method has been extended to the “concept” field.</p></li>
+</ol>
+</section>
+<section id="examples" class="level1">
+<h1>Examples</h1>
+<p>These primarilly illustrate usage of the new <code>tabulate()</code> method.</p>
+<section id="quick-acs-aggregate-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="quick-acs-aggregate-analysis">Quick ACS Aggregate Analysis</h2>
+<p>Here we want to see how many counties in the U.S., as of 2023, had a million or more residents, and how many people lived in those counties.</p>
+<div id="6a489eef" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cendat <span class="im">import</span> CenDatHelper</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pprint <span class="im">import</span> pprint</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>load_dotenv()</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>cdh <span class="op">=</span> CenDatHelper(key<span class="op">=</span>os.getenv(<span class="st">'CENSUS_API_KEY'</span>))</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>cdh.list_products(years<span class="op">=</span>[<span class="dv">2023</span>], patterns<span class="op">=</span><span class="vs">r"/acs/acs1</span><span class="ch">\)</span><span class="vs">"</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>cdh.set_products()</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>cdh.set_variables(<span class="st">"B01001_001E"</span>) <span class="co"># total population</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>cdh.set_geos(<span class="st">"050"</span>) <span class="co"># counties</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> cdh.get_data()</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># how many counties</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>response.tabulate(<span class="st">"state"</span>, where<span class="op">=</span><span class="st">"B01001_001E &gt; 1_000_000"</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># how many people in those counties</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>response.tabulate(<span class="st">"state"</span>, weight_var<span class="op">=</span><span class="st">"B01001_001E"</span>, where<span class="op">=</span><span class="st">"B01001_001E &gt; 1_000_000"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ API key loaded successfully.
+✅ Product set: 'ACS 1-Year Detailed Tables (2023/acs/acs1)' (Vintage: [2023])
+✅ Variables set:
+  - Product: ACS 1-Year Detailed Tables (2023/acs/acs1) (Vintage: [2023])
+    Variables: B01001_001E
+✅ Geographies set: 'county' (requires `within` for: state)
+✅ Parameters created for 1 geo-variable combinations.
+ℹ️ Fetching parent geographies for 'county'...
+✅ Found 52 combinations for 'county' within the specified scope.
+ℹ️ Making 52 API call(s)...
+shape: (18, 5)
+┌───────┬────┬──────┬──────┬────────┐
+│ state ┆  n ┆  pct ┆ cumn ┆ cumpct │
+╞═══════╪════╪══════╪══════╪════════╡
+│    04 ┆  2 ┆  4.2 ┆    2 ┆    4.2 │
+│    06 ┆ 10 ┆ 20.8 ┆   12 ┆   25.0 │
+│    12 ┆  6 ┆ 12.5 ┆   18 ┆   37.5 │
+│    13 ┆  1 ┆  2.1 ┆   19 ┆   39.6 │
+│    17 ┆  1 ┆  2.1 ┆   20 ┆   41.7 │
+│    24 ┆  1 ┆  2.1 ┆   21 ┆   43.8 │
+│    25 ┆  1 ┆  2.1 ┆   22 ┆   45.8 │
+│    26 ┆  2 ┆  4.2 ┆   24 ┆   50.0 │
+│    27 ┆  1 ┆  2.1 ┆   25 ┆   52.1 │
+│    32 ┆  1 ┆  2.1 ┆   26 ┆   54.2 │
+│    36 ┆  6 ┆ 12.5 ┆   32 ┆   66.7 │
+│    37 ┆  2 ┆  4.2 ┆   34 ┆   70.8 │
+│    39 ┆  2 ┆  4.2 ┆   36 ┆   75.0 │
+│    42 ┆  2 ┆  4.2 ┆   38 ┆   79.2 │
+│    48 ┆  7 ┆ 14.6 ┆   45 ┆   93.8 │
+│    49 ┆  1 ┆  2.1 ┆   46 ┆   95.8 │
+│    51 ┆  1 ┆  2.1 ┆   47 ┆   97.9 │
+│    53 ┆  1 ┆  2.1 ┆   48 ┆  100.0 │
+└───────┴────┴──────┴──────┴────────┘
+shape: (18, 5)
+┌───────┬────────────┬──────┬────────────┬────────┐
+│ state ┆          n ┆  pct ┆       cumn ┆ cumpct │
+╞═══════╪════════════╪══════╪════════════╪════════╡
+│    04 ┆  5,649,033 ┆  5.8 ┆  5,649,033 ┆    5.8 │
+│    06 ┆ 28,013,381 ┆ 28.7 ┆ 33,662,414 ┆   34.5 │
+│    12 ┆ 10,221,001 ┆ 10.5 ┆ 43,883,415 ┆   45.0 │
+│    13 ┆  1,079,105 ┆  1.1 ┆ 44,962,520 ┆   46.1 │
+│    17 ┆  5,087,072 ┆  5.2 ┆ 50,049,592 ┆   51.3 │
+│    24 ┆  1,058,474 ┆  1.1 ┆ 51,108,066 ┆   52.4 │
+│    25 ┆  1,623,952 ┆  1.7 ┆ 52,732,018 ┆   54.1 │
+│    26 ┆  3,021,595 ┆  3.1 ┆ 55,753,613 ┆   57.1 │
+│    27 ┆  1,258,713 ┆  1.3 ┆ 57,012,326 ┆   58.4 │
+│    32 ┆  2,336,573 ┆  2.4 ┆ 59,348,899 ┆   60.8 │
+│    36 ┆ 10,672,233 ┆ 10.9 ┆ 70,021,132 ┆   71.8 │
+│    37 ┆  2,353,976 ┆  2.4 ┆ 72,375,108 ┆   74.2 │
+│    39 ┆  2,559,151 ┆  2.6 ┆ 74,934,259 ┆   76.8 │
+│    42 ┆  2,775,367 ┆  2.8 ┆ 77,709,626 ┆   79.7 │
+│    48 ┆ 15,250,132 ┆ 15.6 ┆ 92,959,758 ┆   95.3 │
+│    49 ┆  1,185,813 ┆  1.2 ┆ 94,145,571 ┆   96.5 │
+│    51 ┆  1,141,878 ┆  1.2 ┆ 95,287,449 ┆   97.7 │
+│    53 ┆  2,271,380 ┆  2.3 ┆ 97,558,829 ┆  100.0 │
+└───────┴────────────┴──────┴────────────┴────────┘
+CPU times: user 584 ms, sys: 181 ms, total: 765 ms
+Wall time: 8.01 s</code></pre>
+</div>
+</div>
+<p>In 2023 there were 48 counties with populations over a million (mostly in California, Florida, New York, and Texas), and the total population across those counties was nearly 98 million.</p>
+</section>
+<section id="cps-microdata-tabulation" class="level2">
+<h2 class="anchored" data-anchor-id="cps-microdata-tabulation">CPS Microdata Tabulation</h2>
+<p>In this example, we’ll pull microdata from the Current Population Survey’s tobacco supplements for 2022 and 2023, and compare the proportions of established daily smokers across a selection of states. We’ll start with just 2022 to limit the output in our variable search. We’re looking for variables that indicate the respondent has smooked at least 100 cigarettes and is a current every day smoker.</p>
+<div id="1ec4b6f4" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>cdh.list_products(years<span class="op">=</span>[<span class="dv">2022</span>], patterns<span class="op">=</span><span class="st">"/cps/tobacco"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>cdh.set_products()</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> var <span class="kw">in</span> cdh.list_variables(patterns<span class="op">=</span>[<span class="vs">r"smoke</span><span class="dv">.</span><span class="op">*</span><span class="vs">every day"</span>, <span class="st">"100"</span>], logic<span class="op">=</span><span class="bu">any</span>):</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(var[<span class="st">'name'</span>], var[<span class="st">'label'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ Product set: 'Current Population Survey: Tobacco Use Supplement (2022/cps/tobacco/sep)' (Vintage: [2022])
+PEB7C How long have you smoked every day
+PEC7D How long did you smoke every day
+PEC7A Current some day smokers ever smoke every day for 6 months
+PEA1 Smoked at least 100 cigarettes
+PEA3 Categorize now smoke: every day  some days  not at all.
+PEC8 Current some day smoker was every day  some days  or not at all 12 months ago
+PTC7E Howm many cigs smoked each day when smoking every day
+PEH6 Smoked every day  some days  or not at all
+PEH5 For how long smoked EVERY DAY</code></pre>
+</div>
+</div>
+<p>It looks like we’re interested in <code>PEA1</code> and <code>PEA3</code>–we’ll inspect the full variable dictionaries to make sure.</p>
+<div id="1439ac31" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cdh.list_variables(patterns<span class="op">=</span>[<span class="st">"PEA1"</span>, <span class="st">"PEA3"</span>], logic<span class="op">=</span><span class="bu">any</span>, match_in<span class="op">=</span><span class="st">"name"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>[{'name': 'PEA1',
+  'label': 'Smoked at least 100 cigarettes',
+  'concept': 'N/A',
+  'group': 'N/A',
+  'values': {'item': {'-2': "Don't Know",
+    '2': 'No',
+    '-1': 'Not in universe',
+    '-3': 'Refused',
+    '1': 'Yes',
+    '-9': 'No Answer'}},
+  'type': 'int',
+  'sugg_wgt': 'PWNRWGT',
+  'product': 'Current Population Survey: Tobacco Use Supplement (2022/cps/tobacco/sep)',
+  'vintage': [2022],
+  'url': 'http://api.census.gov/data/2022/cps/tobacco/sep'},
+ {'name': 'PEA3',
+  'label': 'Categorize now smoke: every day  some days  not at all.',
+  'concept': 'N/A',
+  'group': 'N/A',
+  'values': {'item': {'2': 'Some_days',
+    '1': 'Every_day',
+    '-2': "Don't Know",
+    '3': 'Not_at_all',
+    '-3': 'Refused',
+    '-9': 'No Answer',
+    '-1': 'Not in universe'}},
+  'type': 'int',
+  'sugg_wgt': 'PWNRWGT',
+  'product': 'Current Population Survey: Tobacco Use Supplement (2022/cps/tobacco/sep)',
+  'vintage': [2022],
+  'url': 'http://api.census.gov/data/2022/cps/tobacco/sep'}]</code></pre>
+</div>
+</div>
+<p>These variables get at what we want, and since we’re interested in the proportion among all adults, we can ignore the out of universe responsdents (likely never smokers that didn’t make it past a gate question… this is just an example, so we don’t need to dig any deeper).</p>
+<p>Note that we can also see the suggested weights to use for analysis of these variables, so we’ll include that in our set variables list. First, though, we’ll expand our products to cover 2023 as well.</p>
+<div id="e1ca7fbf" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>cdh.list_products(years<span class="op">=</span>[<span class="dv">2022</span>, <span class="dv">2023</span>], patterns<span class="op">=</span><span class="st">"/cps/tobacco"</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>cdh.set_products()</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>cdh.set_variables([<span class="st">"PEA1"</span>, <span class="st">"PEA3"</span>, <span class="st">"PWSRWGT"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ Product set: 'Current Population Survey: Tobacco Use Supplement (2022/cps/tobacco/sep)' (Vintage: [2022])
+✅ Product set: 'Current Population Survey: Tobacco Use Supplement (2023/cps/tobacco/jan)' (Vintage: [2023])
+✅ Product set: 'Current Population Survey: Tobacco Use Supplement (2023/cps/tobacco/may)' (Vintage: [2023])
+✅ Variables set:
+  - Product: Current Population Survey: Tobacco Use Supplement (2022/cps/tobacco/sep) (Vintage: [2022])
+    Variables: PEA1, PEA3, PWSRWGT
+  - Product: Current Population Survey: Tobacco Use Supplement (2023/cps/tobacco/jan) (Vintage: [2023])
+    Variables: PEA1, PEA3, PWSRWGT
+  - Product: Current Population Survey: Tobacco Use Supplement (2023/cps/tobacco/may) (Vintage: [2023])
+    Variables: PEA1, PEA3, PWSRWGT</code></pre>
+</div>
+</div>
+<p>Next, we’ll set our geography of interest–states, specified by description (vs sumlev)–and get our data. Since this is a microdata request, we have to explicitly specify the geographies we want, corresponding to the summary level we set in <code>set_geos()</code>. We’ll specify our states in the <code>within</code> argument of <code>get_data()</code>. Let’s assume we’re interested in comparing the proportions between California (06) and Texas (48).</p>
+<div id="a981ff52" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>cdh.set_geos(<span class="st">"state"</span>, <span class="st">"desc"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> cdh.get_data(within<span class="op">=</span>{<span class="st">'state'</span>: [<span class="st">'06'</span>, <span class="st">'48'</span>]})</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>response.tabulate(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"PEA1"</span>, <span class="st">"PEA3"</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    strat_by<span class="op">=</span><span class="st">"state"</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    weight_var<span class="op">=</span><span class="st">"PWSRWGT"</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    weight_div<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ Geographies set: 'state'
+✅ Parameters created for 3 geo-variable combinations.
+ℹ️ Making 6 API call(s)...
+shape: (43, 7)
+┌───────┬──────┬──────┬──────────────┬──────┬──────────────┬────────┐
+│ state ┆ PEA1 ┆ PEA3 ┆            n ┆  pct ┆         cumn ┆ cumpct │
+╞═══════╪══════╪══════╪══════════════╪══════╪══════════════╪════════╡
+│    48 ┆   -3 ┆   -3 ┆      2,756.2 ┆  0.0 ┆      2,756.2 ┆    0.0 │
+│    48 ┆   -3 ┆   -2 ┆          0.0 ┆  0.0 ┆      2,756.2 ┆    0.0 │
+│    48 ┆   -3 ┆   -1 ┆     29,412.3 ┆  0.1 ┆     32,168.6 ┆    0.1 │
+│    48 ┆   -3 ┆    3 ┆     11,466.1 ┆  0.1 ┆     43,634.7 ┆    0.2 │
+│    48 ┆   -2 ┆   -9 ┆     13,064.5 ┆  0.1 ┆     56,699.3 ┆    0.3 │
+│    48 ┆   -2 ┆   -2 ┆          0.0 ┆  0.0 ┆     56,699.3 ┆    0.3 │
+│    48 ┆   -2 ┆   -1 ┆      8,368.9 ┆  0.0 ┆     65,068.2 ┆    0.3 │
+│    48 ┆   -2 ┆    2 ┆      4,700.8 ┆  0.0 ┆     69,769.0 ┆    0.3 │
+│    48 ┆   -2 ┆    3 ┆          0.0 ┆  0.0 ┆     69,769.0 ┆    0.3 │
+│    48 ┆   -1 ┆   -1 ┆          0.0 ┆  0.0 ┆     69,769.0 ┆    0.3 │
+│    48 ┆    1 ┆   -9 ┆      2,399.3 ┆  0.0 ┆     72,168.3 ┆    0.3 │
+│    48 ┆    1 ┆   -3 ┆      7,364.1 ┆  0.0 ┆     79,532.4 ┆    0.4 │
+│    48 ┆    1 ┆   -2 ┆      3,584.2 ┆  0.0 ┆     83,116.6 ┆    0.4 │
+│    48 ┆    1 ┆    1 ┆  1,256,853.1 ┆  5.6 ┆  1,339,969.7 ┆    6.0 │
+│    48 ┆    1 ┆    2 ┆    589,742.4 ┆  2.6 ┆  1,929,712.1 ┆    8.6 │
+│    48 ┆    1 ┆    3 ┆  3,259,342.3 ┆ 14.6 ┆  5,189,054.4 ┆   23.2 │
+│    48 ┆    2 ┆   -9 ┆     13,255.7 ┆  0.1 ┆  5,202,310.0 ┆   23.3 │
+│    48 ┆    2 ┆   -1 ┆ 10,744,517.3 ┆ 48.1 ┆ 15,946,827.3 ┆   71.4 │
+│    48 ┆    2 ┆    2 ┆     56,334.2 ┆  0.3 ┆ 16,003,161.5 ┆   71.6 │
+│    48 ┆    2 ┆    3 ┆  6,343,550.5 ┆ 28.4 ┆ 22,346,712.0 ┆  100.0 │
+│     6 ┆   -9 ┆   -1 ┆      3,331.4 ┆  0.0 ┆      3,331.4 ┆    0.0 │
+│     6 ┆   -3 ┆   -3 ┆      4,761.5 ┆  0.0 ┆      8,092.9 ┆    0.0 │
+│     6 ┆   -3 ┆   -1 ┆     36,345.0 ┆  0.1 ┆     44,437.8 ┆    0.1 │
+│     6 ┆   -3 ┆    3 ┆     12,168.2 ┆  0.0 ┆     56,606.1 ┆    0.2 │
+│     6 ┆   -2 ┆   -9 ┆          0.0 ┆  0.0 ┆     56,606.1 ┆    0.2 │
+│     6 ┆   -2 ┆   -3 ┆          0.0 ┆  0.0 ┆     56,606.1 ┆    0.2 │
+│     6 ┆   -2 ┆   -2 ┆          0.0 ┆  0.0 ┆     56,606.1 ┆    0.2 │
+│     6 ┆   -2 ┆   -1 ┆     58,476.3 ┆  0.2 ┆    115,082.3 ┆    0.4 │
+│     6 ┆   -2 ┆    3 ┆          0.0 ┆  0.0 ┆    115,082.3 ┆    0.4 │
+│     6 ┆   -1 ┆   -1 ┆          0.0 ┆  0.0 ┆    115,082.3 ┆    0.4 │
+│     6 ┆    1 ┆   -9 ┆     15,334.5 ┆  0.1 ┆    130,416.9 ┆    0.4 │
+│     6 ┆    1 ┆   -3 ┆     15,778.8 ┆  0.1 ┆    146,195.7 ┆    0.5 │
+│     6 ┆    1 ┆   -2 ┆      1,879.6 ┆  0.0 ┆    148,075.3 ┆    0.5 │
+│     6 ┆    1 ┆    1 ┆  1,086,262.4 ┆  3.6 ┆  1,234,337.7 ┆    4.1 │
+│     6 ┆    1 ┆    2 ┆    547,549.0 ┆  1.8 ┆  1,781,886.7 ┆    5.9 │
+│     6 ┆    1 ┆    3 ┆  3,950,257.1 ┆ 13.2 ┆  5,732,143.8 ┆   19.1 │
+│     6 ┆    2 ┆   -9 ┆     19,101.0 ┆  0.1 ┆  5,751,244.8 ┆   19.2 │
+│     6 ┆    2 ┆   -3 ┆      6,544.0 ┆  0.0 ┆  5,757,788.8 ┆   19.2 │
+│     6 ┆    2 ┆   -2 ┆          0.0 ┆  0.0 ┆  5,757,788.8 ┆   19.2 │
+│     6 ┆    2 ┆   -1 ┆ 16,097,353.5 ┆ 53.7 ┆ 21,855,142.3 ┆   72.8 │
+│     6 ┆    2 ┆    1 ┆     21,743.5 ┆  0.1 ┆ 21,876,885.8 ┆   72.9 │
+│     6 ┆    2 ┆    2 ┆     74,863.7 ┆  0.2 ┆ 21,951,749.5 ┆   73.2 │
+│     6 ┆    2 ┆    3 ┆  8,050,987.0 ┆ 26.8 ┆ 30,002,736.5 ┆  100.0 │
+└───────┴──────┴──────┴──────────────┴──────┴──────────────┴────────┘</code></pre>
+</div>
+</div>
+<p>We’re interested in the rows where <code>PEA1 == 1</code> (have smoked 100+ cigarettes) and <code>PEA3 == 1</code> (currently smoke every day). Since we’re pooling three supplement waves, we need to divide the weights by 3 to get totals that make sense. We also stratify by state to get results that are comparable across states.</p>
+<p>In 2022/2023, 5.6% of adults in Texas were estimated to be established, daily cigarette smokers. The figure in California was 3.6%.</p>
+
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{couzens2025,
+  author = {Couzens, Lance},
+  title = {New {Features} in Cendat Ver 0.4.1},
+  date = {2025-08-22},
+  url = {https://mostlyunoriginal.github.io/posts/2025-08-22-cendat-new-features/},
+  langid = {en}
+}
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-couzens2025" class="csl-entry quarto-appendix-citeas" role="listitem">
+Couzens, Lance. 2025. <span>“New Features in Cendat Ver 0.4.1.”</span>
+August 22, 2025. <a href="https://mostlyunoriginal.github.io/posts/2025-08-22-cendat-new-features/">https://mostlyunoriginal.github.io/posts/2025-08-22-cendat-new-features/</a>.
+</div></div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
