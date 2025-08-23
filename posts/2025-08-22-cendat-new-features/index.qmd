@@ -106,5 +106,5 @@ response.tabulate(
 
 We're interested in the rows where `PEA1 == 1` (have smoked 100+ cigarettes) and `PEA3 == 1` (currently smoke every day). Since we're pooling three supplement waves, we need to divide the weights by 3 to get totals that make sense. We also stratify by state to get results that are comparable across states.
 
-In 2022/2023, 5.6% of adults in Texas were estimated to be established, daily cigarette smokers. The figure in California was 3.6%.
+In 2022/2023, 5.5% of adults in Texas were estimated to be established, daily cigarette smokers. The figure in California was 3.5%.
 
