@@ -1,0 +1,53 @@
+---
+title: "cendat Patch ver 0.4.3"
+description: "This post covers a recent patch, and light ruminations on the importance of testing."
+date: 2025-08-24
+author:
+    - name: Lance Couzens
+      url: https://mostlyunoriginal.github.io  
+categories: [Python, cendat, Census, API]
+citation: 
+  url: https://mostlyunoriginal.github.io/posts/2025-08-24-cendat-patch/
+image: Preview.png
+draft: false
+lightbox: true
+---
+
+# A Neglected Nuance, Addressed
+
+One of the key features of `cendat` is its ability to automatically build a query list given a target summary level and any parent geography nesting provided by the user via the `within` parameter of the `get_data()` method. This worked as intended, except when the user provided specific geographies *at the target summary level*. In these cases, those specific geographies were ignored and all geographies at that summary level within the parent branch were returned. Patch version 0.4.3 corrects that behavior.
+
+See below, for example. Under 0.4.2, this request would have returned all places in Colorado and Wyoming, ignoring the specific place requests for Colorado. Now, we correctly get all Wyoming places and only two in Colorado.
+
+```{python}
+import os
+from cendat import CenDatHelper
+import polars as pl
+from dotenv import load_dotenv
+
+load_dotenv()
+
+cdh = CenDatHelper(key=os.getenv("CENSUS_API_KEY"))
+
+cdh.list_products(years=[2022, 2023], patterns=r"acs/acs5\)")
+cdh.set_products()
+cdh.set_variables(["B01001_001E", "YEAR"])
+cdh.set_geos("160")
+response = cdh.get_data(
+    within=[{"state": "08", "place": ["06255", "45970"]}, {"state": "56"}]
+)
+df = (
+    response.to_polars(concat=True, destring=True)
+    .group_by("state", "vintage")
+    .agg(n=pl.len())
+)
+print(df)
+```
+
+# The Importance of a Robust Test Suite
+
+While I have been programming on a near-daily basis for the better part of 20 years, I am not a software developer by trade--I'm a Statistician. This means that much of my coding does not conform to rigid software development protocols. Non-production code for ad hoc data manipulation, analysis, and reporting doesn't rise to the level of 'software' and therefore doesn't require a formal testing protocol (though QC is always important). But, *this is* a codebase that does rise to that level, and I've incorporated many tests to validate the core operations of `cendat` as well its final outputs.
+
+So, when I *initially* drafted this patch with a very subtle indentation error that only impacted certain scenarios, I was saved by a test suite that covered those scenarios and told me that my change had broken something that worked before. A quick diagnosis and revision, followed by a fresh round of tests that only flashed green let me know I was *actually* ready for a fresh build and new version.
+
+I hope this peek behind the curtain is comforting rather than alarming for users of `cendat`! For me, it was a very gentle but useful reminder that there's a place for run-and-gun and there's a place for strict protocols and it's important to know the difference.
