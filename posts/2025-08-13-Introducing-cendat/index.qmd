@@ -8,7 +8,7 @@ author:
 categories: [Python, cendat, Census, API]
 citation: 
   url: https://mostlyunoriginal.github.io/posts/2025-08-13-Introducing-cendat/
-image: logo.png
+image: logo.png 
 draft: false
 lightbox: true
 ---

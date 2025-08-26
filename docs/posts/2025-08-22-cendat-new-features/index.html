@@ -239,7 +239,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="quick-acs-aggregate-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="quick-acs-aggregate-analysis">Quick ACS Aggregate Analysis</h2>
 <p>Here we want to see how many counties in the U.S., as of 2023, had a million or more residents, and how many people lived in those counties.</p>
-<div id="21b1b023" class="cell" data-execution_count="1">
+<div id="cfe64b35" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cendat <span class="im">import</span> CenDatHelper</span>
@@ -318,8 +318,8 @@ shape: (18, 5)
 │    51 ┆  1,141,878 ┆  1.2 ┆ 95,287,449 ┆   97.7 │
 │    53 ┆  2,271,380 ┆  2.3 ┆ 97,558,829 ┆  100.0 │
 └───────┴────────────┴──────┴────────────┴────────┘
-CPU times: user 561 ms, sys: 176 ms, total: 737 ms
-Wall time: 9.89 s</code></pre>
+CPU times: user 685 ms, sys: 177 ms, total: 863 ms
+Wall time: 8.78 s</code></pre>
 </div>
 </div>
 <p>In 2023 there were 48 counties with populations over a million (mostly in California, Florida, New York, and Texas), and the total population across those counties was nearly 98 million.</p>
@@ -327,7 +327,7 @@ Wall time: 9.89 s</code></pre>
 <section id="cps-microdata-tabulation" class="level2">
 <h2 class="anchored" data-anchor-id="cps-microdata-tabulation">CPS Microdata Tabulation</h2>
 <p>In this example, we’ll pull microdata from the Current Population Survey’s tobacco supplements for 2022 and 2023, and compare the proportions of established daily smokers across a selection of states. We’ll start with just 2022 to limit the output in our variable search. We’re looking for variables that indicate the respondent has smooked at least 100 cigarettes and is a current every day smoker.</p>
-<div id="224d6acc" class="cell" data-execution_count="2">
+<div id="417e0cdc" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>cdh.list_products(years<span class="op">=</span>[<span class="dv">2022</span>], patterns<span class="op">=</span><span class="st">"/cps/tobacco"</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>cdh.set_products()</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> var <span class="kw">in</span> cdh.list_variables(patterns<span class="op">=</span>[<span class="vs">r"smoke</span><span class="dv">.</span><span class="op">*</span><span class="vs">every day"</span>, <span class="st">"100"</span>], logic<span class="op">=</span><span class="bu">any</span>):</span>
@@ -346,7 +346,7 @@ PEH5 For how long smoked EVERY DAY</code></pre>
 </div>
 </div>
 <p>It looks like we’re interested in <code>PEA1</code> and <code>PEA3</code>–we’ll inspect the full variable dictionaries to make sure.</p>
-<div id="b926656b" class="cell" data-execution_count="3">
+<div id="10799ec0" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cdh.list_variables(patterns<span class="op">=</span>[<span class="st">"PEA1"</span>, <span class="st">"PEA3"</span>], logic<span class="op">=</span><span class="bu">any</span>, match_in<span class="op">=</span><span class="st">"name"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>[{'name': 'PEA1',
@@ -384,25 +384,25 @@ PEH5 For how long smoked EVERY DAY</code></pre>
 </div>
 <p>These variables get at what we want, and since we’re interested in the proportion among all adults, we can ignore the out of universe responsdents (likely never smokers that didn’t make it past a gate question… this is just an example, so we don’t need to dig any deeper).</p>
 <p>Note that we can also see the suggested weights to use for analysis of these variables, so we’ll include that in our set variables list. First, though, we’ll expand our products to cover 2023 as well.</p>
-<div id="16bbfeb7" class="cell" data-execution_count="4">
+<div id="1233f2f5" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>cdh.list_products(years<span class="op">=</span>[<span class="dv">2022</span>, <span class="dv">2023</span>], patterns<span class="op">=</span><span class="st">"/cps/tobacco"</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>cdh.set_products()</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>cdh.set_variables([<span class="st">"PEA1"</span>, <span class="st">"PEA3"</span>, <span class="st">"PWNRWGT"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>✅ Product set: 'Current Population Survey: Tobacco Use Supplement (2022/cps/tobacco/sep)' (Vintage: [2022])
-✅ Product set: 'Current Population Survey: Tobacco Use Supplement (2023/cps/tobacco/may)' (Vintage: [2023])
 ✅ Product set: 'Current Population Survey: Tobacco Use Supplement (2023/cps/tobacco/jan)' (Vintage: [2023])
+✅ Product set: 'Current Population Survey: Tobacco Use Supplement (2023/cps/tobacco/may)' (Vintage: [2023])
 ✅ Variables set:
   - Product: Current Population Survey: Tobacco Use Supplement (2022/cps/tobacco/sep) (Vintage: [2022])
     Variables: PEA1, PEA3, PWNRWGT
-  - Product: Current Population Survey: Tobacco Use Supplement (2023/cps/tobacco/may) (Vintage: [2023])
-    Variables: PEA1, PEA3, PWNRWGT
   - Product: Current Population Survey: Tobacco Use Supplement (2023/cps/tobacco/jan) (Vintage: [2023])
+    Variables: PEA1, PEA3, PWNRWGT
+  - Product: Current Population Survey: Tobacco Use Supplement (2023/cps/tobacco/may) (Vintage: [2023])
     Variables: PEA1, PEA3, PWNRWGT</code></pre>
 </div>
 </div>
 <p>Next, we’ll set our geography of interest–states, specified by description (vs sumlev)–and get our data. Since this is a microdata request, we have to explicitly specify the geographies we want, corresponding to the summary level we set in <code>set_geos()</code>. We’ll specify our states in the <code>within</code> argument of <code>get_data()</code>. Let’s assume we’re interested in comparing the proportions between California (06) and Texas (48).</p>
-<div id="a35d7d0b" class="cell" data-execution_count="5">
+<div id="11bbe279" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>cdh.set_geos(<span class="st">"state"</span>, <span class="st">"desc"</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> cdh.get_data(within<span class="op">=</span>{<span class="st">'state'</span>: [<span class="st">'06'</span>, <span class="st">'48'</span>]})</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>response.tabulate(</span>

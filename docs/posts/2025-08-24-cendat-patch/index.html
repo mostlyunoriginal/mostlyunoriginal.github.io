@@ -206,7 +206,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1>A Neglected Nuance, Addressed</h1>
 <p>One of the key features of <code>cendat</code> is its ability to automatically build a query list given a target summary level and any parent geography nesting provided by the user via the <code>within</code> parameter of the <code>get_data()</code> method. This worked as intended, except when the user provided specific geographies <em>at the target summary level</em>. In these cases, those specific geographies were ignored and all geographies at that summary level within the parent branch were returned. Patch version 0.4.3 corrects that behavior.</p>
 <p>See below, for example. Under 0.4.2, this request would have returned all places in Colorado and Wyoming, ignoring the specific place requests for Colorado. Now, we correctly get all Wyoming places and only two in Colorado.</p>
-<div id="fb7d48ec" class="cell" data-execution_count="1">
+<div id="b0423d48" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cendat <span class="im">import</span> CenDatHelper</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
@@ -251,8 +251,8 @@ shape: (4, 3)
 │ ---   ┆ ---     ┆ --- │
 │ str   ┆ i32     ┆ u32 │
 ╞═══════╪═════════╪═════╡
-│ 56    ┆ 2022    ┆ 205 │
 │ 56    ┆ 2023    ┆ 205 │
+│ 56    ┆ 2022    ┆ 205 │
 │ 08    ┆ 2023    ┆ 2   │
 │ 08    ┆ 2022    ┆ 2   │
 └───────┴─────────┴─────┘</code></pre>
