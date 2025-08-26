@@ -1,0 +1,84 @@
+---
+title: "cendat ver 0.4.4"
+description: "This post covers a recent performance upgrade."
+date: 2025-08-26
+author:
+    - name: Lance Couzens
+      url: https://mostlyunoriginal.github.io  
+categories: [Python, cendat, Census, API]
+citation: 
+  url: https://mostlyunoriginal.github.io/posts/2025-08-26-cendat-fully-wild/
+image: logo.png 
+draft: false
+lightbox: true
+---
+
+# Full Utilization of Wildcards
+
+One of the core strengths of `cendat` is concurrence–it can build, issue, and manage many API queries simultaneously. And up until `ver 0.4.4` that capability was especially critical because `cendat` brute-forced the geographic hierarchy, generating many small queries for deeply nested geographies to deliver data in a predictable and timely fashion. But, that brute force approach didn't make full use of the API's wildcard paradigm, which allows for queries that are generalized over parent geographies to return bigger data objects with fewer queries. Making use of this capability in a completely general tool like `cendat`, however, is tricky because the Census geographic hierarchy is complex and what works for one summary level may not work for another. Thankfully, the Census Bureau provides all of the necessary information, and this latest version can now make use of it.
+
+Let's take a look at an example JSON entry for the block group summary level in the 2023 ACS 5-year data product:
+
+``` json
+{
+  "name": "block group",
+  "geoLevelDisplay": "150",
+  "referenceDate": "2023-01-01",
+  "requires": [
+    "state",
+    "county",
+    "tract"
+  ],
+  "wildcard": [
+    "county",
+    "tract"
+  ],
+  "optionalWithWCFor": "tract"
+}
+```
+
+Here we can see that in order to query for block groups, an API query requires information on the parent state, county, and tract–that's what's indicated by `"requires": [ "state", "county", "tract" ]`. Prior to `0.4.4`, invoking `get_data()` with block groups set as the target geography yielded API calls that *explicitly* specified the nesting state, county, and tract. Again, these queries were issued concurrently and the individual data objects were small, so this was okay in many cases. But, for national queries, for example–where no nesting geographies are provided to limit the scope–this approach becomes problematic (there are \~85k tracts in the U.S.).
+
+We can do this job with far fewer pulls by utilizing the information in the `wildcard` and `optionalWithWCFor` fields. In the above entry we have `"wildcard": [ "county", "tract" ]` and `"optionalWithWCFor": "tract"`. That means that we really only have to provide state for national results because county and tract can be wildcarded and tract can be dropped altogether unless we need to specify specific tracts. Consider the following example in which we pull total population by block group for the whole nation and see how many of them have contain more than 10k people.
+
+```{python}
+%%time
+
+import os
+from cendat import CenDatHelper
+import polars as pl
+from dotenv import load_dotenv
+
+load_dotenv()
+
+cdh = CenDatHelper(key=os.getenv("CENSUS_API_KEY"))
+
+cdh.list_products(patterns=r"2023/acs/acs5\)")
+cdh.set_products()
+cdh.set_variables(["B01001_001E"])
+cdh.set_geos("150")
+response = cdh.get_data()
+
+response.tabulate("state", where="B01001_001E > 10_000")
+
+df = response.to_polars(concat=True, destring=True)
+df.shape
+```
+
+Now we're down to 52 queries completed in about 10 seconds. And we can still have more complex nesting specifications as well:
+
+```{python}
+%%time
+
+response = cdh.get_data(
+    within=[
+        {'state': '08', 'county': '069', 'tract': ['002601', '002602', '002700']},
+        {'state': '56', 'county': '021'},
+        {'state': ['06', '48']},
+    ]
+)
+
+response.tabulate('state')
+```
+
+That's the last of my planned performance upgrades of core functionality, so (barring patches as of yet unforeseen) up next is feature expansion. First up is a biggie: optionally fetching polygons for requested geographies. Stay tuned...
