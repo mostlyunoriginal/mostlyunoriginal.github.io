@@ -81,4 +81,15 @@ response = cdh.get_data(
 response.tabulate('state')
 ```
 
+And we can combine different summary levels as well. Here we get data for states, counties, and county subdivisions:
+
+```{python}
+%%time
+
+cdh.set_geos(['040', '050', '060'])
+response = cdh.get_data()
+
+response.tabulate('sumlev')
+```
+
 That's the last of my planned performance upgrades of core functionality, so (barring patches as of yet unforeseen) up next is feature expansion. First up is a biggie: optionally fetching polygons for requested geographies. Stay tuned...
