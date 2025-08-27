@@ -1,0 +1,41 @@
+---
+title: "cendat ver 0.4.5"
+description: "Just when I said I was done for a while..."
+date: 2025-08-27
+author:
+    - name: Lance Couzens
+      url: https://mostlyunoriginal.github.io  
+categories: [Python, cendat, Census, API]
+citation: 
+  url: https://mostlyunoriginal.github.io/posts/2025-08-27-now-with-names/
+image: logo.png 
+draft: false
+lightbox: true
+---
+
+# Hi, It's Me Again...
+
+I didn't expect to be back here so soon, but I realized something was missing from `cendat`–the ability to get geography names. It didn't *seem* like it was missing, after all you can just include it in `set_names()`... right? Well, it turns out that you can't do that because `NAME` is a special keyword understood by the by the API but that is not included in `variables.json`, which is the basis for the selections you can make in `set_names()`.
+
+Thankfully the fix for this is very simple: there is a new `include_names` parameter in `get_data()` (boolean, defaults to `False`) that we can use to include geography name in our queries. Like this:
+
+```{python}
+import os
+from cendat import CenDatHelper
+from dotenv import load_dotenv
+
+load_dotenv()
+
+c = CenDatHelper(key=os.getenv("CENSUS_API_KEY"))
+
+c.list_products(2023, r"acs/acs1\)")
+c.set_products()
+c.set_variables("B01001_001E")
+c.set_geos("160")
+
+response = c.get_data(include_names=True)
+
+response.tabulate("NAME", where="B01001_001E > 1_000_000", weight_var="B01001_001E")
+```
+
+Here we tabulate the cities with populations of 1M+ using the 2023 ACS 1-year estimates. Note that we don't include `NAME` in `set_variables()`--it's carried through because of `include_names=True`, and we can reference it in `tabulate()` and it will be included in our output data via the `to_*` methods.
