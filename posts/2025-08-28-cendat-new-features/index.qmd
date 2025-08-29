@@ -1,0 +1,68 @@
+---
+title: "cendat ver 0.5.0"
+description: "New methods for better variable discovery and more."
+date: 2025-08-28
+author:
+    - name: Lance Couzens
+      url: https://mostlyunoriginal.github.io  
+categories: [Python, cendat, Census, API]
+citation: 
+  url: https://mostlyunoriginal.github.io/posts/2025-08-28-cendat-new-features/
+image: logo.png 
+draft: false
+lightbox: true
+---
+
+# A Lifeline for when You're Drowning in Variables
+
+When you're not sure exactly what you're looking for, finding the right variables can be tough, especially for huge products like the ACS. And while `list_variables` was meant to help with that, it wasn't enough on its own. That's why `ver 0.5.0` has three new methods: `list_groups`, `set_groups`, and `describe_groups`. The first of these work almost exactly like the corresponding `*_variables` methods, except we can use them to focus our variable exploration to thematically contiguous sets of variables as an intermediate step. In other words, we can explore and lock in the *concepts* by which variables are grouped before we lock in our variable selections. The `describe_groups` method provides hierarchical listings of nested variable relationships within groups and in many cases will obviate the need for `list_variables` altogether. Let's look at an example where we want to focus on poverty in the ACS 5 year product for 2023.
+
+```{python}
+import os
+from dotenv import load_dotenv
+from cendat import CenDatHelper
+
+load_dotenv()
+
+cdh = CenDatHelper(key=os.getenv("CENSUS_API_KEY"))
+
+cdh.list_products(2023, r"acs/acs5\)")
+cdh.set_products()
+for group in cdh.list_groups(patterns=["sex by age", "poverty"]):
+    print(group['name'], group['description'])
+```
+
+We're interested in poverty overall, so we can lock in group `B17001`. Then we'll invoke `describe_groups` to see what the variable relationships look like.
+
+```{python}
+cdh.set_groups("B17001")
+cdh.describe_groups()
+```
+
+Okay, this is cool, right?! The nesting makes it *much* easier to see how these variables are related to one another. Let's say we want the total overall and the total below poverty: `B17001_001E` and `B17001_002E`. We can set those and proceed like normal. We'll get data for all U.S. places.
+
+```{python}
+cdh.set_variables(["B17001_001E", "B17001_002E"])
+cdh.set_geos("place", "desc")
+
+response = cdh.get_data(
+    include_names=True,
+    include_attributes=True,
+    include_geoids=True
+)
+```
+
+Note that we have some new parameters in `get_data`. Like `include_names`, which I described in the last post, `include_attributes` and `include_geoids` allow us to bring in variables that don't show up in our variable listings because they're either standard summary level attributes or attributes of the statistics themselves. In `ver 1.0.0` I'm going to change the defaults on `include_names` and `include_geoids` to `True`, but for now they all default to `False` for compatibility with prior versions. `GEO_ID` especially will be needed for the upcoming polygon features.
+
+```{python}
+df = response.to_polars(
+    concat=True,
+    schema_overrides={
+        'B17001_001E': int,
+        'B17001_001M': int,
+        'B17001_002E': int,
+        'B17001_002M': int,        
+    }
+)
+df.glimpse()
+```
