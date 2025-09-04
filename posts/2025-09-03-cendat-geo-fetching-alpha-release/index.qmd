@@ -21,7 +21,7 @@ It was always the case that `cendat` would eventually support geometry/polygon f
 pip install --pre --upgrade cendat
 ```
 
-That'll get you `ver 0.7.0a2`. Note that you will need `pandas` and `geopandas` to unlock the new geometry fetching features. New syntax is reflected in the landing page for this version at <https://pypi.org/project/cendat/0.7.0a1/>, but the short version is that there's now an `include_geometry` parameter in `get_data` and there is a new `to_gpd` method in the `CenDatResponse` class that joins the fetched data and polygons and outputs a `Pandas GeoDataFrame`. Here's an example:
+That'll get you `ver 0.7.0a2`. Note that you will need `pandas` and `geopandas` to unlock the new geometry fetching features. New syntax is reflected in the landing page for this version at <https://pypi.org/project/cendat/0.7.0a2/>, but the short version is that there's now an `include_geometry` parameter in `get_data` and there is a new `to_gpd` method in the `CenDatResponse` class that joins the fetched data and polygons and outputs a `Pandas GeoDataFrame`. Here's an example:
 
 ```{python}
 from cendat import CenDatHelper
