@@ -1,0 +1,70 @@
+---
+title: "cendat ver 0.7.0a2"
+description: "A new preview version with geometry fetching"
+date: 2025-09-03
+author:
+    - name: Lance Couzens
+      url: https://mostlyunoriginal.github.io  
+categories: [Python, cendat, Census, API]
+citation: 
+  url: https://mostlyunoriginal.github.io/posts/2025-09-03-cendat-geo-fetching-alpha-release/
+image: logo.png 
+draft: false
+lightbox: true
+---
+
+# New Core Functionality Unlocked
+
+It was always the case that `cendat` would eventually support geometry/polygon fetching for aggregate products, but it took a little while to implement because I didn't want to tack it on as a sequential process–I wanted it to run concurrently with the data fetching, and this required a pretty substantial rewrite of `get_data` and the addition of several new internal methods. That work is now complete enough for me to share an alpha/preview release version which you can install with pip:
+
+``` bash
+pip install --pre --upgrade cendat
+```
+
+That'll get you `ver 0.7.0a2`. Note that you will need `pandas` and `geopandas` to unlock the new geometry fetching features. New syntax is reflected in the landing page for this version at <https://pypi.org/project/cendat/0.7.0a1/>, but the short version is that there's now an `include_geometry` parameter in `get_data` and there is a new `to_gpd` method in the `CenDatResponse` class that joins the fetched data and polygons and outputs a `Pandas GeoDataFrame`. Here's an example:
+
+```{python}
+from cendat import CenDatHelper
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+cdh = CenDatHelper(key=os.getenv("CENSUS_API_KEY"))
+cdh.list_products(2023, r"acs/acs5\)")
+cdh.set_products()
+cdh.list_groups(patterns=r"^race")
+cdh.set_groups(["B02001"])
+cdh.describe_groups()
+```
+
+Here we're looking at the core race group in the 2023 ACS 5-year product. We will bypass variable listing/setting and just pull everything from the group (this was a new feature in `ver 0.6.0` that I never got around to writing a post about).
+
+```{python}
+%%time
+
+cdh.set_geos("050")
+response = cdh.get_data(
+    include_names=True,
+    include_geometry=True,
+)
+```
+
+We choose county-level data and indicate that geometries should be fetched alongside the data. Note that the TIGERweb REST Service has different limitations than the data API, and national queries that would work on the data side are rejected for geometries. For all queries where `include_geometry=True`, we give up some of the wildcarding capability that we would otherwise have: `optionalWithWCFor` is ignored and the most granular `wildcards` level is ignored. We can see that in this example each state was queried individually (still in a concurrent thread pool, once the record counts are obtained), while for a data-only request, only a single API query would be issued.
+
+Note also the use of 'paginated' in the informational prints–the TIGERweb REST Service limits queries to 1,000 records, so any query that goes over is broken into multiple 'paginated' requests. No state has more than 1,000 counties, so we don't leverage that here, but you would see it, for example, in a request for all places in the nation.
+
+These 'paginated' queries are issued concurrently in a dedicated thread pool that is itself executed in its own thread concurrently with the main data API queries. So, while fetching geometries can make `get_data` calls take longer than they otherwise would, in those cases it takes no longer than it would to fetch the geometries alone. We can see evidence of that in this example: the data fetching success message happens while we're still figuring out what our geometry queries need to look like.
+
+Just like with the `to_pandas` and `to_polars` methods, the new `to_gpd` method is invoked on the `CenDatResponse` object:
+
+```{python}
+gdf = response.to_gpd(destring=True, join_strategy='left')
+print(gdf.head())
+```
+
+For many aggregate products supported by `cendat` there is no specific TIGERweb map server (i.e., vintage) and in these cases, the 'Current' version is used. That could result in data with no corresponding geometry, or geometries with no data. In these cases, if `join_strategy='left'`, the `GeoDataFrame` will have rows with empty geometries. You can set `join_strategy='inner'` to filter the output to data rows with matched geometries.
+
+Now that geometries are supported, users can do all the cool things that enables, like plotting choropleth maps. One of my next development goals, in fact, is to add in one or more methods to support just that.
+
+As always, more to come...

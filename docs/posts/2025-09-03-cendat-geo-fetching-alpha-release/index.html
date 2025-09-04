@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Lance Couzens">
+<meta name="dcterms.date" content="2025-09-03">
+<meta name="description" content="A new preview version with geometry fetching">
+
+<title>cendat ver 0.7.0a2 – Lance Couzens</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-3b7f4aff7acac744aa1d596ce5db2ede.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Lance Couzens</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Code Blog</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-page-left">
+      <h1 class="title">cendat ver 0.7.0a2</h1>
+                  <div>
+        <div class="description">
+          A new preview version with geometry fetching
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Python</div>
+                <div class="quarto-category">cendat</div>
+                <div class="quarto-category">Census</div>
+                <div class="quarto-category">API</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta column-page-left">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p><a href="https://mostlyunoriginal.github.io">Lance Couzens</a> </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">September 3, 2025</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#new-core-functionality-unlocked" id="toc-new-core-functionality-unlocked" class="nav-link active" data-scroll-target="#new-core-functionality-unlocked">New Core Functionality Unlocked</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
+
+
+
+
+
+<section id="new-core-functionality-unlocked" class="level1">
+<h1>New Core Functionality Unlocked</h1>
+<p>It was always the case that <code>cendat</code> would eventually support geometry/polygon fetching for aggregate products, but it took a little while to implement because I didn’t want to tack it on as a sequential process–I wanted it to run concurrently with the data fetching, and this required a pretty substantial rewrite of <code>get_data</code> and the addition of several new internal methods. That work is now complete enough for me to share an alpha/preview release version which you can install with pip:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">--pre</span> <span class="at">--upgrade</span> cendat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>That’ll get you <code>ver 0.7.0a2</code>. Note that you will need <code>pandas</code> and <code>geopandas</code> to unlock the new geometry fetching features. New syntax is reflected in the landing page for this version at <a href="https://pypi.org/project/cendat/0.7.0a1/" class="uri">https://pypi.org/project/cendat/0.7.0a1/</a>, but the short version is that there’s now an <code>include_geometry</code> parameter in <code>get_data</code> and there is a new <code>to_gpd</code> method in the <code>CenDatResponse</code> class that joins the fetched data and polygons and outputs a <code>Pandas GeoDataFrame</code>. Here’s an example:</p>
+<div id="1cc75e59" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cendat <span class="im">import</span> CenDatHelper</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>load_dotenv()</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>cdh <span class="op">=</span> CenDatHelper(key<span class="op">=</span>os.getenv(<span class="st">"CENSUS_API_KEY"</span>))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>cdh.list_products(<span class="dv">2023</span>, <span class="vs">r"acs/acs5</span><span class="ch">\)</span><span class="vs">"</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>cdh.set_products()</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>cdh.list_groups(patterns<span class="op">=</span><span class="vs">r"</span><span class="dv">^</span><span class="vs">race"</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>cdh.set_groups([<span class="st">"B02001"</span>])</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>cdh.describe_groups()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ API key loaded successfully.
+✅ Product set: 'ACS 5-Year Detailed Tables (2023/acs/acs5)' (Vintage: [2023])
+✅ Groups set: B02001
+
+--- Group: B02001 (Race) ---
+
+  Product: ACS 5-Year Detailed Tables (2023/acs/acs5) (Vintage: 2023)
+      B02001_001E: Total:
+        B02001_002E: White alone
+        B02001_003E: Black or African American alone
+        B02001_004E: American Indian and Alaska Native alone
+        B02001_005E: Asian alone
+        B02001_006E: Native Hawaiian and Other Pacific Islander alone
+        B02001_007E: Some Other Race alone
+        B02001_008E: Two or More Races:
+          B02001_009E: Two races including Some Other Race
+          B02001_010E: Two races excluding Some Other Race, and three or more races</code></pre>
+</div>
+</div>
+<p>Here we’re looking at the core race group in the 2023 ACS 5-year product. We will bypass variable listing/setting and just pull everything from the group (this was a new feature in <code>ver 0.6.0</code> that I never got around to writing a post about).</p>
+<div id="cb473389" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>cdh.set_geos(<span class="st">"050"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> cdh.get_data(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    include_names<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    include_geometry<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ Geographies set: 'county' (requires `within` for: state)
+✅ Parameters created for 1 geo-variable/group combinations.
+✅ Successfully fetched map servers.
+✅ Successfully fetched map server layers.
+ℹ️ Discovering parent geographies for: ['state']
+✅ Found 52 combinations. Building API queries...
+ℹ️ Making 52 API call(s)...
+ℹ️ Pre-querying for geometry counts to determine pagination...
+  - Found 83 geometries for WHERE 'STATE IN ('26')...'. Building paginated tasks.
+  - Found 53 geometries for WHERE 'STATE IN ('38')...'. Building paginated tasks.
+  - Found 46 geometries for WHERE 'STATE IN ('45')...'. Building paginated tasks.
+✅ Data fetching completed successfully.
+  - Found 88 geometries for WHERE 'STATE IN ('39')...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('10')...'. Building paginated tasks.
+  - Found 93 geometries for WHERE 'STATE IN ('31')...'. Building paginated tasks.
+  - Found 56 geometries for WHERE 'STATE IN ('30')...'. Building paginated tasks.
+  - Found 30 geometries for WHERE 'STATE IN ('02')...'. Building paginated tasks.
+  - Found 64 geometries for WHERE 'STATE IN ('22')...'. Building paginated tasks.
+  - Found 44 geometries for WHERE 'STATE IN ('16')...'. Building paginated tasks.
+  - Found 58 geometries for WHERE 'STATE IN ('06')...'. Building paginated tasks.
+  - Found 66 geometries for WHERE 'STATE IN ('46')...'. Building paginated tasks.
+  - Found 36 geometries for WHERE 'STATE IN ('41')...'. Building paginated tasks.
+  - Found 16 geometries for WHERE 'STATE IN ('23')...'. Building paginated tasks.
+  - Found 95 geometries for WHERE 'STATE IN ('47')...'. Building paginated tasks.
+  - Found 87 geometries for WHERE 'STATE IN ('27')...'. Building paginated tasks.
+  - Found 14 geometries for WHERE 'STATE IN ('25')...'. Building paginated tasks.
+  - Found 77 geometries for WHERE 'STATE IN ('40')...'. Building paginated tasks.
+  - Found 21 geometries for WHERE 'STATE IN ('34')...'. Building paginated tasks.
+  - Found 159 geometries for WHERE 'STATE IN ('13')...'. Building paginated tasks.
+  - Found 254 geometries for WHERE 'STATE IN ('48')...'. Building paginated tasks.
+  - Found 24 geometries for WHERE 'STATE IN ('24')...'. Building paginated tasks.
+  - Found 64 geometries for WHERE 'STATE IN ('08')...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('15')...'. Building paginated tasks.
+  - Found 67 geometries for WHERE 'STATE IN ('42')...'. Building paginated tasks.
+  - Found 33 geometries for WHERE 'STATE IN ('35')...'. Building paginated tasks.
+  - Found 82 geometries for WHERE 'STATE IN ('28')...'. Building paginated tasks.
+  - Found 99 geometries for WHERE 'STATE IN ('19')...'. Building paginated tasks.
+  - Found 62 geometries for WHERE 'STATE IN ('36')...'. Building paginated tasks.
+  - Found 29 geometries for WHERE 'STATE IN ('49')...'. Building paginated tasks.
+  - Found 17 geometries for WHERE 'STATE IN ('32')...'. Building paginated tasks.
+  - Found 15 geometries for WHERE 'STATE IN ('04')...'. Building paginated tasks.
+  - Found 75 geometries for WHERE 'STATE IN ('05')...'. Building paginated tasks.
+  - Found 10 geometries for WHERE 'STATE IN ('33')...'. Building paginated tasks.
+  - Found 115 geometries for WHERE 'STATE IN ('29')...'. Building paginated tasks.
+  - Found 105 geometries for WHERE 'STATE IN ('20')...'. Building paginated tasks.
+  - Found 9 geometries for WHERE 'STATE IN ('09')...'. Building paginated tasks.
+  - Found 100 geometries for WHERE 'STATE IN ('37')...'. Building paginated tasks.
+  - Found 102 geometries for WHERE 'STATE IN ('17')...'. Building paginated tasks.
+  - Found 67 geometries for WHERE 'STATE IN ('12')...'. Building paginated tasks.
+  - Found 92 geometries for WHERE 'STATE IN ('18')...'. Building paginated tasks.
+  - Found 120 geometries for WHERE 'STATE IN ('21')...'. Building paginated tasks.
+  - Found 67 geometries for WHERE 'STATE IN ('01')...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('44')...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('11')...'. Building paginated tasks.
+  - Found 14 geometries for WHERE 'STATE IN ('50')...'. Building paginated tasks.
+  - Found 39 geometries for WHERE 'STATE IN ('53')...'. Building paginated tasks.
+  - Found 72 geometries for WHERE 'STATE IN ('55')...'. Building paginated tasks.
+  - Found 23 geometries for WHERE 'STATE IN ('56')...'. Building paginated tasks.
+  - Found 78 geometries for WHERE 'STATE IN ('72')...'. Building paginated tasks.
+  - Found 133 geometries for WHERE 'STATE IN ('51')...'. Building paginated tasks.
+  - Found 55 geometries for WHERE 'STATE IN ('54')...'. Building paginated tasks.
+ℹ️ Fetching geometries across 52 paginated calls...
+✅ Geometry fetching complete. Stacking results.
+CPU times: user 9.52 s, sys: 2.87 s, total: 12.4 s
+Wall time: 1min 31s</code></pre>
+</div>
+</div>
+<p>We choose county-level data and indicate that geometries should be fetched alongside the data. Note that the TIGERweb REST Service has different limitations than the data API, and national queries that would work on the data side are rejected for geometries. For all queries where <code>include_geometry=True</code>, we give up some of the wildcarding capability that we would otherwise have: <code>optionalWithWCFor</code> is ignored and the most granular <code>wildcards</code> level is ignored. We can see that in this example each state was queried individually (still in a concurrent thread pool, once the record counts are obtained), while for a data-only request, only a single API query would be issued.</p>
+<p>Note also the use of ‘paginated’ in the informational prints–the TIGERweb REST Service limits queries to 1,000 records, so any query that goes over is broken into multiple ‘paginated’ requests. No state has more than 1,000 counties, so we don’t leverage that here, but you would see it, for example, in a request for all places in the nation.</p>
+<p>These ‘paginated’ queries are issued concurrently in a dedicated thread pool that is itself executed in its own thread concurrently with the main data API queries. So, while fetching geometries can make <code>get_data</code> calls take longer than they otherwise would, in those cases it takes no longer than it would to fetch the geometries alone. We can see evidence of that in this example: the data fetching success message happens while we’re still figuring out what our geometry queries need to look like.</p>
+<p>Just like with the <code>to_pandas</code> and <code>to_polars</code> methods, the new <code>to_gpd</code> method is invoked on the <code>CenDatResponse</code> object:</p>
+<div id="03e5a623" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>gdf <span class="op">=</span> response.to_gpd(destring<span class="op">=</span><span class="va">True</span>, join_strategy<span class="op">=</span><span class="st">'left'</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(gdf.head())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                         NAME          GEO_ID  B02001_001E B02001_001EA  \
+0  Beaverhead County, Montana  0500000US30001         9590         None   
+1    Big Horn County, Montana  0500000US30003        12963         None   
+2      Blaine County, Montana  0500000US30005         6997         None   
+3  Broadwater County, Montana  0500000US30007         7310         None   
+4      Carbon County, Montana  0500000US30009        10877         None   
+
+   B02001_001M B02001_001MA  B02001_002E B02001_002EA  B02001_002M  \
+0   -555555555        *****         8852         None          145   
+1   -555555555        *****         3714         None          107   
+2   -555555555        *****         3102         None           21   
+3   -555555555        *****         6595         None          166   
+4   -555555555        *****        10120         None           96   
+
+  B02001_002MA  ...  B02001_010M B02001_010MA  state county  GEOID  \
+0         None  ...           76         None     30    001  30001   
+1         None  ...          213         None     30    003  30003   
+2         None  ...          112         None     30    005  30005   
+3         None  ...          110         None     30    007  30007   
+4         None  ...           82         None     30    009  30009   
+
+                                            geometry  \
+0  POLYGON ((-113.93804 45.6961, -113.9381 45.695...   
+1  POLYGON ((-108.0697 45.68205, -108.0697 45.681...   
+2  POLYGON ((-108.88535 47.92273, -108.88518 47.9...   
+3  POLYGON ((-111.64031 46.64795, -111.64031 46.6...   
+4  POLYGON ((-109.0629 44.99954, -109.06267 44.99...   
+
+                                      product vintage  sumlev    desc  
+0  ACS 5-Year Detailed Tables (2023/acs/acs5)    2023     050  county  
+1  ACS 5-Year Detailed Tables (2023/acs/acs5)    2023     050  county  
+2  ACS 5-Year Detailed Tables (2023/acs/acs5)    2023     050  county  
+3  ACS 5-Year Detailed Tables (2023/acs/acs5)    2023     050  county  
+4  ACS 5-Year Detailed Tables (2023/acs/acs5)    2023     050  county  
+
+[5 rows x 50 columns]</code></pre>
+</div>
+</div>
+<p>For many aggregate products supported by <code>cendat</code> there is no specific TIGERweb map server (i.e., vintage) and in these cases, the ‘Current’ version is used. That could result in data with no corresponding geometry, or geometries with no data. In these cases, if <code>join_strategy='left'</code>, the <code>GeoDataFrame</code> will have rows with empty geometries. You can set <code>join_strategy='inner'</code> to filter the output to data rows with matched geometries.</p>
+<p>Now that geometries are supported, users can do all the cool things that enables, like plotting choropleth maps. One of my next development goals, in fact, is to add in one or more methods to support just that.</p>
+<p>As always, more to come…</p>
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{couzens2025,
+  author = {Couzens, Lance},
+  title = {Cendat Ver 0.7.0a2},
+  date = {2025-09-03},
+  url = {https://mostlyunoriginal.github.io/posts/2025-09-03-cendat-geo-fetching-alpha-release/},
+  langid = {en}
+}
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-couzens2025" class="csl-entry quarto-appendix-citeas" role="listitem">
+Couzens, Lance. 2025. <span>“Cendat Ver 0.7.0a2.”</span> September 3,
+2025. <a href="https://mostlyunoriginal.github.io/posts/2025-09-03-cendat-geo-fetching-alpha-release/">https://mostlyunoriginal.github.io/posts/2025-09-03-cendat-geo-fetching-alpha-release/</a>.
+</div></div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
