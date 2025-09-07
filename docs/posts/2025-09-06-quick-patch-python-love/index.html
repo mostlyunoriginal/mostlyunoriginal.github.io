@@ -210,10 +210,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="the-issue" class="level1">
 <h1>The Issue</h1>
 <p>As is often the case, I introduced a new feature to an existing codebase and thereby introduced a new bug. Some days ago now I updated my <code>cendat</code> library to allow for a shortcut in obtaining all variables in a group from the Census API. This is very handy and wonderful, but in some cases the basket of group variables includes <code>NAME</code> and <code>GEO_ID</code>, which the user separately has the option to pull. The result was that in many cases the returned JSON object contained duplication of those variables, and this could cause problems when those objects were turned into DataFrames.</p>
-<p>Initially, I thought I would just internally undo the user’s variable-level requests for <code>NAME</code> and <code>GEO_ID</code> if they were doing a group-level call, but I’m just not sure that all groups will always include those variables, which would leave the user with no way to obtain them in a group call. In the end I settled on it being best to remove duplicates in the raw data before it’s processed as a Polars or Pandas DataFrame. Here’s an abstracted example of the issue.</p>
+<p>Initially, I thought I would just internally undo the user’s variable-level requests for <code>NAME</code> and <code>GEO_ID</code> if they were doing a group-level call, but I’m just not sure that all groups will always include those variables, which would leave the user with no way to obtain them in a group call. In the end I settled on it being best to remove duplicates in the raw data before it’s processed as a Polars or Pandas DataFrame. Here’s an abstracted example of the issue and its remedy which is simple and concise using basic Python tools.</p>
 <section id="incoming-data" class="level3">
 <h3 class="anchored" data-anchor-id="incoming-data">Incoming Data</h3>
-<div id="34f1a516" class="cell" data-execution_count="1">
+<div id="55d19941" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>schema <span class="op">=</span> [<span class="st">"zero"</span>, <span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>, <span class="st">"two"</span>, <span class="st">"four"</span>, <span class="st">"five"</span>, <span class="st">"one"</span>, <span class="st">"six"</span>]</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [</span>
@@ -222,11 +222,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">1</span>, <span class="dv">6</span>],</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Here we can see how the format in which the raw data are obtained: <code>schema</code> is a list of strings containing the variable names, and <code>data</code> is a list of lists, each representing a row of data. As shown here, some columns may be duplicated, and we need to identify the duplicates and remove them before processing further.</p>
+<p>Here we can see the format in which the raw data are obtained: <code>schema</code> is a list of strings containing the variable names, and <code>data</code> is a list of lists, each representing a row of data. As shown here, some columns may be duplicated, and we need to identify the duplicates and remove them before processing further.</p>
 </section>
 <section id="a-dictionary-for-column-indexes" class="level3">
 <h3 class="anchored" data-anchor-id="a-dictionary-for-column-indexes">A Dictionary for Column Indexes</h3>
-<div id="2c77b327" class="cell" data-execution_count="2">
+<div id="3f413832" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> defaultdict</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pprint <span class="im">import</span> pprint</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -245,7 +245,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="a-set-of-indexes-marked-for-removal" class="level3">
 <h3 class="anchored" data-anchor-id="a-set-of-indexes-marked-for-removal">A Set of Indexes Marked for Removal</h3>
 <p>Next, we create the set <code>removals</code> to contain the indexes where extra occurrences of variables can be found in the data rows. Since we know the indexes will be unique, we can utilize a set for maximum efficiency.</p>
-<div id="25ec2ff8" class="cell" data-execution_count="3">
+<div id="7d0ed0f0" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>removals <span class="op">=</span> <span class="bu">set</span>()</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> indexes <span class="kw">in</span> index_map.values():</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(indexes) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
@@ -260,7 +260,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="updated-data-rows" class="level3">
 <h3 class="anchored" data-anchor-id="updated-data-rows">Updated Data Rows</h3>
 <p>Now we have everything we need to update the raw data before we attempt to process it. We update both the schema and data rows via list comprehension.</p>
-<div id="115c99b7" class="cell" data-execution_count="4">
+<div id="9f8a5e29" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>new_schema <span class="op">=</span> [var <span class="cf">for</span> i, var <span class="kw">in</span> <span class="bu">enumerate</span>(schema) <span class="cf">if</span> i <span class="kw">not</span> <span class="kw">in</span> removals]</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>new_data <span class="op">=</span> [</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    [datum <span class="cf">for</span> i, datum <span class="kw">in</span> <span class="bu">enumerate</span>(row) <span class="cf">if</span> i <span class="kw">not</span> <span class="kw">in</span> removals] </span>

@@ -31,7 +31,7 @@ data = [
 ]
 ```
 
-Here we can see how the format in which the raw data are obtained: `schema` is a list of strings containing the variable names, and `data` is a list of lists, each representing a row of data. As shown here, some columns may be duplicated, and we need to identify the duplicates and remove them before processing further.
+Here we can see the format in which the raw data are obtained: `schema` is a list of strings containing the variable names, and `data` is a list of lists, each representing a row of data. As shown here, some columns may be duplicated, and we need to identify the duplicates and remove them before processing further.
 
 ### A Dictionary for Column Indexes
 
