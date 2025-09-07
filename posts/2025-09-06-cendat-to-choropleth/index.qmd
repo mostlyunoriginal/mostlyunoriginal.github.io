@@ -102,10 +102,10 @@ gdf.plot(
 )
 
 ctx.add_basemap(
-    ax, source=ctx.providers.CartoDB.PositronNoLabels, attribution=False, zoom=10
+    ax, source=ctx.providers.CartoDB.PositronNoLabels, attribution=False, zoom=9
 )
 ctx.add_basemap(
-    ax, source=ctx.providers.CartoDB.PositronOnlyLabels, attribution=False, zoom=10
+    ax, source=ctx.providers.CartoDB.PositronOnlyLabels, attribution=False, zoom=9
 )
 
 ax.set_title(
