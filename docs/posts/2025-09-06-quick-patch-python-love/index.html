@@ -7,10 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Lance Couzens">
-<meta name="dcterms.date" content="2025-09-03">
-<meta name="description" content="A new preview version with geometry fetching">
+<meta name="dcterms.date" content="2025-09-06">
+<meta name="description" content="In which I describe a satisfying conclusion to a recent bug">
 
-<title>cendat ver 0.7.0a3 – Lance Couzens</title>
+<title>A Quick Patch / Love Letter to Python – Lance Couzens</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -146,10 +146,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-page-left">
-      <h1 class="title">cendat ver 0.7.0a3</h1>
+      <h1 class="title">A Quick Patch / Love Letter to Python</h1>
                   <div>
         <div class="description">
-          A new preview version with geometry fetching
+          In which I describe a satisfying conclusion to a recent bug
         </div>
       </div>
                           <div class="quarto-categories">
@@ -174,7 +174,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">September 3, 2025</p>
+        <p class="date">September 6, 2025</p>
       </div>
     </div>
     
@@ -190,7 +190,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#new-core-functionality-unlocked" id="toc-new-core-functionality-unlocked" class="nav-link active" data-scroll-target="#new-core-functionality-unlocked">New Core Functionality Unlocked</a></li>
+  <li><a href="#the-issue" id="toc-the-issue" class="nav-link active" data-scroll-target="#the-issue">The Issue</a>
+  <ul class="collapse">
+  <li><a href="#incoming-data" id="toc-incoming-data" class="nav-link" data-scroll-target="#incoming-data">Incoming Data</a></li>
+  <li><a href="#a-dictionary-for-column-indexes" id="toc-a-dictionary-for-column-indexes" class="nav-link" data-scroll-target="#a-dictionary-for-column-indexes">A Dictionary for Column Indexes</a></li>
+  <li><a href="#a-set-of-indexes-marked-for-removal" id="toc-a-set-of-indexes-marked-for-removal" class="nav-link" data-scroll-target="#a-set-of-indexes-marked-for-removal">A Set of Indexes Marked for Removal</a></li>
+  <li><a href="#updated-data-rows" id="toc-updated-data-rows" class="nav-link" data-scroll-target="#updated-data-rows">Updated Data Rows</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -201,184 +207,89 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<section id="new-core-functionality-unlocked" class="level1">
-<h1>New Core Functionality Unlocked</h1>
-<p>It was always the case that <code>cendat</code> would eventually support geometry/polygon fetching for aggregate products, but it took a little while to implement because I didn’t want to tack it on as a sequential process–I wanted it to run concurrently with the data fetching, and this required a pretty substantial rewrite of <code>get_data</code> and the addition of several new internal methods. That work is now complete enough for me to share an alpha/preview release version which you can install with pip:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">--pre</span> <span class="at">--upgrade</span> cendat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>That’ll get you <code>ver 0.7.0a3</code>. Note that you will need <code>pandas</code> and <code>geopandas</code> to unlock the new geometry fetching features. New syntax is reflected in the landing page for this version at <a href="https://pypi.org/project/cendat/0.7.0a3/" class="uri">https://pypi.org/project/cendat/0.7.0a3/</a>, but the short version is that there’s now an <code>include_geometry</code> parameter in <code>get_data</code> and there is a new <code>to_gpd</code> method in the <code>CenDatResponse</code> class that joins the fetched data and polygons and outputs a <code>Pandas GeoDataFrame</code>. Here’s an example:</p>
-<div id="ea64485a" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cendat <span class="im">import</span> CenDatHelper</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>load_dotenv()</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>cdh <span class="op">=</span> CenDatHelper(key<span class="op">=</span>os.getenv(<span class="st">"CENSUS_API_KEY"</span>))</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>cdh.list_products(<span class="dv">2023</span>, <span class="vs">r"acs/acs5</span><span class="ch">\)</span><span class="vs">"</span>)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>cdh.set_products()</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>cdh.list_groups(patterns<span class="op">=</span><span class="vs">r"</span><span class="dv">^</span><span class="vs">race"</span>)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>cdh.set_groups([<span class="st">"B02001"</span>])</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>cdh.describe_groups()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="the-issue" class="level1">
+<h1>The Issue</h1>
+<p>As is often the case, I introduced a new feature to an existing codebase and thereby introduced a new bug. Some days ago now I updated my <code>cendat</code> library to allow for a shortcut in obtaining all variables in a group from the Census API. This is very handy and wonderful, but in some cases the basket of group variables includes <code>NAME</code> and <code>GEO_ID</code>, which the user separately has the option to pull. The result was that in many cases the returned JSON object contained duplication of those variables, and this could cause problems when those objects were turned into DataFrames.</p>
+<p>Initially, I thought I would just internally undo the user’s variable-level requests for <code>NAME</code> and <code>GEO_ID</code> if they were doing a group-level call, but I’m just not sure that all groups will always include those variables, which would leave the user with no way to obtain them in a group call. In the end I settled on it being best to remove duplicates in the raw data before it’s processed as a Polars or Pandas DataFrame. Here’s an abstracted example of the issue.</p>
+<section id="incoming-data" class="level3">
+<h3 class="anchored" data-anchor-id="incoming-data">Incoming Data</h3>
+<div id="34f1a516" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>schema <span class="op">=</span> [<span class="st">"zero"</span>, <span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>, <span class="st">"two"</span>, <span class="st">"four"</span>, <span class="st">"five"</span>, <span class="st">"one"</span>, <span class="st">"six"</span>]</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">1</span>, <span class="dv">6</span>],</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">1</span>, <span class="dv">6</span>],</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">1</span>, <span class="dv">6</span>],</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here we can see how the format in which the raw data are obtained: <code>schema</code> is a list of strings containing the variable names, and <code>data</code> is a list of lists, each representing a row of data. As shown here, some columns may be duplicated, and we need to identify the duplicates and remove them before processing further.</p>
+</section>
+<section id="a-dictionary-for-column-indexes" class="level3">
+<h3 class="anchored" data-anchor-id="a-dictionary-for-column-indexes">A Dictionary for Column Indexes</h3>
+<div id="2c77b327" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> defaultdict</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pprint <span class="im">import</span> pprint</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>index_map <span class="op">=</span> defaultdict(<span class="bu">list</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> index, name <span class="kw">in</span> <span class="bu">enumerate</span>(schema):</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    index_map[name].append(index)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>pprint(<span class="ss">f"</span><span class="sc">{</span>index_map<span class="op">=</span><span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>✅ API key loaded successfully.
-✅ Product set: 'ACS 5-Year Detailed Tables (2023/acs/acs5)' (Vintage: [2023])
-✅ Groups set: B02001
-
---- Group: B02001 (Race) ---
-
-  Product: ACS 5-Year Detailed Tables (2023/acs/acs5) (Vintage: 2023)
-      B02001_001E: Total:
-        B02001_002E: White alone
-        B02001_003E: Black or African American alone
-        B02001_004E: American Indian and Alaska Native alone
-        B02001_005E: Asian alone
-        B02001_006E: Native Hawaiian and Other Pacific Islander alone
-        B02001_007E: Some Other Race alone
-        B02001_008E: Two or More Races:
-          B02001_009E: Two races including Some Other Race
-          B02001_010E: Two races excluding Some Other Race, and three or more races</code></pre>
+<pre><code>("index_map=defaultdict(&lt;class 'list'&gt;, {'zero': [0], 'one': [1, 7], 'two': "
+ "[2, 4], 'three': [3], 'four': [5], 'five': [6], 'six': [8]})")</code></pre>
 </div>
 </div>
-<p>Here we’re looking at the core race group in the 2023 ACS 5-year product. We will bypass variable listing/setting and just pull everything from the group (this was a new feature in <code>ver 0.6.0</code> that I never got around to writing a post about).</p>
-<div id="18962522" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>cdh.set_geos(<span class="st">"050"</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> cdh.get_data(</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    include_names<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    include_geometry<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The first step is to create the dictionary <code>index_map</code> which we instantiate with <code>defaultdict</code> so we can default each item to contain list values. We then enumerate over the <code>schema</code> list to build out the dictionary’s items with keys being the unique variable names and the values being each index in which they are found. Variables that occur only once in <code>schema</code> will have index lists of length 1, while those that are duplicated will have multiple entries in their index lists.</p>
+</section>
+<section id="a-set-of-indexes-marked-for-removal" class="level3">
+<h3 class="anchored" data-anchor-id="a-set-of-indexes-marked-for-removal">A Set of Indexes Marked for Removal</h3>
+<p>Next, we create the set <code>removals</code> to contain the indexes where extra occurrences of variables can be found in the data rows. Since we know the indexes will be unique, we can utilize a set for maximum efficiency.</p>
+<div id="25ec2ff8" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>removals <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> indexes <span class="kw">in</span> index_map.values():</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(indexes) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        removals.update(indexes[<span class="dv">1</span>:])</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>pprint(<span class="ss">f"</span><span class="sc">{</span>removals<span class="op">=</span><span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>✅ Geographies set: 'county' (requires `within` for: state)
-✅ Parameters created for 1 geo-variable/group combinations.
-✅ Successfully fetched map servers.
-✅ Successfully fetched map server layers.
-ℹ️ Discovering parent geographies for: ['state']
-✅ Found 52 combinations. Building API queries...
-ℹ️ Making 52 API call(s)...
-ℹ️ Pre-querying for geometry counts to determine pagination...
-  - Found 9 geometries for WHERE 'STATE IN ('09')...'. Building paginated tasks.
-  - Found 46 geometries for WHERE 'STATE IN ('45')...'. Building paginated tasks.
-  - Found 56 geometries for WHERE 'STATE IN ('30')...'. Building paginated tasks.
-  - Found 5 geometries for WHERE 'STATE IN ('44')...'. Building paginated tasks.
-  - Found 83 geometries for WHERE 'STATE IN ('26')...'. Building paginated tasks.
-  - Found 105 geometries for WHERE 'STATE IN ('20')...'. Building paginated tasks.
-  - Found 115 geometries for WHERE 'STATE IN ('29')...'. Building paginated tasks.
-  - Found 100 geometries for WHERE 'STATE IN ('37')...'. Building paginated tasks.
-  - Found 93 geometries for WHERE 'STATE IN ('31')...'. Building paginated tasks.
-  - Found 30 geometries for WHERE 'STATE IN ('02')...'. Building paginated tasks.
-  - Found 64 geometries for WHERE 'STATE IN ('08')...'. Building paginated tasks.
-  - Found 120 geometries for WHERE 'STATE IN ('21')...'. Building paginated tasks.
-  - Found 58 geometries for WHERE 'STATE IN ('06')...'. Building paginated tasks.
-  - Found 92 geometries for WHERE 'STATE IN ('18')...'. Building paginated tasks.
-  - Found 64 geometries for WHERE 'STATE IN ('22')...'. Building paginated tasks.
-  - Found 99 geometries for WHERE 'STATE IN ('19')...'. Building paginated tasks.
-  - Found 67 geometries for WHERE 'STATE IN ('42')...'. Building paginated tasks.
-  - Found 87 geometries for WHERE 'STATE IN ('27')...'. Building paginated tasks.
-  - Found 77 geometries for WHERE 'STATE IN ('40')...'. Building paginated tasks.
-  - Found 44 geometries for WHERE 'STATE IN ('16')...'. Building paginated tasks.
-  - Found 36 geometries for WHERE 'STATE IN ('41')...'. Building paginated tasks.
-  - Found 21 geometries for WHERE 'STATE IN ('34')...'. Building paginated tasks.
-  - Found 17 geometries for WHERE 'STATE IN ('32')...'. Building paginated tasks.
-  - Found 102 geometries for WHERE 'STATE IN ('17')...'. Building paginated tasks.
-  - Found 29 geometries for WHERE 'STATE IN ('49')...'. Building paginated tasks.
-  - Found 88 geometries for WHERE 'STATE IN ('39')...'. Building paginated tasks.
-  - Found 75 geometries for WHERE 'STATE IN ('05')...'. Building paginated tasks.
-  - Found 15 geometries for WHERE 'STATE IN ('04')...'. Building paginated tasks.
-  - Found 53 geometries for WHERE 'STATE IN ('38')...'. Building paginated tasks.
-  - Found 5 geometries for WHERE 'STATE IN ('15')...'. Building paginated tasks.
-  - Found 82 geometries for WHERE 'STATE IN ('28')...'. Building paginated tasks.
-  - Found 62 geometries for WHERE 'STATE IN ('36')...'. Building paginated tasks.
-  - Found 95 geometries for WHERE 'STATE IN ('47')...'. Building paginated tasks.
-  - Found 16 geometries for WHERE 'STATE IN ('23')...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('10')...'. Building paginated tasks.
-  - Found 14 geometries for WHERE 'STATE IN ('25')...'. Building paginated tasks.
-  - Found 159 geometries for WHERE 'STATE IN ('13')...'. Building paginated tasks.
-  - Found 254 geometries for WHERE 'STATE IN ('48')...'. Building paginated tasks.
-  - Found 10 geometries for WHERE 'STATE IN ('33')...'. Building paginated tasks.
-  - Found 66 geometries for WHERE 'STATE IN ('46')...'. Building paginated tasks.
-  - Found 67 geometries for WHERE 'STATE IN ('12')...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('11')...'. Building paginated tasks.
-  - Found 24 geometries for WHERE 'STATE IN ('24')...'. Building paginated tasks.
-  - Found 55 geometries for WHERE 'STATE IN ('54')...'. Building paginated tasks.
-  - Found 33 geometries for WHERE 'STATE IN ('35')...'. Building paginated tasks.
-  - Found 14 geometries for WHERE 'STATE IN ('50')...'. Building paginated tasks.
-  - Found 39 geometries for WHERE 'STATE IN ('53')...'. Building paginated tasks.
-  - Found 67 geometries for WHERE 'STATE IN ('01')...'. Building paginated tasks.
-  - Found 78 geometries for WHERE 'STATE IN ('72')...'. Building paginated tasks.
-  - Found 133 geometries for WHERE 'STATE IN ('51')...'. Building paginated tasks.
-  - Found 23 geometries for WHERE 'STATE IN ('56')...'. Building paginated tasks.
-  - Found 72 geometries for WHERE 'STATE IN ('55')...'. Building paginated tasks.
-ℹ️ Fetching geometries across 52 paginated calls...
-✅ Data fetching complete. Stacking results.
-✅ Geometry fetching complete. Stacking results.
-CPU times: user 8.54 s, sys: 1.23 s, total: 9.78 s
-Wall time: 24.4 s</code></pre>
+<pre><code>'removals={4, 7}'</code></pre>
 </div>
 </div>
-<p>We choose county-level data and indicate that geometries should be fetched alongside the data. Note that the TIGERweb REST Service has different limitations than the data API, and national queries that would work on the data side are rejected for geometries. For all queries where <code>include_geometry=True</code>, we give up some of the wildcarding capability that we would otherwise have: <code>optionalWithWCFor</code> is ignored and the least granular <code>wildcards</code> level is ignored–for counties that means that states can no longer be omitted or wildcarded. We can see that in this example each state was queried individually (still in a concurrent thread pool, once the record counts are obtained), while for a data-only request, only a single API query would be issued.</p>
-<p>Note also the use of ‘paginated’ in the informational prints–the TIGERweb REST Service limits queries to 1,000 records, so any query that goes over is broken into multiple ‘paginated’ requests. No state has more than 1,000 counties, so we don’t leverage that here, but you would see it, for example, in a request for all places in the nation.</p>
-<p>These ‘paginated’ queries are issued concurrently in a dedicated thread pool that is itself executed in its own thread concurrently with the main data API queries. So, while fetching geometries can make <code>get_data</code> calls take longer than they otherwise would, in those cases it takes no longer than it would to fetch the geometries alone. We can see evidence of that in this example: the data fetching success message happens before geometries are fetched and stacked, even though the two tasks are kicked off simultaneously.</p>
-<p>Just like with the <code>to_pandas</code> and <code>to_polars</code> methods, the new <code>to_gpd</code> method is invoked on the <code>CenDatResponse</code> object:</p>
-<div id="9da15477" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>gdf <span class="op">=</span> response.to_gpd(destring<span class="op">=</span><span class="va">True</span>, join_strategy<span class="op">=</span><span class="st">'left'</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(gdf.head())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="updated-data-rows" class="level3">
+<h3 class="anchored" data-anchor-id="updated-data-rows">Updated Data Rows</h3>
+<p>Now we have everything we need to update the raw data before we attempt to process it. We update both the schema and data rows via list comprehension.</p>
+<div id="115c99b7" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>new_schema <span class="op">=</span> [var <span class="cf">for</span> i, var <span class="kw">in</span> <span class="bu">enumerate</span>(schema) <span class="cf">if</span> i <span class="kw">not</span> <span class="kw">in</span> removals]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>new_data <span class="op">=</span> [</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    [datum <span class="cf">for</span> i, datum <span class="kw">in</span> <span class="bu">enumerate</span>(row) <span class="cf">if</span> i <span class="kw">not</span> <span class="kw">in</span> removals] </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> row <span class="kw">in</span> data</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>pprint(<span class="ss">f"</span><span class="sc">{</span>new_schema<span class="op">=</span><span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>pprint(<span class="ss">f"</span><span class="sc">{</span>new_data<span class="op">=</span><span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                               NAME          GEO_ID  B02001_001E B02001_001EA  \
-0  Abbeville County, South Carolina  0500000US45001        24352         None   
-1      Aiken County, South Carolina  0500000US45003       171949         None   
-2  Allendale County, South Carolina  0500000US45005         7738         None   
-3   Anderson County, South Carolina  0500000US45007       207218         None   
-4    Bamberg County, South Carolina  0500000US45009        13164         None   
-
-   B02001_001M B02001_001MA  B02001_002E B02001_002EA  B02001_002M  \
-0   -555555555        *****        16882         None          212   
-1   -555555555        *****       113667         None          845   
-2   -555555555        *****         1871         None           78   
-3   -555555555        *****       159966         None          919   
-4   -555555555        *****         4979         None           99   
-
-  B02001_002MA  ...  B02001_010M B02001_010MA  state county  GEOID  \
-0         None  ...          180         None     45    001  45001   
-1         None  ...          770         None     45    003  45003   
-2         None  ...           69         None     45    005  45005   
-3         None  ...         1139         None     45    007  45007   
-4         None  ...           94         None     45    009  45009   
-
-                                            geometry  \
-0  POLYGON ((-82.50085 34.0719, -82.50077 34.0719...   
-1  POLYGON ((-81.37349 33.49051, -81.3711 33.4924...   
-2  POLYGON ((-81.61356 33.09567, -81.61403 33.095...   
-3  POLYGON ((-82.57851 34.31332, -82.57841 34.313...   
-4  POLYGON ((-81.22267 33.44, -81.22266 33.43994,...   
-
-                                      product vintage  sumlev    desc  
-0  ACS 5-Year Detailed Tables (2023/acs/acs5)    2023     050  county  
-1  ACS 5-Year Detailed Tables (2023/acs/acs5)    2023     050  county  
-2  ACS 5-Year Detailed Tables (2023/acs/acs5)    2023     050  county  
-3  ACS 5-Year Detailed Tables (2023/acs/acs5)    2023     050  county  
-4  ACS 5-Year Detailed Tables (2023/acs/acs5)    2023     050  county  
-
-[5 rows x 50 columns]</code></pre>
+<pre><code>"new_schema=['zero', 'one', 'two', 'three', 'four', 'five', 'six']"
+'new_data=[[0, 1, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 5, 6]]'</code></pre>
 </div>
 </div>
-<p>For many aggregate products supported by <code>cendat</code> there is no specific TIGERweb map server (i.e., vintage) and in these cases, the ‘Current’ version is used. That could result in data with no corresponding geometry, or geometries with no data. In these cases, if <code>join_strategy='left'</code>, the <code>GeoDataFrame</code> will have rows with empty geometries. You can set <code>join_strategy='inner'</code> to filter the output to data rows with matched geometries.</p>
-<p>Now that geometries are supported, users can do all the cool things that enables, like plotting choropleth maps. One of my next development goals, in fact, is to add in one or more methods to support just that.</p>
-<p>As always, more to come…</p>
+<p>I found this solution both very satisfying and a nice, compact example of why I really like Python: you’ve got a nice variety of useful collection types to work with (here we used lists, dictionaries, and sets) and syntactic constructs like comprehensions to easily and conditionally manipulate them.</p>
 
 
+</section>
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{couzens2025,
   author = {Couzens, Lance},
-  title = {Cendat Ver 0.7.0a3},
-  date = {2025-09-03},
-  url = {https://mostlyunoriginal.github.io/posts/2025-09-03-cendat-geo-fetching-alpha-release/},
+  title = {A {Quick} {Patch} / {Love} {Letter} to {Python}},
+  date = {2025-09-06},
+  url = {https://mostlyunoriginal.github.io/posts/2025-09-06-quick-patch-python-love/},
   langid = {en}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-couzens2025" class="csl-entry quarto-appendix-citeas" role="listitem">
-Couzens, Lance. 2025. <span>“Cendat Ver 0.7.0a3.”</span> September 3,
-2025. <a href="https://mostlyunoriginal.github.io/posts/2025-09-03-cendat-geo-fetching-alpha-release/">https://mostlyunoriginal.github.io/posts/2025-09-03-cendat-geo-fetching-alpha-release/</a>.
+Couzens, Lance. 2025. <span>“A Quick Patch / Love Letter to
+Python.”</span> September 6, 2025. <a href="https://mostlyunoriginal.github.io/posts/2025-09-06-quick-patch-python-love/">https://mostlyunoriginal.github.io/posts/2025-09-06-quick-patch-python-love/</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
