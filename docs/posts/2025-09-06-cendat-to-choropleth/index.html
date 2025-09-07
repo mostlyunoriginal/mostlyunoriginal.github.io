@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Lance Couzens">
+<meta name="dcterms.date" content="2025-09-06">
+<meta name="description" content="Starting to Plan for the Next Big Feature">
+
+<title>Choropleths from Census Data – Lance Couzens</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-3b7f4aff7acac744aa1d596ce5db2ede.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Lance Couzens</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../posts.html"> 
+<span class="menu-text">Code Blog</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-page-left">
+      <h1 class="title">Choropleths from Census Data</h1>
+                  <div>
+        <div class="description">
+          Starting to Plan for the Next Big Feature
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Python</div>
+                <div class="quarto-category">cendat</div>
+                <div class="quarto-category">Census</div>
+                <div class="quarto-category">API</div>
+                <div class="quarto-category">choropleth maps</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta column-page-left">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p><a href="https://mostlyunoriginal.github.io">Lance Couzens</a> </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">September 6, 2025</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#population-estimates-area-geometry-new-possibilities" id="toc-population-estimates-area-geometry-new-possibilities" class="nav-link active" data-scroll-target="#population-estimates-area-geometry-new-possibilities">Population Estimates + Area Geometry = New Possibilities</a>
+  <ul class="collapse">
+  <li><a href="#example-median-household-income-by-block-group-for-counties-in-northern-colorado" id="toc-example-median-household-income-by-block-group-for-counties-in-northern-colorado" class="nav-link" data-scroll-target="#example-median-household-income-by-block-group-for-counties-in-northern-colorado">Example: Median Household Income by Block Group for Counties in Northern Colorado</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
+
+
+
+
+
+<section id="population-estimates-area-geometry-new-possibilities" class="level1">
+<h1>Population Estimates + Area Geometry = New Possibilities</h1>
+<p>Well, not new to like <em>the world</em>, but new to <code>cendat</code>.</p>
+<p>Ever since I really got into statistical graphics (by way of <code>ggplot2</code> in <code>R</code>, circa 2012 or so) I’ve been fascinated with maps. Not maps for navigation, but maps for relating statistics to the areas from which they were derived–i.e., choropleth maps, which tie statistics to physical geometry by way of color scales. In order to create these maps, you need a data frame with your area-level statistic and polygons (arrays of coordinate pairs) to describe the shapes of those areas. In R that might just be a data frame with a list column (here’s an example from a <a href="https://mostlyunoriginal.github.io/posts/2025-03-22-Choropleths-and-LIst-Retrieval-Fun/">previous post</a>), and in Python, most commonly, a geopandas GeoDataFrame. Now, with the alpha release[s] of <code>ver 0.7.0</code>, <code>cendat</code> can both fetch the geometries corresponding to statistical areas and output GeoDataFrames via the <code>to_gpd</code> method of the <code>CenDatResponse</code> class. I’m just starting to tinker–admittedly, I have historically always used <code>ggplot2</code> to make these–and this post will document the origin point of that process, one that should result in a new <code>to_choropleth</code> method in the days (weeks?) ahead.</p>
+<section id="example-median-household-income-by-block-group-for-counties-in-northern-colorado" class="level2">
+<h2 class="anchored" data-anchor-id="example-median-household-income-by-block-group-for-counties-in-northern-colorado">Example: Median Household Income by Block Group for Counties in Northern Colorado</h2>
+<p><code>cendat</code> supports several geographies down to the census block group level, and we’ll focus on that summary level (150) for this example. Since there are literally hundreds of thousands of block groups in the U.S., they’re mainly useful for <em>visual</em> analysis at local levels. In this example, we’ll inspect the income distribution by block group across Larimer, Weld, and Boulder Counties in Northern Colorado. We’ll use the 2023 ACS 5-year program for our estimates. We can specify our focus areas in the <code>within</code> parameter of the <code>get_data</code> method, as shown below.</p>
+<div id="90ff1fe0" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cendat <span class="im">import</span> CenDatHelper</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> contextily <span class="im">as</span> ctx</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>cdh <span class="op">=</span> CenDatHelper(key<span class="op">=</span>os.getenv(<span class="st">"CENSUS_API_KEY"</span>))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>cdh.list_products(years<span class="op">=</span>[<span class="dv">2023</span>], patterns<span class="op">=</span><span class="vs">r"acs/acs5</span><span class="ch">\)</span><span class="vs">"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>cdh.set_products()</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>cdh.list_groups(patterns<span class="op">=</span><span class="vs">r"</span><span class="dv">^</span><span class="vs">median household income"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ API key loaded successfully.
+✅ Product set: 'ACS 5-Year Detailed Tables (2023/acs/acs5)' (Vintage: [2023])</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>[{'name': 'B29004',
+  'description': 'Median Household Income for Households With a Citizen, Voting-Age Householder (in 2023 Inflation-Adjusted Dollars)',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'vintage': [2023],
+  'url': 'http://api.census.gov/data/2023/acs/acs5'},
+ {'name': 'B19013H',
+  'description': 'Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (White Alone, Not Hispanic or Latino Householder)',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'vintage': [2023],
+  'url': 'http://api.census.gov/data/2023/acs/acs5'},
+ {'name': 'B19013I',
+  'description': 'Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (Hispanic or Latino Householder)',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'vintage': [2023],
+  'url': 'http://api.census.gov/data/2023/acs/acs5'},
+ {'name': 'B19013B',
+  'description': 'Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (Black or African American Alone Householder)',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'vintage': [2023],
+  'url': 'http://api.census.gov/data/2023/acs/acs5'},
+ {'name': 'B19013C',
+  'description': 'Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (American Indian and Alaska Native Alone Householder)',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'vintage': [2023],
+  'url': 'http://api.census.gov/data/2023/acs/acs5'},
+ {'name': 'B19013A',
+  'description': 'Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (White Alone Householder)',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'vintage': [2023],
+  'url': 'http://api.census.gov/data/2023/acs/acs5'},
+ {'name': 'B19013F',
+  'description': 'Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (Some Other Race Alone Householder)',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'vintage': [2023],
+  'url': 'http://api.census.gov/data/2023/acs/acs5'},
+ {'name': 'B19013G',
+  'description': 'Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (Two or More Races Householder)',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'vintage': [2023],
+  'url': 'http://api.census.gov/data/2023/acs/acs5'},
+ {'name': 'B19013D',
+  'description': 'Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (Asian Alone Householder)',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'vintage': [2023],
+  'url': 'http://api.census.gov/data/2023/acs/acs5'},
+ {'name': 'B19013E',
+  'description': 'Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) (Native Hawaiian and Other Pacific Islander Alone Householder)',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'vintage': [2023],
+  'url': 'http://api.census.gov/data/2023/acs/acs5'},
+ {'name': 'B25119',
+  'description': 'Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) by Tenure',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'vintage': [2023],
+  'url': 'http://api.census.gov/data/2023/acs/acs5'},
+ {'name': 'B19019',
+  'description': 'Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) by Household Size',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'vintage': [2023],
+  'url': 'http://api.census.gov/data/2023/acs/acs5'},
+ {'name': 'B19013',
+  'description': 'Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars)',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'vintage': [2023],
+  'url': 'http://api.census.gov/data/2023/acs/acs5'},
+ {'name': 'B22008',
+  'description': 'Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) by Receipt of Food Stamps/SNAP in the Past 12 Months',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'vintage': [2023],
+  'url': 'http://api.census.gov/data/2023/acs/acs5'},
+ {'name': 'B19049',
+  'description': 'Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars) by Age of Householder',
+  'product': 'ACS 5-Year Detailed Tables (2023/acs/acs5)',
+  'vintage': [2023],
+  'url': 'http://api.census.gov/data/2023/acs/acs5'}]</code></pre>
+</div>
+</div>
+<p>We can see here that <code>B19013</code> is the group we’re interested in, so we’ll set it and our geo level of interest (block groups: sumlev 150) and make our data request.</p>
+<div id="16368a0a" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>cdh.set_groups([<span class="st">"B19013"</span>])</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>cdh.describe_groups()</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>cdh.set_geos([<span class="st">"150"</span>])</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> cdh.get_data(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    include_names<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    include_geometry<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    within<span class="op">=</span>{</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"state"</span>: [</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"08"</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"county"</span>: [<span class="st">"069"</span>, <span class="st">"123"</span>, <span class="st">"013"</span>],</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✅ Groups set: B19013
+
+--- Group: B19013 (Median Household Income in the Past 12 Months (in 2023 Inflation-Adjusted Dollars)) ---
+
+  Product: ACS 5-Year Detailed Tables (2023/acs/acs5) (Vintage: 2023)
+      B19013_001E: Median household income in the past 12 months (in 2023 inflation-adjusted dollars)
+✅ Geographies set: 'block group' (requires `within` for: county, state, tract)
+✅ Variables set:
+  - Product: ACS 5-Year Detailed Tables (2023/acs/acs5) (Vintage: [2023])
+    Variables: B19013_001E
+✅ Parameters created for 1 geo-variable/group combinations.
+✅ Successfully fetched map servers.
+✅ Successfully fetched map server layers.
+✅ Found 1 combinations. Building API queries...
+ℹ️ Discovering parent geographies for: ['tract']
+✅ Found 83 combinations. Building API queries...
+ℹ️ Discovering parent geographies for: ['tract']
+✅ Found 78 combinations. Building API queries...
+ℹ️ Making 162 API call(s)...
+ℹ️ Pre-querying for geometry counts to determine pagination...
+  - Found 243 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('069')...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 6 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 7 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 6 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+ℹ️ Fetching geometries across 162 paginated calls...
+✅ Geometry fetching complete. Stacking results.
+✅ Data fetching complete. Stacking results.</code></pre>
+</div>
+</div>
+<p>Because we’re requesting geometry, we’re querying at the tract level, and this output is making me think I should have a <code>verbose</code> parameter that defaults to <code>False</code>…</p>
+<p>Now we can apply the new <code>to_gpd</code> method to the response object to join the data and geometries into a single GeoDataFrame. At this point we also want to set special missings to <code>None</code> so they don’t pollute the color scale. I think this will need to be an optional dictionary parameter in the <code>to_choropleth</code> method.</p>
+<div id="96673a32" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>gdf <span class="op">=</span> response.to_gpd(destring<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>gdf.loc[gdf[<span class="st">"B19013_001E"</span>] <span class="op">==</span> <span class="op">-</span><span class="dv">666666666</span>, <span class="st">"B19013_001E"</span>] <span class="op">=</span> <span class="va">None</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next we need to do a bit of manipulation to allow for harmony between area map base layers we might want to apply and our coordinates. This would be handled under the hood of the new method.</p>
+<div id="79d0f30a" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>gdf <span class="op">=</span> gdf.set_crs(epsg<span class="op">=</span><span class="dv">4326</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>gdf <span class="op">=</span> gdf.to_crs(epsg<span class="op">=</span><span class="dv">3857</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And now we can create the plot. This is pretty basic, as I’m still digging into all the possibilities and customizations that I might want to use as a baseline template. One thing to note, though–since we know that not all block groups will have nonmissing values for our estimates, we’ll want to handle that in some graceful way. For now, I think subtle crosshatching works well.</p>
+<p>Straight choropleths are useful in and of themselves, but it can also be useful to have some places denoted. One way to do that would be to, say, directly label places above a certain size by their centroids. Another is to apply a base map. Not sure where I’ll land with that option, but for this example I’m going with the latter.</p>
+<div id="a5de025f" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="fl">8.5</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>gdf.plot(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    column<span class="op">=</span><span class="st">"B19013_001E"</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    cmap<span class="op">=</span><span class="st">"viridis"</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">0.05</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    edgecolor<span class="op">=</span><span class="st">"k"</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>ax,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    legend<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.7</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    legend_kwds<span class="op">=</span>{</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"label"</span>: <span class="st">"Income"</span>,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"orientation"</span>: <span class="st">"horizontal"</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"location"</span>: <span class="st">"bottom"</span>,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"shrink"</span>: <span class="fl">0.5</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"fraction"</span>: <span class="fl">0.1</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"format"</span>: <span class="st">"</span><span class="sc">{x:,.0f}</span><span class="st">"</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    missing_kwds<span class="op">=</span>{</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">"color"</span>: <span class="st">"lightgrey"</span>,</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">"edgecolor"</span>: <span class="st">"grey"</span>,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">"hatch"</span>: <span class="st">"////"</span>,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">"label"</span>: <span class="st">"Missing values"</span>,</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>ctx.add_basemap(</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    ax, source<span class="op">=</span>ctx.providers.CartoDB.PositronNoLabels, attribution<span class="op">=</span><span class="va">False</span>, zoom<span class="op">=</span><span class="dv">10</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>ctx.add_basemap(</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    ax, source<span class="op">=</span>ctx.providers.CartoDB.PositronOnlyLabels, attribution<span class="op">=</span><span class="va">False</span>, zoom<span class="op">=</span><span class="dv">10</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>ax.set_title(</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Larimer, Weld, and Boulder County Med. HH Income by block group"</span>,</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    fontdict<span class="op">=</span>{<span class="st">"fontsize"</span>: <span class="st">"16"</span>, <span class="st">"fontweight"</span>: <span class="st">"3"</span>},</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>ax.set_axis_off()</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="index_files/figure-html/cell-6-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="index_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This isn’t perfect, but I think it’s promising. Still lots to work out, but that’s the fun part, right?</p>
+
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{couzens2025,
+  author = {Couzens, Lance},
+  title = {Choropleths from {Census} {Data}},
+  date = {2025-09-06},
+  url = {https://mostlyunoriginal.github.io/posts/2025-09-06-cendat-to-choropleth/},
+  langid = {en}
+}
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-couzens2025" class="csl-entry quarto-appendix-citeas" role="listitem">
+Couzens, Lance. 2025. <span>“Choropleths from Census Data.”</span>
+September 6, 2025. <a href="https://mostlyunoriginal.github.io/posts/2025-09-06-cendat-to-choropleth/">https://mostlyunoriginal.github.io/posts/2025-09-06-cendat-to-choropleth/</a>.
+</div></div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>

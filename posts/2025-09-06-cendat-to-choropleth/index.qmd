@@ -1,0 +1,119 @@
+---
+title: "Choropleths from Census Data"
+description: "Starting to Plan for the Next Big Feature"
+date: 2025-09-06
+author:
+    - name: Lance Couzens
+      url: https://mostlyunoriginal.github.io  
+categories: [Python, cendat, Census, API, choropleth maps]
+citation: 
+  url: https://mostlyunoriginal.github.io/posts/2025-09-06-cendat-to-choropleth/
+image: logo.png 
+draft: false
+lightbox: true
+---
+
+# Population Estimates + Area Geometry = New Possibilities
+
+Well, not new to like *the world*, but new to `cendat`.
+
+Ever since I really got into statistical graphics (by way of `ggplot2` in `R`, circa 2012 or so) I've been fascinated with maps. Not maps for navigation, but maps for relating statistics to the areas from which they were derived–i.e., choropleth maps, which tie statistics to physical geometry by way of color scales. In order to create these maps, you need a data frame with your area-level statistic and polygons (arrays of coordinate pairs) to describe the shapes of those areas. In R that might just be a data frame with a list column (here's an example from a [previous post](https://mostlyunoriginal.github.io/posts/2025-03-22-Choropleths-and-LIst-Retrieval-Fun/)), and in Python, most commonly, a geopandas GeoDataFrame. Now, with the alpha release\[s\] of `ver 0.7.0`, `cendat` can both fetch the geometries corresponding to statistical areas and output GeoDataFrames via the `to_gpd` method of the `CenDatResponse` class. I'm just starting to tinker–admittedly, I have historically always used `ggplot2` to make these–and this post will document the origin point of that process, one that should result in a new `to_choropleth` method in the days (weeks?) ahead.
+
+## Example: Median Household Income by Block Group for Counties in Northern Colorado
+
+`cendat` supports several geographies down to the census block group level, and we'll focus on that summary level (150) for this example. Since there are literally hundreds of thousands of block groups in the U.S., they're mainly useful for *visual* analysis at local levels. In this example, we'll inspect the income distribution by block group across Larimer, Weld, and Boulder Counties in Northern Colorado. We'll use the 2023 ACS 5-year program for our estimates. We can specify our focus areas in the `within` parameter of the `get_data` method, as shown below.
+
+```{python}
+import matplotlib.pyplot as plt
+import os
+from cendat import CenDatHelper
+import contextily as ctx
+
+cdh = CenDatHelper(key=os.getenv("CENSUS_API_KEY"))
+
+cdh.list_products(years=[2023], patterns=r"acs/acs5\)")
+cdh.set_products()
+cdh.list_groups(patterns=r"^median household income")
+```
+
+We can see here that `B19013` is the group we're interested in, so we'll set it and our geo level of interest (block groups: sumlev 150) and make our data request.
+
+```{python}
+cdh.set_groups(["B19013"])
+cdh.describe_groups()
+cdh.set_geos(["150"])
+response = cdh.get_data(
+    include_names=True,
+    include_geometry=True,
+    within={
+        "state": [
+            "08",
+        ],
+        "county": ["069", "123", "013"],
+    },
+)
+```
+
+Because we're requesting geometry, we're querying at the tract level, and this output is making me think I should have a `verbose` parameter that defaults to `False`...
+
+Now we can apply the new `to_gpd` method to the response object to join the data and geometries into a single GeoDataFrame. At this point we also want to set special missings to `None` so they don't pollute the color scale. I think this will need to be an optional dictionary parameter in the `to_choropleth` method.
+
+```{python}
+gdf = response.to_gpd(destring=True)
+gdf.loc[gdf["B19013_001E"] == -666666666, "B19013_001E"] = None
+```
+
+Next we need to do a bit of manipulation to allow for harmony between area map base layers we might want to apply and our coordinates. This would be handled under the hood of the new method.
+
+```{python}
+gdf = gdf.set_crs(epsg=4326)
+gdf = gdf.to_crs(epsg=3857)
+```
+
+And now we can create the plot. This is pretty basic, as I'm still digging into all the possibilities and customizations that I might want to use as a baseline template. One thing to note, though--since we know that not all block groups will have nonmissing values for our estimates, we'll want to handle that in some graceful way. For now, I think subtle crosshatching works well.
+
+Straight choropleths are useful in and of themselves, but it can also be useful to have some places denoted. One way to do that would be to, say, directly label places above a certain size by their centroids. Another is to apply a base map. Not sure where I'll land with that option, but for this example I'm going with the latter.
+
+```{python}
+fig, ax = plt.subplots(1, 1, figsize=(11, 8.5))
+
+gdf.plot(
+    column="B19013_001E",
+    cmap="viridis",
+    linewidth=0.05,
+    edgecolor="k",
+    ax=ax,
+    legend=True,
+    alpha=0.7,
+    legend_kwds={
+        "label": "Income",
+        "orientation": "horizontal",
+        "location": "bottom",
+        "shrink": 0.5,
+        "fraction": 0.1,
+        "format": "{x:,.0f}",
+    },
+    missing_kwds={
+        "color": "lightgrey",
+        "edgecolor": "grey",
+        "hatch": "////",
+        "label": "Missing values",
+    },
+)
+
+ctx.add_basemap(
+    ax, source=ctx.providers.CartoDB.PositronNoLabels, attribution=False, zoom=10
+)
+ctx.add_basemap(
+    ax, source=ctx.providers.CartoDB.PositronOnlyLabels, attribution=False, zoom=10
+)
+
+ax.set_title(
+    "Larimer, Weld, and Boulder County Med. HH Income by block group",
+    fontdict={"fontsize": "16", "fontweight": "3"},
+)
+ax.set_axis_off()
+plt.show()
+```
+
+This isn't perfect, but I think it's promising. Still lots to work out, but that's the fun part, right?
