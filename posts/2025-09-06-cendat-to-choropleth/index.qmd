@@ -89,7 +89,7 @@ gdf.plot(
         "label": "Income",
         "orientation": "horizontal",
         "location": "bottom",
-        "shrink": 0.75,
+        "shrink": .8,
         "fraction": 0.1,
         "format": "{x:,.0f}",
     },
