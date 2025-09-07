@@ -75,7 +75,7 @@ And now we can create the plot. This is pretty basic, as I'm still digging into 
 Straight choropleths are useful in and of themselves, but it can also be useful to have some places denoted. One way to do that would be to, say, directly label places above a certain size by their centroids. Another is to apply a base map. Not sure where I'll land with that option, but for this example I'm going with the latter.
 
 ```{python}
-fig, ax = plt.subplots(1, 1, figsize=(11, 8.5))
+fig, ax = plt.subplots(1, 1, figsize=(7, 5), dpi=300)
 
 gdf.plot(
     column="B19013_001E",
@@ -102,15 +102,15 @@ gdf.plot(
 )
 
 ctx.add_basemap(
-    ax, source=ctx.providers.CartoDB.PositronNoLabels, attribution=False, zoom=9
+    ax, source=ctx.providers.CartoDB.PositronNoLabels, attribution=False, zoom=10
 )
 ctx.add_basemap(
     ax, source=ctx.providers.CartoDB.PositronOnlyLabels, attribution=False, zoom=9
 )
 
 ax.set_title(
-    "Larimer, Weld, and Boulder County Med. HH Income by block group",
-    fontdict={"fontsize": "16", "fontweight": "3"},
+    "Larimer, Weld, and Boulder County - Med. HH Income by block group",
+    fontdict={"fontsize": "10", "fontweight": "1"},
 )
 ax.set_axis_off()
 plt.show()
