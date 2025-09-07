@@ -89,7 +89,7 @@ gdf.plot(
         "label": "Income",
         "orientation": "horizontal",
         "location": "bottom",
-        "shrink": 0.5,
+        "shrink": 0.75,
         "fraction": 0.1,
         "format": "{x:,.0f}",
     },
@@ -116,4 +116,4 @@ ax.set_axis_off()
 plt.show()
 ```
 
-This isn't perfect, but I think it's promising. Still lots to work out, but that's the fun part, right?
+This isn't perfect, and I think I will probably end up labelling places directly without the garbage raster labels from a base map, but I think it's promising. Still lots to work out, but that's the fun part, right?

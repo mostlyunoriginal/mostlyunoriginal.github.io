@@ -215,7 +215,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="example-median-household-income-by-block-group-for-counties-in-northern-colorado" class="level2">
 <h2 class="anchored" data-anchor-id="example-median-household-income-by-block-group-for-counties-in-northern-colorado">Example: Median Household Income by Block Group for Counties in Northern Colorado</h2>
 <p><code>cendat</code> supports several geographies down to the census block group level, and we’ll focus on that summary level (150) for this example. Since there are literally hundreds of thousands of block groups in the U.S., they’re mainly useful for <em>visual</em> analysis at local levels. In this example, we’ll inspect the income distribution by block group across Larimer, Weld, and Boulder Counties in Northern Colorado. We’ll use the 2023 ACS 5-year program for our estimates. We can specify our focus areas in the <code>within</code> parameter of the <code>get_data</code> method, as shown below.</p>
-<div id="c4e6fd9c" class="cell" data-execution_count="1">
+<div id="7022f32d" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cendat <span class="im">import</span> CenDatHelper</span>
@@ -309,7 +309,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>We can see here that <code>B19013</code> is the group we’re interested in, so we’ll set it and our geo level of interest (block groups: sumlev 150) and make our data request.</p>
-<div id="fe06bfde" class="cell" data-execution_count="2">
+<div id="121dc2c6" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>cdh.set_groups([<span class="st">"B19013"</span>])</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>cdh.describe_groups()</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>cdh.set_geos([<span class="st">"150"</span>])</span>
@@ -344,168 +344,168 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ✅ Found 78 combinations. Building API queries...
 ℹ️ Making 162 API call(s)...
 ℹ️ Pre-querying for geometry counts to determine pagination...
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 243 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('069')...'. Building paginated tasks.
   - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 7 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 6 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
   - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('123') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 6 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 5 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
   - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
-  - Found 1 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 4 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 2 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
+  - Found 3 geometries for WHERE 'STATE IN ('08') AND COUNTY IN ('013') AND TRACT IN...'. Building paginated tasks.
 ℹ️ Fetching geometries across 162 paginated calls...
 ✅ Data fetching complete. Stacking results.
 ✅ Geometry fetching complete. Stacking results.</code></pre>
@@ -513,18 +513,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Because we’re requesting geometry, we’re querying at the tract level, and this output is making me think I should have a <code>verbose</code> parameter that defaults to <code>False</code>…</p>
 <p>Now we can apply the new <code>to_gpd</code> method to the response object to join the data and geometries into a single GeoDataFrame. At this point we also want to set special missings to <code>None</code> so they don’t pollute the color scale. I think this will need to be an optional dictionary parameter in the <code>to_choropleth</code> method.</p>
-<div id="3afdfa67" class="cell" data-execution_count="3">
+<div id="06ae856d" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>gdf <span class="op">=</span> response.to_gpd(destring<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>gdf.loc[gdf[<span class="st">"B19013_001E"</span>] <span class="op">==</span> <span class="op">-</span><span class="dv">666666666</span>, <span class="st">"B19013_001E"</span>] <span class="op">=</span> <span class="va">None</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Next we need to do a bit of manipulation to allow for harmony between area map base layers we might want to apply and our coordinates. This would be handled under the hood of the new method.</p>
-<div id="ff29ffbb" class="cell" data-execution_count="4">
+<div id="d0e72c5c" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>gdf <span class="op">=</span> gdf.set_crs(epsg<span class="op">=</span><span class="dv">4326</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>gdf <span class="op">=</span> gdf.to_crs(epsg<span class="op">=</span><span class="dv">3857</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>And now we can create the plot. This is pretty basic, as I’m still digging into all the possibilities and customizations that I might want to use as a baseline template. One thing to note, though–since we know that not all block groups will have nonmissing values for our estimates, we’ll want to handle that in some graceful way. For now, I think subtle crosshatching works well.</p>
 <p>Straight choropleths are useful in and of themselves, but it can also be useful to have some places denoted. One way to do that would be to, say, directly label places above a certain size by their centroids. Another is to apply a base map. Not sure where I’ll land with that option, but for this example I’m going with the latter.</p>
-<div id="2789f481" class="cell" data-execution_count="5">
+<div id="8b3532ee" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">5</span>), dpi<span class="op">=</span><span class="dv">300</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>gdf.plot(</span>
@@ -539,7 +539,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"label"</span>: <span class="st">"Income"</span>,</span>
 <span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"orientation"</span>: <span class="st">"horizontal"</span>,</span>
 <span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"location"</span>: <span class="st">"bottom"</span>,</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"shrink"</span>: <span class="fl">0.5</span>,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"shrink"</span>: <span class="fl">0.75</span>,</span>
 <span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"fraction"</span>: <span class="fl">0.1</span>,</span>
 <span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"format"</span>: <span class="st">"</span><span class="sc">{x:,.0f}</span><span class="st">"</span>,</span>
 <span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    },</span>
