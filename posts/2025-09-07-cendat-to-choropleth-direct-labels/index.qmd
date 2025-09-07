@@ -1,0 +1,237 @@
+---
+title: "Choropleths from Census Data Pt. 2"
+description: "An updated mockup with direct labelling"
+date: 2025-09-07
+author:
+    - name: Lance Couzens
+      url: https://mostlyunoriginal.github.io  
+categories: [Python, cendat, Census, API, choropleth maps]
+citation: 
+  url: https://mostlyunoriginal.github.io/posts/2025-09-07-cendat-to-choropleth-direct-labels/
+image: logo.png 
+draft: false
+lightbox: true
+---
+
+# A Preference for Direct Labels
+
+As covered in yesterday's post, I've got all the pieces I need to add choropleth map functionality to `cendat`–now I just need to put them all together. My biggest complaint about yesterday's first attempt was the way the base map labels degrade because they're raster graphics that you can only zoom in on. I speculated that it would probably be better to just plot labels directly, and that's what's covered here.
+
+### Place and (some) County Subdivision Centroids
+
+In order to make it easy for users to orient themselves in choropleth maps, they need labels for cities, towns, etc. Depending on where you are in the U.S., that could imply incorporated places or a mix of incorporated places and county subdivisions (in some states, county subdivision areas represent official government entities, often called townships).
+
+To label these entities, we need their names and the latitudes and longitudes representing their centroids. Thankfully, I can easily get that for all U.S. incorporated places and (meaningful) county subdivisions with single queries to the TIGERweb REST Service. Since this will be done within a new method of the `CenDatResponse` class, I will make sure to update `CenDatHelper.get_data` to pass the appropriate map server and layer IDs to the response object. But, once I have that, it's a pretty straight-forward addition. The following continues the example started in yesterday's post.
+
+### Get Places and County Subs Simultaneously in a 2-Worker Thread Pool
+
+```{python}
+%%time
+
+from concurrent.futures import ThreadPoolExecutor
+import geopandas as gpd
+import pandas as pd
+import requests
+from collections import defaultdict
+import matplotlib.pyplot as plt
+import os
+from cendat import CenDatHelper
+import contextily as ctx
+
+geo_data = defaultdict(gpd.GeoDataFrame)
+
+def get_tiger_polygons(
+    layer_id: int,
+    where_clause: str,
+    fields: str,
+    service: str = "TIGERweb/tigerWMS_Current",
+) -> gpd.GeoDataFrame:
+
+    API_URL = (
+        "https://tigerweb.geo.census.gov/arcgis/rest/"
+        f"services/{service}/MapServer/{layer_id}/query"
+    )
+
+    params = {
+        "where": where_clause,
+        "outFields": fields,
+        "outSR": "4326",
+        "f": "geojson",
+        "returnGeometry": "false",
+        "returnCountOnly": "false",
+        "resultOffset": 0,
+        "resultRecordCount": 100_000,
+        "timeout": 60,
+    }
+
+    try:
+        response = requests.get(API_URL, params=params)
+        response.raise_for_status()
+        geo_data[layer_id] = gpd.GeoDataFrame.from_features(response.json()["features"])
+        print(f"✅ Successfully fetched {len(geo_data[layer_id])} centroids.")
+
+    except requests.exceptions.RequestException as e:
+        print(f"❌ HTTP Request failed: {e}")
+    except (KeyError, ValueError) as e:
+        print(f"❌ Failed to parse response JSON: {e}")
+        print(f"   Server Response: {response.text[:200]}...")
+
+
+try:
+    with ThreadPoolExecutor(max_workers=2) as executor:
+
+        future_places = executor.submit(
+            get_tiger_polygons, 28, "1=1", "STATE,NAME,AREALAND,CENTLAT,CENTLON"
+        )
+        future_countysubs = executor.submit(
+            get_tiger_polygons,
+            22,
+            (
+                "NAME LIKE '%township' OR "
+                "NAME LIKE '%town' OR "
+                "NAME LIKE '%village' OR "
+                "NAME LIKE '%borough'"
+            ),
+            "STATE,NAME,AREALAND,CENTLAT,CENTLON",
+        )
+
+        future_places.result()
+        future_countysubs.result()
+
+except Exception as exc:
+    print(f"❌ A master fetching task failed: {exc}")
+```
+
+Here we've used a generic function to fetch geography centroids, separately parameterized for places and county subs, in a thread pool, updating the `geo_data` dictionary as the data come in.
+
+### Clean up Centroids and Get Income Estimates
+
+```{python}
+#| output: false
+
+stacked = pd.concat(geo_data.values(), ignore_index=True)
+stacked["AREALAND"] = stacked["AREALAND"].astype(int)
+stacked["CENTLAT"] = stacked["CENTLAT"].astype(float)
+stacked["CENTLON"] = stacked["CENTLON"].astype(float)
+stacked["NCILE"] = stacked.groupby("STATE")["AREALAND"].transform(
+    lambda x: pd.qcut(x, 20, labels=False, duplicates="drop") + 1
+)
+
+cdh = CenDatHelper(key=os.getenv("CENSUS_API_KEY"))
+
+cdh.list_products(years=[2023], patterns=r"acs/acs5\)")
+cdh.set_products()
+cdh.set_groups(["B19013"])
+cdh.set_geos(["150"])
+response = cdh.get_data(
+    include_names=True,
+    include_geometry=True,
+    within={
+        "state": [
+            "08",
+        ],
+        "county": ["069", "123", "013"],
+    },
+)
+```
+
+The latitude and longitude data come in as strings, so we need to convert those. We've also pulled the overall land area for our geographies, which we use (after converting to numeric) to create the rank groups variable `NCILE`. We'll use this to filter down to the areas we want to label based on their area size.
+
+### Plot
+
+This builds directly off what we had yesterday, except I only use the unlabeled base map, adding labels directly from our centroids data.
+
+```{python}
+cutoff = 19
+
+gdf = response.to_gpd(destring=True, join_strategy="inner")
+gdf.loc[gdf["B19013_001E"] == -666666666, "B19013_001E"] = None
+
+fig, ax = plt.subplots(1, 1, figsize=(10, 6), dpi=300)
+
+gdf.plot(
+    column="B19013_001E",
+    cmap="viridis",
+    linewidth=0.3,
+    edgecolor="black",
+    ax=ax,
+    legend=True,
+    alpha=0.8,
+    legend_kwds={
+        "label": "Income",
+        "orientation": "horizontal",
+        "location": "bottom",
+        "shrink": 0.5,
+        "fraction": 0.1,
+        "format": "{x:,.0f}",
+        "alpha": 0.8,
+        "pad": 0.1,
+    },
+    missing_kwds={
+        "color": "lightgrey",
+        "edgecolor": "grey",
+        "hatch": "////",
+        "label": "Missing values",
+    },
+)
+
+xmin, xmax = ax.get_xlim()
+ymin, ymax = ax.get_ylim()
+
+visible_centroids = stacked[
+    (stacked["CENTLON"] >= xmin)
+    & (stacked["CENTLON"] <= xmax)
+    & (stacked["CENTLAT"] >= ymin)
+    & (stacked["CENTLAT"] <= ymax)
+    & (stacked["NCILE"] >= cutoff)
+]
+
+ax.scatter(
+    visible_centroids["CENTLON"],
+    visible_centroids["CENTLAT"],
+    s=10,  
+    c="black",  
+    edgecolor="white",
+    zorder=2,  
+    alpha=0.8,
+)
+
+y_offset = 0.015
+
+for idx, row in visible_centroids.iterrows():
+    ax.text(
+        x=row["CENTLON"],
+        y=row["CENTLAT"] + y_offset,
+        s=row["NAME"],
+        fontsize=max(3, 9 * (row["NCILE"] ** (cutoff / 4) / 20 ** (cutoff / 4))),
+        fontweight="light",
+        ha="center",
+        va="bottom",
+        zorder=3,
+        bbox=dict(
+            boxstyle="round,pad=0.1,rounding_size=0.2",
+            fc="white",
+            ec="none",
+            alpha=0.7,
+        ),
+    )
+
+ctx.add_basemap(
+    ax,
+    source=ctx.providers.CartoDB.PositronNoLabels,
+    attribution=False,
+    zoom=10,
+    crs=4326,
+    alpha=1.0,
+)
+
+ax.set_title(
+    "Larimer, Weld, and Boulder County Med. HH Income by block group",
+    fontdict={"fontsize": "16", "fontweight": "3"},
+)
+ax.set_axis_off()
+plt.show()
+
+```
+
+I like this *so* much more! And, while it's very difficult to avoid overlapping labels in a generalized context, I actually don't mind them here. These plots are intended to have analytic utility, not really to be publication ready, and the combination of the white label backgrounds and transparency level makes them both useful and not too visually cluttered.
